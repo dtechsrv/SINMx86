@@ -3,7 +3,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: v2.3.1 Build 4710 (2018-03-25)
+## Current stable version: 2.3.1 Build 4710 (2018-03-25)
 
 ![](Screenshots/SINMx86_v2.3.1_About.png)
 
@@ -11,7 +11,7 @@ This utility reads all system information directly from WMI database.
 
 __Supported languages:__ English, Hungarian\
 __Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5)\
-__Source author:__ Gábor Deé (dtechsrv)\
+__Source author:__ Gábor Deé (dtech)\
 __License:__ GNU/GPL 2.0
 
 ## Screenshot
