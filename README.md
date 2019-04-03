@@ -1,26 +1,24 @@
 # SINMx86 - System Information and Network Monitor
 
-![](Screenshots/SINMx86_v2.3.1_About.png)
-
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version:
+## Current stable version: v2.3.1 Build 4710 (2018-03-25)
 
-SINMx86 v2.3.1 Build 4710 (2018-03-25)
+![](Screenshots/SINMx86_v2.3.1_About.png)
 
-### Supported languages:
+#### Supported languages:
 
 English, Hungarian
 
-### Compilation environment:
+#### Compilation environment:
 
 Microsoft Visual Basic 2013 (Community, Update 5)
 
-### Source author:
+#### Source author:
 Gábor Deé
 
-### License:
+#### License:
 
 GNU/GPL 2.0
 
