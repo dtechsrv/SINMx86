@@ -57,4 +57,4 @@ GNU/GPL 2.0
 - Windows 7 lemez szériaszám korrekció,
 - Rendszermemória tizedes elválasztó hiba javítva.
 
-## Copyright (C) 2019 dtech(.hu)
+### Copyright (C) 2019 dtech(.hu)
