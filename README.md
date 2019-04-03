@@ -1,13 +1,11 @@
-# SINMx86
+# SINMx86 - System Information and Network Monitor
 
-### System Information and Network Monitor (PORTABLE)
+![](Screenshots/SINMx86_v2.3.1_About.png)
 
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-![](Screenshots/SINMx86_v2.3.1_Win10.png)
-
-### Current stable version:
+## Current stable version:
 
 SINMx86 v2.3.1 Build 4710 (2018-03-25)
 
@@ -25,6 +23,10 @@ Gábor Deé
 ### License:
 
 GNU/GPL 2.0
+
+## Screenshot
+
+![](Screenshots/SINMx86_v2.3.1_Win10.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
