@@ -7,20 +7,12 @@ This utility reads all system information directly from WMI database.
 
 ![](Screenshots/SINMx86_v2.3.1_About.png)
 
-#### Supported languages:
+## Developement information
 
-English, Hungarian
-
-#### Compilation environment:
-
-Microsoft Visual Basic 2013 (Community, Update 5)
-
-#### Source author:
-Gábor Deé
-
-#### License:
-
-GNU/GPL 2.0
+__Supported languages:__ English, Hungarian\
+__Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5)\
+__Source author:__ Gábor Deé (dtechsrv)\
+__License:__ GNU/GPL 2.0
 
 ## Screenshot
 
@@ -28,11 +20,13 @@ GNU/GPL 2.0
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-### 2019-03-25 - Version 2.3.1 / Build 4710 (stable)
+__2019-03-25 - Version 2.3.1 / Build 4710 (stable)__
+
 - Tabstop indexek javítva,
 - Főablak megjelenés korrigálása (lenyíló listák egységesítve, boxok helyzete fixálva).
 
-### 2019-03-24 - Version 2.3.0 / Build 4700 (stable)
+__2019-03-24 - Version 2.3.0 / Build 4700 (stable)__
+
 - Lokalizált dátum és idő generálás a diagramon,
 - Videokártya lenyíló lista (több VGA-t is kezel),
 - Videomemória tizedes elválasztó javítása,
@@ -48,7 +42,8 @@ GNU/GPL 2.0
 - Főablak megjelenés korrigálása,
 - Fordítások javítása.
 
-### 2019-03-20 - Version 2.2.0 / Build 4500 (stable)
+__2019-03-20 - Version 2.2.0 / Build 4500 (stable)__
+
 - Videomemória fix MB helyett aktuális helyiértékben,
 - Rendszerinformációk helyett az alaplap azonosítóinak kiolvasása,
 - Lemezek sorszám szerinti rendezése,
@@ -58,4 +53,4 @@ GNU/GPL 2.0
 - Windows 7 lemez szériaszám korrekció,
 - Rendszermemória tizedes elválasztó hiba javítva.
 
-### Copyright (C) 2019 dtech(.hu)
+__Copyright (C) 2019 dtech(.hu), [http://sinmx86.dtech.hu/](http://sinmx86.dtech.hu/).__
