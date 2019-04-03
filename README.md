@@ -9,10 +9,10 @@ This utility reads all system information directly from WMI database.
 
 ## Developement information
 
-__Supported languages:__ English, Hungarian\
-__Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5)\
-__Source author:__ Gábor Deé (dtech)\
-__License:__ GNU/GPL 2.0
+__Supported languages:__ English, Hungarian,\
+__Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5),\
+__Source author:__ Gábor Deé (dtech),\
+__License:__ GNU General Public License v2.0.
 
 ## Screenshot
 
@@ -46,11 +46,11 @@ __2019-03-20 - Version 2.2.0 / Build 4500 (stable)__
 
 - Videomemória fix MB helyett aktuális helyiértékben,
 - Rendszerinformációk helyett az alaplap azonosítóinak kiolvasása,
-- Lemezek sorszám szerinti rendezése,
-- SMART infó és szektorméret nem kell,
+- Lemezek index szerinti rendezése, növekvő sorrendben,
+- A szektorméret helyett lemez sorozatszámának kiírása (kiírási sorrend átrendezve),
 - Rendszermemória fix MB helyett aktuális helyiértékben,
-- Teljes screenshot mentésének lehetősége a ablakról (fotó ikon a jobb felső sarokban),
-- Windows 7 lemez szériaszám korrekció,
+- Teljes screenshot mentésének lehetősége az ablakról (fotó ikon a jobb felső sarokban),
+- Windows 7 lemez szériaszám korrekció (hexadecimális visszaalakítás és bájtsorrend csere),
 - Rendszermemória tizedes elválasztó hiba javítva.
 
 __Copyright (C) 2019 dtech(.hu), [http://sinmx86.dtech.hu/](http://sinmx86.dtech.hu/).__
