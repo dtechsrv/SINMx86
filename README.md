@@ -1,10 +1,11 @@
 # SINMx86
 
-## System Information and Network Monitor (PORTABLE)
+### System Information and Network Monitor (PORTABLE)
 
-A simple system information and real-time network monitoring utility.
-
+A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
+
+![](Screenshots/SINMx86_v2.3.1_Win10.png)
 
 ### Current stable version:
 
