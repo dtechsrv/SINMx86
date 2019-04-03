@@ -1,4 +1,4 @@
-# SINMx86 - System Information and Network Monitor ![](Screenshots/SINMx86_Icon.png)
+# SINMx86 - System Information and Network Monitor ![](Screenshots/SINMx86_Icon.gif)
 
 
 A simple system information and real-time network monitoring utility.\
