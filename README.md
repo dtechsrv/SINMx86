@@ -1,4 +1,5 @@
-# SINMx86 - System Information and Network Monitor
+# SINMx86 - System Information and Network Monitor ![](Screenshots/SINMx86_Icon.png)
+
 
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
