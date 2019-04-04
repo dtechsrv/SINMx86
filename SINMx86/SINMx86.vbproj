@@ -205,6 +205,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Splash\yumi.png" />
+    <None Include="Resources\Splash\montana.png" />
+    <None Include="Resources\Splash\yuzuki.png" />
+    <None Include="Resources\Splash\hikari.png" />
+    <None Include="Resources\Splash\midori.png" />
     <None Include="Resources\Controls\refresh.gif" />
     <None Include="Resources\Controls\computer.gif" />
     <None Include="Resources\Controls\uptime.gif" />
@@ -213,11 +218,6 @@
     <None Include="Resources\Controls\pin_red.gif" />
     <None Include="Resources\Controls\check.gif" />
     <None Include="Resources\Controls\screenshot.gif" />
-    <None Include="Resources\SplashBackgrounds\yumi.png" />
-    <None Include="Resources\SplashBackgrounds\yuzuki.png" />
-    <None Include="Resources\SplashBackgrounds\midori.png" />
-    <None Include="Resources\SplashBackgrounds\montana.png" />
-    <None Include="Resources\SplashBackgrounds\hikari.png" />
     <Content Include="Resources\Icon\main.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

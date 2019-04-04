@@ -88,13 +88,6 @@ Partial Class MainWindow
         Me.CheckBoxChart_DownloadVisible = New System.Windows.Forms.CheckBox()
         Me.Name_InterfaceUsage = New System.Windows.Forms.Label()
         Me.PictureBox_TrafficChart = New System.Windows.Forms.PictureBox()
-        Me.ChartMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
-        Me.ChartMenuItem_DownloadVisible = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ChartMenuItem_UploadVisible = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ChartMenuItem_Separator1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ChartMenuItem_SaveChart = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ChartMenuItem_Separator2 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ChartMenuItem_ClearChart = New System.Windows.Forms.ToolStripMenuItem()
         Me.EventTimer = New System.Windows.Forms.Timer(Me.components)
         Me.Name_LanguageList = New System.Windows.Forms.Label()
         Me.EventToolTip = New System.Windows.Forms.ToolTip(Me.components)
@@ -125,9 +118,6 @@ Partial Class MainWindow
         Me.MainMenuItem_Chart = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenu_ChartItem_DownloadVisible = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenu_ChartItem_UploadVisible = New System.Windows.Forms.ToolStripMenuItem()
-        Me.MainMenu_ChartItem_Separator1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.MainMenu_ChartItem_SaveChart = New System.Windows.Forms.ToolStripMenuItem()
-        Me.MainMenu_ChartItem_Separator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.MainMenu_ChartItem_ClearChart = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenuItem_Information = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenu_ActionItem_UpdateCheck = New System.Windows.Forms.ToolStripMenuItem()
@@ -156,6 +146,7 @@ Partial Class MainWindow
         Me.ComboBox_UpdateList = New SINMx86.RightComboBox()
         Me.ComboBox_VideoList = New SINMx86.LeftComboBox()
         Me.ComboBox_CPUList = New SINMx86.LeftComboBox()
+        Me.MainMenu_ChartItem_Separator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.GroupBox_HWInfo.SuspendLayout()
         Me.GroupBox_OSInfo.SuspendLayout()
         Me.GroupBox_CPUInfo.SuspendLayout()
@@ -163,7 +154,6 @@ Partial Class MainWindow
         Me.GroupBox_VideoInfo.SuspendLayout()
         Me.GroupBox_Network.SuspendLayout()
         CType(Me.PictureBox_TrafficChart, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.ChartMenu.SuspendLayout()
         Me.MainStatusStrip.SuspendLayout()
         Me.MainContextMenu.SuspendLayout()
         Me.MainMenu.SuspendLayout()
@@ -891,52 +881,11 @@ Partial Class MainWindow
         'PictureBox_TrafficChart
         '
         Me.PictureBox_TrafficChart.BackColor = System.Drawing.Color.Gray
-        Me.PictureBox_TrafficChart.ContextMenuStrip = Me.ChartMenu
         Me.PictureBox_TrafficChart.Location = New System.Drawing.Point(17, 94)
         Me.PictureBox_TrafficChart.Name = "PictureBox_TrafficChart"
         Me.PictureBox_TrafficChart.Size = New System.Drawing.Size(420, 250)
         Me.PictureBox_TrafficChart.TabIndex = 18
         Me.PictureBox_TrafficChart.TabStop = False
-        '
-        'ChartMenu
-        '
-        Me.ChartMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ChartMenuItem_DownloadVisible, Me.ChartMenuItem_UploadVisible, Me.ChartMenuItem_Separator1, Me.ChartMenuItem_SaveChart, Me.ChartMenuItem_Separator2, Me.ChartMenuItem_ClearChart})
-        Me.ChartMenu.Name = "GraphMenu"
-        Me.ChartMenu.Size = New System.Drawing.Size(224, 104)
-        '
-        'ChartMenuItem_DownloadVisible
-        '
-        Me.ChartMenuItem_DownloadVisible.Name = "ChartMenuItem_DownloadVisible"
-        Me.ChartMenuItem_DownloadVisible.Size = New System.Drawing.Size(223, 22)
-        Me.ChartMenuItem_DownloadVisible.Text = "Show &download chart"
-        '
-        'ChartMenuItem_UploadVisible
-        '
-        Me.ChartMenuItem_UploadVisible.Name = "ChartMenuItem_UploadVisible"
-        Me.ChartMenuItem_UploadVisible.Size = New System.Drawing.Size(223, 22)
-        Me.ChartMenuItem_UploadVisible.Text = "Show &upload chart"
-        '
-        'ChartMenuItem_Separator1
-        '
-        Me.ChartMenuItem_Separator1.Name = "ChartMenuItem_Separator1"
-        Me.ChartMenuItem_Separator1.Size = New System.Drawing.Size(220, 6)
-        '
-        'ChartMenuItem_SaveChart
-        '
-        Me.ChartMenuItem_SaveChart.Name = "ChartMenuItem_SaveChart"
-        Me.ChartMenuItem_SaveChart.Size = New System.Drawing.Size(223, 22)
-        Me.ChartMenuItem_SaveChart.Text = "Save chart image to desktop"
-        '
-        'ChartMenuItem_Separator2
-        '
-        Me.ChartMenuItem_Separator2.Name = "ChartMenuItem_Separator2"
-        Me.ChartMenuItem_Separator2.Size = New System.Drawing.Size(220, 6)
-        '
-        'ChartMenuItem_ClearChart
-        '
-        Me.ChartMenuItem_ClearChart.Name = "ChartMenuItem_ClearChart"
-        Me.ChartMenuItem_ClearChart.Size = New System.Drawing.Size(223, 22)
-        Me.ChartMenuItem_ClearChart.Text = "Clear chart"
         '
         'EventTimer
         '
@@ -1166,43 +1115,27 @@ Partial Class MainWindow
         '
         'MainMenuItem_Chart
         '
-        Me.MainMenuItem_Chart.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MainMenu_ChartItem_DownloadVisible, Me.MainMenu_ChartItem_UploadVisible, Me.MainMenu_ChartItem_Separator1, Me.MainMenu_ChartItem_SaveChart, Me.MainMenu_ChartItem_Separator2, Me.MainMenu_ChartItem_ClearChart})
+        Me.MainMenuItem_Chart.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MainMenu_ChartItem_DownloadVisible, Me.MainMenu_ChartItem_UploadVisible, Me.MainMenu_ChartItem_Separator1, Me.MainMenu_ChartItem_ClearChart})
         Me.MainMenuItem_Chart.Name = "MainMenuItem_Chart"
-        Me.MainMenuItem_Chart.Size = New System.Drawing.Size(48, 20)
+        Me.MainMenuItem_Chart.Size = New System.Drawing.Size(94, 20)
         Me.MainMenuItem_Chart.Text = "&Chart"
         '
         'MainMenu_ChartItem_DownloadVisible
         '
         Me.MainMenu_ChartItem_DownloadVisible.Name = "MainMenu_ChartItem_DownloadVisible"
-        Me.MainMenu_ChartItem_DownloadVisible.Size = New System.Drawing.Size(223, 22)
+        Me.MainMenu_ChartItem_DownloadVisible.Size = New System.Drawing.Size(189, 22)
         Me.MainMenu_ChartItem_DownloadVisible.Text = "Show &download chart"
         '
         'MainMenu_ChartItem_UploadVisible
         '
         Me.MainMenu_ChartItem_UploadVisible.Name = "MainMenu_ChartItem_UploadVisible"
-        Me.MainMenu_ChartItem_UploadVisible.Size = New System.Drawing.Size(223, 22)
+        Me.MainMenu_ChartItem_UploadVisible.Size = New System.Drawing.Size(189, 22)
         Me.MainMenu_ChartItem_UploadVisible.Text = "Show &upload chart"
-        '
-        'MainMenu_ChartItem_Separator1
-        '
-        Me.MainMenu_ChartItem_Separator1.Name = "MainMenu_ChartItem_Separator1"
-        Me.MainMenu_ChartItem_Separator1.Size = New System.Drawing.Size(220, 6)
-        '
-        'MainMenu_ChartItem_SaveChart
-        '
-        Me.MainMenu_ChartItem_SaveChart.Name = "MainMenu_ChartItem_SaveChart"
-        Me.MainMenu_ChartItem_SaveChart.Size = New System.Drawing.Size(223, 22)
-        Me.MainMenu_ChartItem_SaveChart.Text = "Save chart image to desktop"
-        '
-        'MainMenu_ChartItem_Separator2
-        '
-        Me.MainMenu_ChartItem_Separator2.Name = "MainMenu_ChartItem_Separator2"
-        Me.MainMenu_ChartItem_Separator2.Size = New System.Drawing.Size(220, 6)
         '
         'MainMenu_ChartItem_ClearChart
         '
         Me.MainMenu_ChartItem_ClearChart.Name = "MainMenu_ChartItem_ClearChart"
-        Me.MainMenu_ChartItem_ClearChart.Size = New System.Drawing.Size(223, 22)
+        Me.MainMenu_ChartItem_ClearChart.Size = New System.Drawing.Size(189, 22)
         Me.MainMenu_ChartItem_ClearChart.Text = "&Clear chart"
         '
         'MainMenuItem_Information
@@ -1478,6 +1411,11 @@ Partial Class MainWindow
         Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
         Me.ComboBox_CPUList.TabIndex = 1
         '
+        'MainMenu_ChartItem_Separator1
+        '
+        Me.MainMenu_ChartItem_Separator1.Name = "MainMenu_ChartItem_Separator1"
+        Me.MainMenu_ChartItem_Separator1.Size = New System.Drawing.Size(186, 6)
+        '
         'MainWindow
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -1518,7 +1456,6 @@ Partial Class MainWindow
         Me.GroupBox_Network.ResumeLayout(False)
         Me.GroupBox_Network.PerformLayout()
         CType(Me.PictureBox_TrafficChart, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.ChartMenu.ResumeLayout(False)
         Me.MainStatusStrip.ResumeLayout(False)
         Me.MainStatusStrip.PerformLayout()
         Me.MainContextMenu.ResumeLayout(False)
@@ -1548,14 +1485,14 @@ Partial Class MainWindow
     Friend WithEvents GroupBox_VideoInfo As System.Windows.Forms.GroupBox
     Friend WithEvents Button_Exit As System.Windows.Forms.Button
     Friend WithEvents Name_InterfaceList As System.Windows.Forms.Label
-    Friend WithEvents ComboBox_InterfaceList As SINMx86.LeftComboBox
+    Friend WithEvents ComboBox_InterfaceList As LeftComboBox
     Friend WithEvents Name_Bandwidth As System.Windows.Forms.Label
     Friend WithEvents Name_DownloadSpeed As System.Windows.Forms.Label
     Friend WithEvents Name_UploadSpeed As System.Windows.Forms.Label
     Friend WithEvents GroupBox_Network As System.Windows.Forms.GroupBox
     Public WithEvents EventTimer As System.Windows.Forms.Timer
     Friend WithEvents Name_InterfaceUsage As System.Windows.Forms.Label
-    Friend WithEvents ComboBox_LanguageList As SINMx86.LeftComboBox
+    Friend WithEvents ComboBox_LanguageList As LeftComboBox
     Friend WithEvents Name_LanguageList As System.Windows.Forms.Label
     Friend WithEvents Name_UpdateList As System.Windows.Forms.Label
     Friend WithEvents Name_ChartVisible As System.Windows.Forms.Label
@@ -1574,8 +1511,6 @@ Partial Class MainWindow
     Friend WithEvents Button_InterfaceListReload As System.Windows.Forms.Button
     Friend WithEvents StatusLabel_ChartStatus As System.Windows.Forms.ToolStripStatusLabel
     Friend WithEvents StatusLabel_TopMost As System.Windows.Forms.ToolStripStatusLabel
-    Friend WithEvents ChartMenu As System.Windows.Forms.ContextMenuStrip
-    Friend WithEvents ChartMenuItem_ClearChart As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainNotifyIcon As System.Windows.Forms.NotifyIcon
     Friend WithEvents MainContextMenu As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents MainContextMenuItem_TopMost As System.Windows.Forms.ToolStripMenuItem
@@ -1593,13 +1528,11 @@ Partial Class MainWindow
     Friend WithEvents Name_VirtualMemoryUsage As System.Windows.Forms.Label
     Friend WithEvents Name_PhysicalMemoryUsage As System.Windows.Forms.Label
     Friend WithEvents Name_UpdateUnit As System.Windows.Forms.Label
-    Friend WithEvents ComboBox_UpdateList As SINMx86.RightComboBox
+    Friend WithEvents ComboBox_UpdateList As RightComboBox
     Friend WithEvents MainContextMenuItem_TaskbarMinimize As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainContextMenuItem_DisableSplash As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainContextMenuItem_Separator2 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents MainContextMenuItem_About As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ChartMenuItem_SaveChart As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ChartMenuItem_Separator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents Name_VirtualMemoryFree As System.Windows.Forms.Label
     Friend WithEvents Name_PhysicalMemoryFree As System.Windows.Forms.Label
     Friend WithEvents Name_OSBuild As System.Windows.Forms.Label
@@ -1625,17 +1558,11 @@ Partial Class MainWindow
     Friend WithEvents MainMenu_SettingsItem_DisableSplash As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainMenu_ChartItem_DownloadVisible As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainMenu_ChartItem_UploadVisible As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents MainMenu_ChartItem_Separator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents MainMenu_ChartItem_ClearChart As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainMenu_ActionItem_UpdateCheck As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainMenu_ActionItem_About As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents MainMenu_ChartItem_SaveChart As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents MainMenu_ChartItem_Separator2 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents MainMenu_ActionItem_Separator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents MainMenu_ActionItem_Exit As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ChartMenuItem_DownloadVisible As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ChartMenuItem_UploadVisible As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ChartMenuItem_Separator2 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents Name_VideoList As System.Windows.Forms.Label
     Friend WithEvents GroupBox_DiskInfo As System.Windows.Forms.GroupBox
     Friend WithEvents Name_DiskList As System.Windows.Forms.Label
@@ -1643,7 +1570,7 @@ Partial Class MainWindow
     Friend WithEvents Value_VideoMemory As System.Windows.Forms.Label
     Friend WithEvents Name_VideoResolution As System.Windows.Forms.Label
     Friend WithEvents Name_VideoMemory As System.Windows.Forms.Label
-    Friend WithEvents ComboBox_DiskList As SINMx86.LeftComboBox
+    Friend WithEvents ComboBox_DiskList As LeftComboBox
     Friend WithEvents Value_DiskSerial As System.Windows.Forms.Label
     Friend WithEvents Name_DiskSerial As System.Windows.Forms.Label
     Friend WithEvents Value_DiskSmart As System.Windows.Forms.Label
@@ -1658,10 +1585,11 @@ Partial Class MainWindow
     Friend WithEvents ScreenshotToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Value_DiskIndex As System.Windows.Forms.Label
     Friend WithEvents Name_DiskIndex As System.Windows.Forms.Label
-    Friend WithEvents ComboBox_VideoList As SINMx86.LeftComboBox
+    Friend WithEvents ComboBox_VideoList As LeftComboBox
     Friend WithEvents Button_VideoListReload As System.Windows.Forms.Button
     Friend WithEvents Button_CPUListReload As System.Windows.Forms.Button
-    Friend WithEvents ComboBox_CPUList As SINMx86.LeftComboBox
+    Friend WithEvents ComboBox_CPUList As LeftComboBox
+    Friend WithEvents MainMenu_ChartItem_Separator1 As System.Windows.Forms.ToolStripSeparator
 
 End Class
 

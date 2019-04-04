@@ -218,7 +218,6 @@ Public Class MainWindow
         ' Checkbox és menüelemek állapotának beállítása
         CheckBoxChart_DownloadVisible.Checked = CheckedDownChart
         MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
-        ChartMenuItem_DownloadVisible.Checked = CheckedDownChart
 
         ' *** REGISTRY ELEMZÉS: Feltöltési diagram engedélyezése ***
         If ReadUpChart Is Nothing Or ToInt32(ReadUpChart) <> 0 Then
@@ -229,7 +228,6 @@ Public Class MainWindow
 
         ' Checkbox és menüelemek állapotának beállítása
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
-        ChartMenuItem_UploadVisible.Checked = CheckedUpChart
         CheckBoxChart_UploadVisible.Checked = CheckedUpChart
 
         ' *** REGISTRY ELEMZÉS: Állandó láthatóság ellenőrzése ***
@@ -281,27 +279,27 @@ Public Class MainWindow
         objBB = New ManagementObjectSearcher("SELECT Manufacturer, Product, Name FROM Win32_Baseboard")
 
         ' Értékek definiálása
-        Dim BaseManufacturer As String = Nothing                ' Alaplap gyártója
-        Dim BaseModel As String = Nothing                       ' Alaplap azonosítója
+        Dim Manufacturer As String = Nothing                ' Alaplap gyártója
+        Dim Model As String = Nothing                       ' Alaplap azonosítója
 
         ' Értékek beállítása
         For Each Me.objMgmt In objBB.Get
-            BaseManufacturer = objMgmt("Manufacturer").ToString
-            BaseModel = objMgmt("Product").ToString
+            Manufacturer = objMgmt("Manufacturer").ToString
+            Model = objMgmt("Product").ToString
             Hostname = objMgmt("Name").ToString
         Next
 
         ' Kiírások értékének frissítése
-        If BaseManufacturer = Nothing Then
+        If Manufacturer = Nothing Then
             Value_HWVendor.Text = "(" + Str_Unknown + ")"
         Else
-            Value_HWVendor.Text = StringNormalize(BaseManufacturer)
+            Value_HWVendor.Text = StringNormalize(Manufacturer)
         End If
 
-        If BaseModel = Nothing Then
+        If Model = Nothing Then
             Value_HWModel.Text = "(" + Str_Unknown + ")"
         Else
-            Value_HWModel.Text = StringNormalize(BaseModel)
+            Value_HWModel.Text = StringNormalize(Model)
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem" -> Hosztnév ***
@@ -336,7 +334,7 @@ Public Class MainWindow
         Value_OSName.Text = StringNormalize(OSName)
         Value_OSRelease.Text = OSRelase.ToString + "-bit"
         Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString
-        Value_OSBuild.Text = OSBuild
+        Value_OSBuild.Text = OSBuild.ToString
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Futásidő ***
         UptimeSeconds = DateDiff("s", DateTimeConv(SysUpTime), DateTimeConv(CurrentTime))
@@ -455,10 +453,10 @@ Public Class MainWindow
         ' Kiírások formázása
         Value_PhysicalMemorySize.Text = FixDigitSeparator(PMemSizeConv(0), 2, True) + " " + PrefixTable(PMemSizeConv(1)) + "B"
         Value_PhysicalMemoryFree.Text = FixDigitSeparator(PMemFreeConv(0), 2, True).ToString + " " + PrefixTable(PMemFreeConv(1)) + "B"
-        Value_PhysicalMemoryUsage.Text = PMemPerc + " %"
+        Value_PhysicalMemoryUsage.Text = PMemPerc.ToString + " %"
         Value_VirtualMemorySize.Text = FixDigitSeparator(VMemSizeConv(0), 2, True) + " " + PrefixTable(VMemSizeConv(1)) + "B"
         Value_VirtualMemoryFree.Text = FixDigitSeparator(VMemFreeConv(0), 2, True) + " " + PrefixTable(VMemFreeConv(1)) + "B"
-        Value_VirtualMemoryUsage.Text = VMemPerc + " %"
+        Value_VirtualMemoryUsage.Text = VMemPerc.ToString + " %"
 
         ' Visszatérési érték beállítása
         Return False
@@ -1775,7 +1773,7 @@ Public Class MainWindow
 
                 ' Sztringek
                 Str_Title = "System Information and Network Monitor"
-                Str_Comment = "This software is freeware and portable."
+                Str_Comment = "This software is open source and portable."
                 Str_Version = "Version"
                 Str_Loading = "Loading"
                 Str_LoadReg = "Registry settings"
@@ -1895,7 +1893,6 @@ Public Class MainWindow
                 MainMenu_ActionItem_Exit.Text = "E&xit"
                 MainMenu_ChartItem_DownloadVisible.Text = "Show &download chart"
                 MainMenu_ChartItem_UploadVisible.Text = "Show &upload chart"
-                MainMenu_ChartItem_SaveChart.Text = "&Save chart image to desktop"
                 MainMenu_ChartItem_ClearChart.Text = "&Clear chart"
 
                 ' Checkbox feliratok
@@ -1909,7 +1906,7 @@ Public Class MainWindow
 
                 ' Sztringek
                 Str_Title = "Rendszerinformációk és hálózatfigyelés"
-                Str_Comment = "Ez a szoftver ingyenesen használható és hordozható."
+                Str_Comment = "Ez a szoftver nyílt forrású és hordozható."
                 Str_Version = "Verziószám"
                 Str_Loading = "Betöltés"
                 Str_LoadReg = "Registry beállítások"
@@ -2029,7 +2026,6 @@ Public Class MainWindow
                 MainMenu_ActionItem_Exit.Text = "&Kilépés"
                 MainMenu_ChartItem_DownloadVisible.Text = "&Letöltési diagram mutatása"
                 MainMenu_ChartItem_UploadVisible.Text = "&Feltöltési diagram mutatása"
-                MainMenu_ChartItem_SaveChart.Text = "Diagram &mentése az asztalra"
                 MainMenu_ChartItem_ClearChart.Text = "Diagram &törlése"
 
                 ' Checkbox feliratok
@@ -2049,10 +2045,6 @@ Public Class MainWindow
         MainContextMenuItem_UpdateCheck.Text = MainMenu_ActionItem_UpdateCheck.Text
         MainContextMenuItem_About.Text = MainMenu_ActionItem_About.Text
         MainContextMenuItem_Exit.Text = MainMenu_ActionItem_Exit.Text
-        ChartMenuItem_DownloadVisible.Text = MainMenu_ChartItem_DownloadVisible.Text
-        ChartMenuItem_UploadVisible.Text = MainMenu_ChartItem_UploadVisible.Text
-        ChartMenuItem_SaveChart.Text = MainMenu_ChartItem_SaveChart.Text
-        ChartMenuItem_ClearChart.Text = MainMenu_ChartItem_ClearChart.Text
 
         ' Hosztnév beálítása az állapotsorban
         StatusLabel_Host.Text = Str_Hostname + ": " + Hostname
@@ -2208,7 +2200,7 @@ Public Class MainWindow
 
     ' *** ELJÁRÁS: Letöltési diagram generálásának ellenőrzése ***
     ' Eseményvezérelt: MainMenu_ChartItem_DownloadVisible.Click, ChartMenuItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click -> Klikk (Menüelem, Checkbox)
-    Private Sub DownloadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_DownloadVisible.Click, ChartMenuItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click
+    Private Sub DownloadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click
 
         ' Változás ellenőrzése és állapot invertálása
         If CheckedDownChart Then
@@ -2222,7 +2214,6 @@ Public Class MainWindow
 
         ' Menüelem állapotának beállítása
         MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
-        ChartMenuItem_DownloadVisible.Checked = CheckedDownChart
 
         ' Diagram frissítése
         MakeChart(False)
@@ -2231,7 +2222,7 @@ Public Class MainWindow
 
     ' *** ELJÁRÁS: Feltöltési diagram generálásának ellenőrzése ***
     ' Eseményvezérelt: MainMenu_ChartItem_UploadVisible.Click, ChartMenuItem_UploadVisible.Click, CheckBoxChart_UploadVisible.Click -> Klikk (Menüelem, Checkbox)
-    Private Sub UploadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_UploadVisible.Click, ChartMenuItem_UploadVisible.Click, CheckBoxChart_UploadVisible.Click
+    Private Sub UploadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_UploadVisible.Click, CheckBoxChart_UploadVisible.Click
 
         ' Változás ellenőrzése és állapot invertálása
         If CheckedUpChart Then
@@ -2245,7 +2236,6 @@ Public Class MainWindow
 
         ' Menüelem állapotának beállítása
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
-        ChartMenuItem_UploadVisible.Checked = CheckedUpChart
 
         ' Diagram frissítése
         MakeChart(False)
@@ -2310,6 +2300,9 @@ Public Class MainWindow
 
         End If
 
+        ' Splash ablak bezárása
+        LoadSplash.Visible = False
+
     End Sub
 
     ' *** ELJÁRÁS: Főablak láthatóságának beállítása ***
@@ -2334,30 +2327,9 @@ Public Class MainWindow
 
     End Sub
 
-    ' *** ELJÁRÁS: Forgalmi diagram mentése az asztalra ***
-    ' Eseményvezérelt: MainMenu_ChartItem_SaveChart.Click, ChartMenuItem_SaveChart.Click, PictureBox_TrafficChart.MouseDoubleClick -> Klikk (Menüelem), Duplaklikk (Kép)
-    Private Sub Chart_Save(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_SaveChart.Click, ChartMenuItem_SaveChart.Click, PictureBox_TrafficChart.MouseDoubleClick
-
-        ' Mentési kép létrhozása és feltöltése
-        Dim SaveImage As New Bitmap(ChartDimension(0), ChartDimension(1), Imaging.PixelFormat.Format24bppRgb)
-        SaveImage = ChartImage
-
-        ' Elérési út beállítása (Desktop) és fájnév generálása
-        Dim DesktopPath As String = My.Computer.FileSystem.SpecialDirectories.Desktop
-        Dim FileName As String = MyName + "_Chart_" + Hostname + "_" + Format(ChartCreationTime, "yyyyMMdd-HHmmss") + "_AVG_" + RefreshInterval(SelectedRefresh).ToString + "s.png"
-        Dim FilePath As String = DesktopPath + "\" + FileName
-
-        ' Kép mentése (PNG)
-        SaveImage.Save(FilePath, Imaging.ImageFormat.Png)
-
-        ' Buboréküzenet megjelenítése
-        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + Str_Note, Str_ImageSaved + ": '" + FilePath + "'", ToolTipIcon.Info)
-
-    End Sub
-
     ' *** ELJÁRÁS: Forgalmi diagram törlése ***
     ' Eseményvezérelt: MainMenu_ChartItem_ClearChart.Click, ChartMenuItem_ClearChart.Click -> Állapotváltozás (Menüelem)
-    Private Sub Chart_Clear(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_ClearChart.Click, ChartMenuItem_ClearChart.Click
+    Private Sub Chart_Clear(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_ClearChart.Click
 
         ' Diagram frissítése
         MakeChart(True)
@@ -2435,6 +2407,7 @@ Public Class MainWindow
 
         ' Splash ablak megnyitása (névjegy)
         LoadSplash.Visible = True
+        LoadSplash.TopMost = False
 
     End Sub
 

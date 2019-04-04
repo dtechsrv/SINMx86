@@ -90,7 +90,7 @@ Partial Class LoadSplash
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.BackgroundImage = Global.SINMx86.My.Resources.Resources.Splash_1
+        Me.BackgroundImage = My.Resources.Resources.Splash_1
         Me.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None
         Me.ClientSize = New System.Drawing.Size(340, 100)
         Me.ControlBox = False
@@ -103,7 +103,7 @@ Partial Class LoadSplash
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "LoadSplash"
-        Me.Opacity = 0.85R
+        Me.Opacity = 0.9R
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.TopMost = True
