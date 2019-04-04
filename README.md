@@ -6,7 +6,7 @@ This utility reads all system information directly from WMI database.
 
 ## Current stable version: 2.3.1 Build 4710 (2018-03-25)
 
-![](Screenshots/SINMx86_v2.3.1_About.png)
+![](Screenshots/SINMx86_LoadSplash.png)
 
 ## Developement information
 
@@ -17,7 +17,7 @@ __License:__ GNU General Public License v2.0.
 
 ## Screenshot
 
-![](Screenshots/SINMx86_v2.3.1_Win10.png)
+![](Screenshots/SINMx86_MainWindow.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
