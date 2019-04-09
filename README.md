@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 2.3.1 Build 4710 (2018-03-25)
+## Current stable version: 2.3.2 Build 4725 (2018-04-09)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -20,6 +20,13 @@ __License:__ GNU General Public License v2.0.
 ![](Screenshots/SINMx86_MainWindow.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__2019-04-09 - Version 2.3.2 / Build 4725 (stable)__
+
+- Forráskódok közzététele az oldalon és GitHub-on is,
+- Diagram mentési lehetőség és diagram menü kikapcsolása,
+- Splash ablak TopMost kikapcsolása névjegynél, automatikus bezárás tálcára tételkor,
+- Mentett screenshot megnyitása a buborékra kattintáskor.
 
 __2019-03-25 - Version 2.3.1 / Build 4710 (stable)__
 
