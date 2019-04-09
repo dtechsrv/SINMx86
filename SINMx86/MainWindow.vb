@@ -62,6 +62,8 @@ Public Class MainWindow
     Public ChartDimension() As Int32 = {420, 250}                           ' Diagram képének felbontása (szélesség, magasság)
     Public ChartCreationTime As DateTime                                    ' Az utolsó diagram elkészülésének ideje
     Public DisableBalloon As Boolean = False                                ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
+    Public OpenFile As Boolean = False                                      ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
+    Public SavePath As String = Nothing                                     ' Az utolsó mentett fájl elérési útja
     Public Languages() As String = {"English (EN)", "Magyar (HU)"}          ' Nyelvek (egyelőre statikus, 2 elemű)
     Public MainWindowDone As Boolean = False                                ' A főablak betöltődésének indikátora, néhány szükséges lekérdezés csak ezután történhet meg!
 
@@ -2288,6 +2290,9 @@ Public Class MainWindow
     ' Eseményvezérelt: Me.Resize -> Ablak átméretezése
     Private Sub MainWindow_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
 
+        ' Splash ablak bezárása
+        LoadSplash.Close()
+
         ' Kis méret állapotának beállítása
         If Me.WindowState = FormWindowState.Minimized And CheckedMinToTray Then
             Me.Visible = False
@@ -2297,17 +2302,63 @@ Public Class MainWindow
                 MainNotifyIcon.ShowBalloonTip(3000, MyName + " - " + Str_Note, Str_Taskbar, ToolTipIcon.Info)
                 DisableBalloon = True
             End If
-
         End If
 
+    End Sub
+
+    ' *** ELJÁRÁS: Tálcaikon duplaklikk kezelése (Kis méret: oda-vissza) ***
+    ' Eseményvezérelt: MainNotifyIcon.MouseDoubleClick -> Dupla klikk (Taskbar ikon)
+    Private Sub MainNotifyIcon_DoubleClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles MainNotifyIcon.MouseDoubleClick
+
         ' Splash ablak bezárása
-        LoadSplash.Visible = False
+        LoadSplash.Close()
+
+        ' Változás ellenőrzése és állapot invertálása
+        If Me.WindowState = FormWindowState.Normal Then
+            If CheckedMinToTray Then
+                Me.Visible = False
+                If Not DisableBalloon Then
+                    MainNotifyIcon.ShowBalloonTip(3000, MyName, Str_Taskbar, ToolTipIcon.Info)
+                    DisableBalloon = True
+                End If
+            End If
+            Me.WindowState = FormWindowState.Minimized
+        Else
+            Me.Visible = True
+            Me.WindowState = FormWindowState.Normal
+        End If
+
+    End Sub
+
+    ' *** ELJÁRÁS: Kicsinyítés a tálcára ***
+    ' Eseményvezérelt: MainMenu_SettingsItem_TaskbarMinimize.Click, MainContextMenuItem_TaskbarMinimize.Click -> Állapotváltozás (Menüelem)
+    Private Sub MinToTray_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_SettingsItem_TaskbarMinimize.Click, MainContextMenuItem_TaskbarMinimize.Click
+
+        ' Változás ellenőrzése és állapot invertálása
+        If MainContextMenuItem_TaskbarMinimize.Checked Then
+            CheckedMinToTray = False
+            If Me.WindowState = FormWindowState.Minimized Then
+                Me.Visible = True
+            End If
+        Else
+            CheckedMinToTray = True
+            If Me.WindowState = FormWindowState.Minimized Then
+                Me.Visible = False
+            End If
+        End If
+
+        ' Menüelem állapotának beállítása
+        MainMenu_SettingsItem_TaskbarMinimize.Checked = CheckedMinToTray
+        MainContextMenuItem_TaskbarMinimize.Checked = CheckedMinToTray
 
     End Sub
 
     ' *** ELJÁRÁS: Főablak láthatóságának beállítása ***
     ' Eseményvezérelt: MainMenu_SettingsItem_TopMost.Click, StatusLabel_TopMost.Click, MainContextMenuItem_TopMost.Click -> Állapotváltozás (StatusLabel, Menüelem)
     Private Sub TopMost_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_SettingsItem_TopMost.Click, StatusLabel_TopMost.Click, MainContextMenuItem_TopMost.Click
+
+        ' Splash ablak bezárása
+        LoadSplash.Close()
 
         ' Változás ellenőrzése és állapot invertálása
         If Me.TopMost Then
@@ -2353,29 +2404,6 @@ Public Class MainWindow
 
     End Sub
 
-    ' *** ELJÁRÁS: Kicsinyítés a tálcára ***
-    ' Eseményvezérelt: MainMenu_SettingsItem_TaskbarMinimize.Click, MainContextMenuItem_TaskbarMinimize.Click -> Állapotváltozás (Menüelem)
-    Private Sub MinToTray_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_SettingsItem_TaskbarMinimize.Click, MainContextMenuItem_TaskbarMinimize.Click
-
-        ' Változás ellenőrzése és állapot invertálása
-        If MainContextMenuItem_TaskbarMinimize.Checked Then
-            CheckedMinToTray = False
-            If Me.WindowState = FormWindowState.Minimized Then
-                Me.Visible = True
-            End If
-        Else
-            CheckedMinToTray = True
-            If Me.WindowState = FormWindowState.Minimized Then
-                Me.Visible = False
-            End If
-        End If
-
-        ' Menüelem állapotának beállítása
-        MainMenu_SettingsItem_TaskbarMinimize.Checked = CheckedMinToTray
-        MainContextMenuItem_TaskbarMinimize.Checked = CheckedMinToTray
-
-    End Sub
-
     ' *** ELJÁRÁS: Betöltőképernyő elrejtése ***
     ' Eseményvezérelt: MainMenu_SettingsItem_DisableSplash.Click, MainContextMenuItem_DisableSplash.Click -> Állapotváltozás (Menüelem)
     Private Sub DisableSplash_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_SettingsItem_DisableSplash.Click, MainContextMenuItem_DisableSplash.Click
@@ -2405,9 +2433,12 @@ Public Class MainWindow
     ' Eseményvezérelt: MainMenu_ActionItem_About.Click, MainContextMenuItem_About.Click, Link_Bottom.LinkClicked -> Klikk (Menüelem, Link)
     Private Sub LoadSplash_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ActionItem_About.Click, MainContextMenuItem_About.Click, Link_Bottom.LinkClicked
 
-        ' Splash ablak megnyitása (névjegy)
+        ' Splash ablak bezárása
+        LoadSplash.Close()
+
+        ' Splash időzítő újbóli elindítása és ablak megjelenítése
+        LoadSplash.SplashTimer.Enabled = False
         LoadSplash.Visible = True
-        LoadSplash.TopMost = False
 
     End Sub
 
@@ -2422,36 +2453,32 @@ Public Class MainWindow
         ' Kép készítési idejének frissítése
         Dim ImageCreationTime As DateTime = DateTime.Now
 
-        ' Elérési út beállítása (Desktop) és fájnév generálása
+        ' Fájnév generálása
+        Dim FileName As String = MyName + "_" + Hostname + "_" + Format(ImageCreationTime, "yyyyMMdd-HHmmss") + ".png"
+
+        ' Elérési út beállítása (Desktop)
         Dim DesktopPath As String = My.Computer.FileSystem.SpecialDirectories.Desktop
-        Dim FileName As String = MyName + "_Screenshot_" + Hostname + "_" + Format(ImageCreationTime, "yyyyMMdd-HHmmss") + ".png"
-        Dim FilePath As String = DesktopPath + "\" + FileName
+        SavePath = DesktopPath + "\" + FileName
 
         ' Kép mentése (PNG)
-        SaveImage.Save(FilePath, Imaging.ImageFormat.Png)
+        SaveImage.Save(SavePath, Imaging.ImageFormat.Png)
 
-        ' Buboréküzenet megjelenítése
-        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + Str_Note, Str_ImageSaved + ": '" + FilePath + "'", ToolTipIcon.Info)
+        ' Buboréküzenet állapotának beállítása (fájl megnyitása) és üzenet megjelenítése
+        OpenFile = True
+        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + Str_Note, Str_ImageSaved + ": '" + SavePath + "'", ToolTipIcon.Info)
 
     End Sub
 
-    ' *** ELJÁRÁS: Tálcaikon duplaklikk kezelése ***
-    ' Eseményvezérelt: MainNotifyIcon.MouseDoubleClick -> Dupla klikk (Taskbar ikon)
-    Private Sub MainNotifyIcon_DoubleClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles MainNotifyIcon.MouseDoubleClick
+    ' *** ELJÁRÁS: Buboréküzenetre kattintás kezelése ***
+    ' Eseményvezérelt: MainNotifyIcon.BalloonTipClicked -> Klikk (Taskbar ikon buboréküzenet)
+    Private Sub MainNotifyIcon_BalloonTipClicked(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainNotifyIcon.BalloonTipClicked
 
-        ' Változás ellenőrzése és állapot invertálása
-        If Me.WindowState = FormWindowState.Normal Then
-            If CheckedMinToTray Then
-                Me.Visible = False
-                If Not DisableBalloon Then
-                    MainNotifyIcon.ShowBalloonTip(3000, MyName, Str_Taskbar, ToolTipIcon.Info)
-                    DisableBalloon = True
-                End If
-            End If
-            Me.WindowState = FormWindowState.Minimized
-        Else
-            Me.Visible = True
-            Me.WindowState = FormWindowState.Normal
+        ' Kép megnyitása, a buboréközenet fájl mentésére vonatkozik
+        If OpenFile Then
+            Process.Start(SavePath)
+
+            ' Buboréküzenet állapot visszaállítása
+            OpenFile = False
         End If
 
     End Sub

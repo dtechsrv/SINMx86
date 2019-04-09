@@ -39,9 +39,17 @@ Public NotInheritable Class LoadSplash
         If MainWindow.SplashDefineAsAbout Then
             Link_SplashClose.Text = MainWindow.Str_Close
             Splash_Status.Text = My.Application.Info.Copyright
+
+            If MainWindow.TopMost Then
+                Me.TopMost = True
+            Else
+                Me.TopMost = False
+            End If
         Else
             Link_SplashClose.Text = Nothing
             Splash_Status.Text = MainWindow.Str_Loading + "..." ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
+
+            Me.TopMost = True
         End If
 
     End Sub
