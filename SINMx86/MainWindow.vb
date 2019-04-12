@@ -289,7 +289,7 @@ Public Class MainWindow
 
         ' Értékek beállítása
         For Each Me.objMgmt In objCS.Get
-            Hostname = objMgmt("Name").ToString
+            Hostname = objMgmt("Name")
         Next
 
         ' Hosztnév beálítása az állapotsorban
@@ -306,8 +306,8 @@ Public Class MainWindow
 
         ' Értékek beállítása
         For Each Me.objMgmt In objOS.Get
-            OSName = objMgmt("Caption").ToString
-            OSBuild = objMgmt("BuildNumber").ToString
+            OSName = objMgmt("Caption")
+            OSBuild = objMgmt("BuildNumber")
             CurrentTime = objMgmt("LocalDateTime").ToString
             SysUpTime = objMgmt("LastBootUptime").ToString
         Next
@@ -316,7 +316,7 @@ Public Class MainWindow
         Value_OSName.Text = StringNormalize(OSName)
         Value_OSRelease.Text = OSRelase.ToString + "-bit"
         Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString
-        Value_OSBuild.Text = OSBuild.ToString
+        Value_OSBuild.Text = OSBuild
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Futásidő ***
         UptimeSeconds = DateDiff("s", DateTimeConv(SysUpTime), DateTimeConv(CurrentTime))
@@ -368,9 +368,9 @@ Public Class MainWindow
 
         ' Értékek beállítása
         For Each Me.objMgmt In objBB.Get
-            Vendor = objMgmt("Manufacturer").ToString
-            Model = objMgmt("Product").ToString
-            Identifier = objMgmt("SerialNumber").ToString
+            Vendor = objMgmt("Manufacturer")
+            Model = objMgmt("Product")
+            Identifier = objMgmt("SerialNumber")
         Next
 
         ' Értéktároló tömb frissítése -> Alaplap
@@ -393,8 +393,8 @@ Public Class MainWindow
 
         ' Értékek beállítása
         For Each Me.objMgmt In objCS.Get
-            Vendor = objMgmt("Manufacturer").ToString
-            Model = objMgmt("Model").ToString
+            Vendor = objMgmt("Manufacturer")
+            Model = objMgmt("Model")
         Next
 
         ' Értéktároló tömb frissítése -> Számítógép
@@ -415,9 +415,9 @@ Public Class MainWindow
 
         ' Értékek beállítása
         For Each Me.objMgmt In objBS.Get
-            Vendor = objMgmt("Manufacturer").ToString
-            Model = objMgmt("SMBIOSBIOSVersion").ToString
-            Identifier = Format(DateTimeConv(objMgmt("ReleaseDate")), "yyyy-MM-dd").ToString
+            Vendor = objMgmt("Manufacturer")
+            Model = objMgmt("SMBIOSBIOSVersion")
+            Identifier = Format(DateTimeConv(objMgmt("ReleaseDate").ToString), "yyyy-MM-dd")
         Next
 
         ' Értéktároló tömb frissítése -> BIOS
@@ -494,10 +494,10 @@ Public Class MainWindow
         For Each Me.objMgmt In objOS.Get
             PMemSize = objMgmt("TotalVisibleMemorySize")
             PMemFree = objMgmt("FreePhysicalMemory")
-            PMemPerc = Round(((PMemSize - PMemFree) / PMemSize) * 100)
+            PMemPerc = Round(((PMemSize - PMemFree) / PMemSize) * 100).ToString
             VMemSize = objMgmt("TotalVirtualMemorySize")
             VMemFree = objMgmt("FreeVirtualMemory")
-            VMemPerc = Round(((VMemSize - VMemFree) / VMemSize) * 100)
+            VMemPerc = Round(((VMemSize - VMemFree) / VMemSize) * 100).ToString
         Next
 
         ' Hibakorrekció: Fizikai memória (100%-nál nagyobb kihasználtság. Nem fordulhat elő, de ha mégis, akkor 100-ra betonozva a plafon!)
@@ -519,11 +519,11 @@ Public Class MainWindow
 
         ' Kiírások formázása
         Value_PhysicalMemorySize.Text = FixDigitSeparator(PMemSizeConv(0), 2, True) + " " + PrefixTable(PMemSizeConv(1)) + "B"
-        Value_PhysicalMemoryFree.Text = FixDigitSeparator(PMemFreeConv(0), 2, True).ToString + " " + PrefixTable(PMemFreeConv(1)) + "B"
-        Value_PhysicalMemoryUsage.Text = PMemPerc.ToString + " %"
+        Value_PhysicalMemoryFree.Text = FixDigitSeparator(PMemFreeConv(0), 2, True) + " " + PrefixTable(PMemFreeConv(1)) + "B"
+        Value_PhysicalMemoryUsage.Text = PMemPerc + " %"
         Value_VirtualMemorySize.Text = FixDigitSeparator(VMemSizeConv(0), 2, True) + " " + PrefixTable(VMemSizeConv(1)) + "B"
         Value_VirtualMemoryFree.Text = FixDigitSeparator(VMemFreeConv(0), 2, True) + " " + PrefixTable(VMemFreeConv(1)) + "B"
-        Value_VirtualMemoryUsage.Text = VMemPerc.ToString + " %"
+        Value_VirtualMemoryUsage.Text = VMemPerc + " %"
 
         ' Visszatérési érték beállítása
         Return False
@@ -545,14 +545,13 @@ Public Class MainWindow
         Dim SmartInfo As String = Nothing                   ' S.M.A.R.T állapot
         Dim SerialNumber As String = Nothing                ' Sorozatszám
 
-        ' WMI érték definiálása
+        ' WMI érték definiálása (Direkt van wildcard, mert XP alatt nem szerepel minden érték)
         objDD = New ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive WHERE Index = '" + DiskList(SelectedDisk) + "'")
 
         ' Értékek kinyerése a WMI-ből
         For Each Me.objMgmt In objDD.Get
             Capacity = objMgmt("Size")
             Connector = objMgmt("InterfaceType")
-            SectorSize = objMgmt("BytesPerSector")
             DiskIndex = objMgmt("Index")
             SmartInfo = objMgmt("Status")
 
@@ -573,24 +572,22 @@ Public Class MainWindow
             SerialNumber = DiskSerialNumberConv(SerialNumber)
         End If
 
-        ' Üres sorozatszám korrekció
+        ' Felesleges szóközök eltávolítása
+        While (InStr(SerialNumber, " "))
+            SerialNumber = Replace(SerialNumber, " ", "")
+        End While
+
+        While (InStr(Firmware, " "))
+            Firmware = Replace(Firmware, " ", "")
+        End While
+
+        ' Üres sztring korrekció
         If SerialNumber = Nothing Then
             SerialNumber = "(" + Str_Unknown + ")"
-        Else
-            ' Felesleges szóközök eltávolítása
-            While (InStr(SerialNumber, " "))
-                SerialNumber = Replace(SerialNumber, " ", "")
-            End While
         End If
 
-        ' Üres firmware korrekció
         If Firmware = Nothing Then
             Firmware = "(" + Str_Unknown + ")"
-        Else
-            ' Felesleges szóközök eltávolítása
-            While (InStr(Firmware, " "))
-                Firmware = Replace(Firmware, " ", "")
-            End While
         End If
 
         ' Kapacitás konvertálása 
@@ -605,9 +602,9 @@ Public Class MainWindow
 
         ' Kiírások formázása
         Value_DiskIndex.Text = "# " + DiskIndex.ToString
-        Value_DiskFirmware.Text = Firmware.ToString
-        Value_DiskSmart.Text = SmartInfo.ToString
-        Value_DiskSerial.Text = SerialNumber.ToString
+        Value_DiskFirmware.Text = Firmware
+        Value_DiskSmart.Text = SmartInfo
+        Value_DiskSerial.Text = SerialNumber
 
         If Connector = "IDE" Then
             Value_DiskInterface.Text = "IDE / SATA"
@@ -1209,7 +1206,7 @@ Public Class MainWindow
 
         For Each Me.objMgmt In objDD.Get
             DiskList(DiskCount) = ToInt32(objMgmt("Index"))
-            DiskName(DiskList(DiskCount)) = objMgmt("Model").ToString
+            DiskName(DiskList(DiskCount)) = objMgmt("Model")
             DiskCount += 1
         Next
 
@@ -1721,9 +1718,9 @@ Public Class MainWindow
 
         If CheckedDownChart Then
             Chart.DrawString(Str_Current + ": " + FixDigitSeparator(DownCurrentConv(0), TraffDigit, True) + " " +
-                             PrefixTable(DownCurrentConv(1)).ToString + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
+                             PrefixTable(DownCurrentConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
             Chart.DrawString(Str_Peak + ": " + FixDigitSeparator(DownPeakConv(0), TraffDigit, True) + " " +
-                             PrefixTable(DownPeakConv(1)).ToString + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(1), TextOffset(1))
+                             PrefixTable(DownPeakConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(1), TextOffset(1))
         Else
             Chart.DrawString(Str_ChartHide, SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
         End If
@@ -1748,9 +1745,9 @@ Public Class MainWindow
 
         If CheckedUpChart Then
             Chart.DrawString(Str_Current + ": " + FixDigitSeparator(UpCurrentConv(0), TraffDigit, True) + " " +
-                             PrefixTable(UpPeakConv(1)).ToString + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(0), TextOffset(1))
+                             PrefixTable(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(0), TextOffset(1))
             Chart.DrawString(Str_Peak + ": " + FixDigitSeparator(UpPeakConv(0), TraffDigit, True) + " " +
-                             PrefixTable(UpPeakConv(1)).ToString + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(1), TextOffset(1))
+                             PrefixTable(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(1), TextOffset(1))
         Else
             Chart.DrawString(Str_ChartHide, SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
         End If
