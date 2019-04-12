@@ -15,7 +15,7 @@ Public Class MainWindow
     Public SplashDefineAsAbout As Boolean = False                           ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objPR, objNI, objVC, objDD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objPR, objNI, objVC, objDD As ManagementObjectSearcher
     Public objMgmt As ManagementObject
 
     ' Beállításjegyzék változói
@@ -24,9 +24,9 @@ Public Class MainWindow
     ' Nyelvi sztringek
     Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Loading, Str_LoadReg, Str_LoadWMI, Str_MemUse, Str_MemFree, Str_Uptime,
            Str_DayName(7), Str_MonthName(12), Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator,
-           Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak, Str_ChartTime, Str_ChartDown,
-           Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname, Str_ChartCount,
-           Str_Note, Str_NoDisk, Str_Unknown, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
+           Str_Motherboard, Str_System, Str_BIOS, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak,
+           Str_ChartTime, Str_ChartDown, Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname,
+           Str_ChartCount, Str_Note, Str_NoDisk, Str_Unknown, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
 
     ' ToolTip sztringek
     Public Tip_Language, Tip_CPU, Tip_Disk, Tip_Video, Tip_Interface, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown, Tip_ChartUp,
@@ -36,17 +36,19 @@ Public Class MainWindow
     Public CheckedSplashDisable, CheckedDownChart, CheckedUpChart, CheckedTopMost, CheckedNoQuitAsk, CheckedMinToTray As Boolean
 
     ' Listák kiválasztott elemeinek sorszáma
-    Public SelectedCPU, SelectedInterface, SelectedLanguage, SelectedRefresh, SelectedDisk, SelectedVideo As Int32
+    Public SelectedHardware, SelectedCPU, SelectedInterface, SelectedLanguage, SelectedRefresh, SelectedDisk, SelectedVideo As Int32
 
     ' További változók
     Public ReleaseStatus As String = Nothing                                ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
     Public VersionString As String                                          ' Formázott verziószám
+    Public HWVendor(2), HWIdentifier(2) As String                           ' Komponensinformációs tömbök
     Public OSMajorVersion, OSMinorVersion As Int32                          ' OS fő- és alverzió száma (hibakereséshez)
     Public OSRelase As Int32                                                ' Kiadás típusa (32/64 bit)
     Public RefreshInterval() As Int32 = {1, 2, 3, 4, 5, 10, 15, 30, 60}     ' Frissítési intervallumok
     Public PrefixTable() As String = {"", "k", "M", "G", "T"}               ' Prefixumok tömbje (amíg szükséges lehet)
     Public TraffGenCounter As Int32                                         ' Diagram generálási időköz visszaszámlálója
     Public Hostname As String                                               ' Hosztnév
+    Public HWList(2) As String                                              ' Hardver komonensek listája
     Public CPUName(32) As String                                            ' Processzorok nevei (kiírásokhoz)
     Public InterfaceList(32) As String                                      ' Interfészlista tömbje (lekérdezésekhez)
     Public InterfaceName(32) As String                                      ' Interfészek formázott neve (kiírásokhoz)
@@ -59,16 +61,12 @@ Public Class MainWindow
     Public GridUpdate As Boolean = False                                    ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
     Public TimerSeconds, UptimeSeconds As Int32                             ' Időértékek: időzítő, futásidő
     Public LatestDownload, LatestUpload As Int64                            ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
-    Public ChartDimension() As Int32 = {420, 250}                           ' Diagram képének felbontása (szélesség, magasság)
     Public ChartCreationTime As DateTime                                    ' Az utolsó diagram elkészülésének ideje
     Public DisableBalloon As Boolean = False                                ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
     Public OpenFile As Boolean = False                                      ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
     Public SavePath As String = Nothing                                     ' Az utolsó mentett fájl elérési útja
     Public Languages() As String = {"English (EN)", "Magyar (HU)"}          ' Nyelvek (egyelőre statikus, 2 elemű)
     Public MainWindowDone As Boolean = False                                ' A főablak betöltődésének indikátora, néhány szükséges lekérdezés csak ezután történhet meg!
-
-    ' Diagram képének létrehozása
-    Public ChartImage As New Bitmap(ChartDimension(0), ChartDimension(1), Imaging.PixelFormat.Format24bppRgb)
 
     ' Forgalmi diagramok (2-vel több eleműnek kell lennie, mint a kijelzett érték!)
     Public TraffDownArray(TraffResolution + 2), TraffUpArray(TraffResolution + 2) As Int64
@@ -80,6 +78,7 @@ Public Class MainWindow
         ' Alapértelmezett értékek beállítása (Ismeretlen érték vagy üres registryváltozó esetén)
         Dim DefaultLaguage As Int32 = 0         ' Nyelv: angol
         Dim DefaultRefresh As Int32 = 2         ' Frissítési időköz: 3 másodperc
+        Dim DefaultHardware As Int32 = 0        ' Kiválasztott komponens: alaplap
 
         ' Debug sztring kiürítése
         Value_Debug.Text = Nothing
@@ -119,6 +118,9 @@ Public Class MainWindow
         ReDim Preserve OSVersionArray(0 To 1)
         OSMajorVersion = OSVersionArray(0)
         OSMinorVersion = OSVersionArray(1)
+
+        ' Lista állapotának beállítása (Komponensek -> első elem: alaplap)
+        SelectedHardware = DefaultHardware
 
         ' ----- REGISTRY LEKÉRDEZÉSEK ÉS LISTÁK FELTÖLTÉSE -----
 
@@ -277,32 +279,10 @@ Public Class MainWindow
             LoadSplash.Splash_Status.Text = Str_Loading + ": " + Str_LoadWMI + "..."
         End If
 
-        ' *** WMI LEKÉRDEZÉS: Win32_Baseboard -> Alaplap információi ***
-        objBB = New ManagementObjectSearcher("SELECT Manufacturer, Product, Name FROM Win32_Baseboard")
-
-        ' Értékek definiálása
-        Dim Manufacturer As String = Nothing                ' Alaplap gyártója
-        Dim Model As String = Nothing                       ' Alaplap azonosítója
-
-        ' Értékek beállítása
-        For Each Me.objMgmt In objBB.Get
-            Manufacturer = objMgmt("Manufacturer").ToString
-            Model = objMgmt("Product").ToString
-            Hostname = objMgmt("Name").ToString
-        Next
-
-        ' Kiírások értékének frissítése
-        If Manufacturer = Nothing Then
-            Value_HWVendor.Text = "(" + Str_Unknown + ")"
-        Else
-            Value_HWVendor.Text = StringNormalize(Manufacturer)
-        End If
-
-        If Model = Nothing Then
-            Value_HWModel.Text = "(" + Str_Unknown + ")"
-        Else
-            Value_HWModel.Text = StringNormalize(Model)
-        End If
+        ' Hardverinformációk lekérdezése
+        SelectedHardware = DefaultHardware
+        SetHWInformation()
+        ComboBox_HWList.SelectedIndex = SelectedHardware
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem" -> Hosztnév ***
         objCS = New ManagementObjectSearcher("SELECT Name FROM Win32_ComputerSystem")
@@ -372,6 +352,91 @@ Public Class MainWindow
     End Sub
 
     ' ----- FÜGGVÉNYEK -----
+
+    ' *** FÜGGVEÉNY: Hardver komponensek értékeinek beállítása ***
+    ' Bemenet: Void
+    ' Kimenet: Boolean (False)
+    Private Function SetHWInformation()
+
+        ' Értékek definiálása
+        Dim Vendor As String = Nothing                      ' Gyártó
+        Dim Model As String = Nothing                       ' Modell
+        Dim Identifier As String = Nothing                  ' Azonosító
+
+        ' *** WMI LEKÉRDEZÉS: Win32_Baseboard -> Alaplap információi ***
+        objBB = New ManagementObjectSearcher("SELECT Manufacturer, Product, SerialNumber FROM Win32_Baseboard")
+
+        ' Értékek beállítása
+        For Each Me.objMgmt In objBB.Get
+            Vendor = objMgmt("Manufacturer").ToString
+            Model = objMgmt("Product").ToString
+            Identifier = objMgmt("SerialNumber").ToString
+        Next
+
+        ' Értéktároló tömb frissítése -> Alaplap
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Then
+            HWVendor(0) = Nothing
+        Else
+            HWVendor(0) = Vendor
+        End If
+
+        If Model = Nothing Or Model = "To be filled by O.E.M." Then
+            HWIdentifier(0) = Nothing
+        ElseIf Identifier = Nothing Or Identifier = "To be filled by O.E.M." Then
+            HWIdentifier(0) = Model
+        Else
+            HWIdentifier(0) = Model + ", S/N: " + Identifier
+        End If
+
+        ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
+        objCS = New ManagementObjectSearcher("SELECT Manufacturer, Model FROM Win32_ComputerSystem")
+
+        ' Értékek beállítása
+        For Each Me.objMgmt In objCS.Get
+            Vendor = objMgmt("Manufacturer").ToString
+            Model = objMgmt("Model").ToString
+        Next
+
+        ' Értéktároló tömb frissítése -> Számítógép
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Then
+            HWVendor(1) = Nothing
+        Else
+            HWVendor(1) = Vendor
+        End If
+
+        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
+            HWIdentifier(1) = Nothing
+        Else
+            HWIdentifier(1) = Model
+        End If
+
+        ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> BIOS információi ***
+        objBS = New ManagementObjectSearcher("SELECT Manufacturer, SMBIOSBIOSVersion, ReleaseDate FROM Win32_BIOS")
+
+        ' Értékek beállítása
+        For Each Me.objMgmt In objBS.Get
+            Vendor = objMgmt("Manufacturer").ToString
+            Model = objMgmt("SMBIOSBIOSVersion").ToString
+            Identifier = Format(DateTimeConv(objMgmt("ReleaseDate")), "yyyy-MM-dd").ToString
+        Next
+
+        ' Értéktároló tömb frissítése -> BIOS
+        If Vendor = Nothing Then
+            HWVendor(2) = Nothing
+        Else
+            HWVendor(2) = Vendor
+        End If
+
+        If Model = Nothing Then
+            HWIdentifier(2) = Nothing
+        Else
+            HWIdentifier(2) = Model + " (" + Identifier + ")"
+        End If
+
+        ' Visszatérési érték beállítása
+        Return False
+
+    End Function
 
     ' *** FÜGGVEÉNY: Processzor aktuális órajelének beállítása ***
     ' Bemenet: Void
@@ -1245,6 +1310,9 @@ Public Class MainWindow
         Dim ResetCount As Int32 = 0                             ' Hibakorrekció számlálója (lépések száma az átbillenáés után)
 
         ' Diagram határérték definiálása és alapértékre állítása
+        Dim ChartCanvas() As Int32 = {PictureBox_TrafficChart.Size.Width, PictureBox_TrafficChart.Size.Height}
+        Dim ChartDimension() As Int32 = {420, 150}
+        Dim ChartBegining() As Int32 = {0, ChartCanvas(1) - ChartDimension(1)}
         Dim DownPeak As Int32 = 0
         Dim UpPeak As Int32 = 0
         Dim Amplitude As Int32 = 0
@@ -1254,7 +1322,7 @@ Public Class MainWindow
         Dim ChartUpNumbers(TraffResolution + 1) As Int32
 
         ' Kép létrehozása
-        Dim Picture As New Bitmap(ChartDimension(0), ChartDimension(1), Imaging.PixelFormat.Format24bppRgb)
+        Dim Picture As New Bitmap(ChartCanvas(0), ChartCanvas(1), Imaging.PixelFormat.Format24bppRgb)
         Dim Chart As Graphics = Graphics.FromImage(Picture)
 
         ' Argumentumvizsgálat (értékek nullázása, ha az érték valós) 
@@ -1327,7 +1395,6 @@ Public Class MainWindow
         ' Értékek definiálása
         Dim GridLine(1) As Point                                    ' Koordináta értékek
         Dim DefaultSlip As Int32                                    ' Kezdeti rácscsúszás
-        Dim StartGrid As Int32 = Round(ChartDimension(1) * (2 / 5)) ' A rács függőlegesen a kép 40%-nál kezdődik.
         Dim Scale As Int32 = 10                                     ' Függőleges osztások száma
         Dim TraffDigit As Int32 = 2                                 ' Forgalmi értékek tizedesvessző utáni helyiértékeinek száma
 
@@ -1349,9 +1416,6 @@ Public Class MainWindow
                 GridSlip = (GridSlip + DefaultSlip) Mod Round(ChartDimension(0) / (RefreshInterval(SelectedRefresh) * VerticalGrids))
                 GridUpdate = False
 
-                ' Diagram készítési idejének frissítése
-                'ChartCreationTime = DateTime.Now
-
             End If
 
         End If
@@ -1360,7 +1424,7 @@ Public Class MainWindow
         ChartCreationTime = DateTime.Now
 
         ' *** RÁCSVONAL - Vízszintes vonalak ***
-        ' Rajzolási irány: vízszintesen balról jobbra, függőlegesen alulról felfelé.
+        ' Rajzolási irány: vízszintesen balról jobbra, függőlegesen fentről lefelé.
 
         ' Koordinátacsúszás beállítása: vízszintesen változatlan, függőlegesen eggyel felfelé -> Az alsó vonal látszódik!
         DrawOffset = {0, -1}
@@ -1369,21 +1433,21 @@ Public Class MainWindow
         For Horizontal As Int32 = 0 To Scale
 
             ' Koordináták feltöltése (X0, X1, Y0, Y1)
-            GridLine(0).X = DrawOffset(0)
-            GridLine(1).X = DrawOffset(0) + ChartDimension(0)
-            GridLine(0).Y = DrawOffset(1) + ChartDimension(1)
+            GridLine(0).X = ChartBegining(0) + DrawOffset(0)
+            GridLine(1).X = ChartBegining(0) + ChartDimension(0) + DrawOffset(0)
+            GridLine(0).Y = ChartBegining(1) + DrawOffset(1)
             GridLine(1).Y = GridLine(0).Y ' Egyezik a kezdeti koordinátákkal
 
             ' Aktuális vonal megrajzolása
             Chart.DrawLines(Pens.DarkGreen, GridLine)
 
-            ' Y koordináta eltolása a következő ciklusra
-            DrawOffset(1) -= Round((ChartDimension(1) - StartGrid) / Scale)
+            ' Y koordináta eltolása a következő ciklusra (Fentről lefelé)
+            DrawOffset(1) += ToInt32(ChartDimension(1) / Scale)
 
         Next
 
         ' *** RÁCSVONAL - Függőleges vonalak ***
-        ' Rajzolási irány: vízszintesen jobbról balra, függőlegesen alulról felfelé.
+        ' Rajzolási irány: vízszintesen jobbról balra, függőlegesen fentről lefelé.
 
         ' Koordinátacsúszás beállítása: vízszintesen eggyel balra, függőlegesen eggyel felfelé -> A jobb szélső vonal látszódik, valamint a vízszintes vonalak eltolása miatt felfelé is el kell tolni!
         DrawOffset = {-1, -1}
@@ -1392,15 +1456,15 @@ Public Class MainWindow
         For Vertical As Int32 = 0 To Round(RefreshInterval(SelectedRefresh) * VerticalGrids)
 
             ' Koordináták feltöltése (X0, X1, Y0, Y1)
-            GridLine(0).X = DrawOffset(0) + ChartDimension(0) - GridSlip
+            GridLine(0).X = ChartDimension(0) + DrawOffset(0) - GridSlip
             GridLine(1).X = GridLine(0).X ' Egyezik a kezdeti koordinátákkal
-            GridLine(0).Y = DrawOffset(1) + StartGrid
-            GridLine(1).Y = DrawOffset(1) + ChartDimension(1)
+            GridLine(0).Y = ChartBegining(1) + DrawOffset(1)
+            GridLine(1).Y = ChartBegining(1) + ChartDimension(1) + DrawOffset(1)
 
             ' Aktuális vonal megrajzolása
             Chart.DrawLines(Pens.DarkGreen, GridLine)
 
-            ' X koordináta eltolása a következő ciklusra
+            ' X koordináta eltolása a következő ciklusra (jobbról balra
             DrawOffset(0) -= ToInt32(ChartDimension(0) / (RefreshInterval(SelectedRefresh))) * VerticalGrids
 
         Next
@@ -1441,9 +1505,9 @@ Public Class MainWindow
 
         ' Függőleges koordináta számítása
         If UpPeak <> 0 Then
-            UpPeakLine = ChartDimension(1) - Round(((UpPeakConv(0) * (1000 ^ UpPeakConv(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartDimension(1) - StartGrid))
+            UpPeakLine = ChartCanvas(1) - Round(((UpPeakConv(0) * (1000 ^ UpPeakConv(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartCanvas(1) - ChartBegining(1)))
         Else
-            UpPeakLine = ChartDimension(1)
+            UpPeakLine = ChartCanvas(1)
         End If
 
         ' Feltöltési segédegyenes megrajzolása
@@ -1452,8 +1516,8 @@ Public Class MainWindow
 
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
                 GridLine(0).X = DrawOffset(0) - GridSlip
-                GridLine(1).X = DrawOffset(0) + Round(ChartDimension(0) / LineCuts) - GridSlip - 1 ' Szaggatásnál eggyel rövidebb szakasz kell, nem fedhetik egymást a segédegyenesek.
-                GridLine(0).Y = DrawOffset(1) + Round(UpPeakLine)
+                GridLine(1).X = DrawOffset(0) + ToInt32(ChartDimension(0) / LineCuts) - GridSlip - 1 ' A szaggatásnál eggyel rövidebb szakasz kell, mert nem fedhetik egymást a segédegyenesek.
+                GridLine(0).Y = DrawOffset(1) + ToInt32(UpPeakLine)
                 GridLine(1).Y = GridLine(0).Y ' Egyezik a kezdeti koordinátákkal
 
                 ' Aktuális szakasz megrajzolása
@@ -1484,9 +1548,9 @@ Public Class MainWindow
 
         ' Függőleges koordináta számítása
         If DownPeak <> 0 Then
-            DownPeakLine = ChartDimension(1) - Round(((DownPeakConv(0) * (1000 ^ DownPeakConv(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartDimension(1) - StartGrid))
+            DownPeakLine = ChartCanvas(1) - Round(((DownPeakConv(0) * (1000 ^ DownPeakConv(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartCanvas(1) - ChartBegining(1)))
         Else
-            DownPeakLine = ChartDimension(1)
+            DownPeakLine = ChartCanvas(1)
         End If
 
         ' Letöltési segédegyenes megrajzolása
@@ -1495,7 +1559,7 @@ Public Class MainWindow
 
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
                 GridLine(0).X = DrawOffset(0) - GridSlip
-                GridLine(1).X = DrawOffset(0) + Round(ChartDimension(0) / 50) - GridSlip - 1 ' Szaggatásnál eggyel rövidebb szakasz kell, nem fedhetik egymást a segédegyenesek.
+                GridLine(1).X = DrawOffset(0) + Round(ChartDimension(0) / LineCuts) - GridSlip - 1 ' A szaggatásnál eggyel rövidebb szakasz kell, mert nem fedhetik egymást a segédegyenesek.
                 GridLine(0).Y = DrawOffset(1) + Round(DownPeakLine)
                 GridLine(1).Y = GridLine(0).Y ' Egyezik a kezdeti koordinátákkal
 
@@ -1539,14 +1603,14 @@ Public Class MainWindow
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
                 UpTraffLine(0).X = DrawOffset(0)
                 UpTraffLine(1).X = DrawOffset(0) + Round(ChartDimension(0) / (TraffResolution + 1))
-                UpTraffLine(0).Y = DrawOffset(1) + ChartDimension(1) - Round(((UpByteDiffCurrent(0) * (1000 ^ UpByteDiffCurrent(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartDimension(1) - StartGrid))
-                UpTraffLine(1).Y = DrawOffset(1) + ChartDimension(1) - Round(((UpByteDiffLast(0) * (1000 ^ UpByteDiffLast(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartDimension(1) - StartGrid))
+                UpTraffLine(0).Y = DrawOffset(1) + ChartCanvas(1) - Round(((UpByteDiffCurrent(0) * (1000 ^ UpByteDiffCurrent(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartCanvas(1) - ChartBegining(1)))
+                UpTraffLine(1).Y = DrawOffset(1) + ChartCanvas(1) - Round(((UpByteDiffLast(0) * (1000 ^ UpByteDiffLast(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartCanvas(1) - ChartBegining(1)))
 
                 ' Aktuális szakasz megrajzolása
                 Chart.DrawLines(Pens.Red, UpTraffLine)
 
                 ' X koordináta eltolása a következő ciklusra
-                DrawOffset(0) += Round(ChartDimension(0) / (TraffResolution))
+                DrawOffset(0) += Round(ChartCanvas(0) / (TraffResolution))
 
             Next
         End If
@@ -1575,15 +1639,15 @@ Public Class MainWindow
 
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
                 DownTraffLine(0).X = DrawOffset(0)
-                DownTraffLine(1).X = DrawOffset(0) + Round(ChartDimension(0) / (TraffResolution + 1))
-                DownTraffLine(0).Y = DrawOffset(1) + ChartDimension(1) - Round(((DownByteDiffCurrent(0) * (1000 ^ DownByteDiffCurrent(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartDimension(1) - StartGrid))
-                DownTraffLine(1).Y = DrawOffset(1) + ChartDimension(1) - Round(((DownByteDiffLast(0) * (1000 ^ DownByteDiffLast(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartDimension(1) - StartGrid))
+                DownTraffLine(1).X = DrawOffset(0) + Round(ChartCanvas(0) / (TraffResolution + 1))
+                DownTraffLine(0).Y = DrawOffset(1) + ChartCanvas(1) - Round(((DownByteDiffCurrent(0) * (1000 ^ DownByteDiffCurrent(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartCanvas(1) - ChartBegining(1)))
+                DownTraffLine(1).Y = DrawOffset(1) + ChartCanvas(1) - Round(((DownByteDiffLast(0) * (1000 ^ DownByteDiffLast(1))) / (PeakDiv * (1000 ^ PeakExp))) * (ChartCanvas(1) - ChartBegining(1)))
 
                 ' Aktuális szakasz megrajzolása
                 Chart.DrawLines(Pens.Lime, DownTraffLine)
 
                 ' X koordináta eltolása a következő ciklusra
-                DrawOffset(0) += Round(ChartDimension(0) / (TraffResolution))
+                DrawOffset(0) += Round(ChartCanvas(0) / (TraffResolution))
 
             Next
         End If
@@ -1640,7 +1704,7 @@ Public Class MainWindow
         ' *** SZÖVEGES KIÍRÁSOK: Letöltési jelmagyarázat, értékek (4.sor) ***
 
         ' Koordináták eltolása: sorugrás
-        TextOffset(1) += 15
+        TextOffset(1) += 22
 
         ' Jelmagyarázat (X0, X1, Y0, Y1)
         SignLine(0).X = TextOffset(0) + 5
@@ -1692,9 +1756,6 @@ Public Class MainWindow
         End If
 
         ' ----- KÉPMŰVELETEK -----
-
-        ' Külső kép beállítása -> A mentési lehetőség miatt kell egy másolat publikusra is, a függvényen kívül!
-        ChartImage = Picture
 
         ' Elkészült kép kirajzolása
         PictureBox_TrafficChart.Image = Picture
@@ -1783,6 +1844,9 @@ Public Class MainWindow
                 Str_DigitSeparator = "."
                 Str_Interval = "Intervals"
                 Str_Traffic = "Traffic"
+                Str_Motherboard = "Motherboard"
+                Str_System = "Computer"
+                Str_BIOS = "BIOS"
                 Str_Interface = "Interface"
                 Str_ChartTime = "Chart created on"
                 Str_Time = "Time"
@@ -1838,8 +1902,9 @@ Public Class MainWindow
                 Tip_Screenshot = "Take screenshot"
 
                 ' Feliratok
+                Name_HWList.Text = "Component:"
                 Name_HWVendor.Text = "Vendor:"
-                Name_HWModel.Text = "Motherboard:"
+                Name_HWIdentifier.Text = "Identifier:"
                 Name_CPUList.Text = "Processor:"
                 Name_CPUCore.Text = "Cores / Threads:"
                 Name_CPUClock.Text = "Clock:"
@@ -1916,6 +1981,9 @@ Public Class MainWindow
                 Str_DigitSeparator = ","
                 Str_Interval = "Intervallumok"
                 Str_Traffic = "Forgalom"
+                Str_Motherboard = "Alaplap"
+                Str_System = "Számítógép"
+                Str_BIOS = "BIOS"
                 Str_Interface = "Interfész"
                 Str_ChartTime = "Diagram elkészítve:"
                 Str_Time = "Idő"
@@ -1971,8 +2039,9 @@ Public Class MainWindow
                 Tip_Screenshot = "Képernyőkép készítése"
 
                 ' Feliratok
+                Name_HWList.Text = "Komponens:"
                 Name_HWVendor.Text = "Gyártó:"
-                Name_HWModel.Text = "Alaplap:"
+                Name_HWIdentifier.Text = "Azonosító:"
                 Name_CPUList.Text = "Processzor:"
                 Name_CPUCore.Text = "Magok / Szálak:"
                 Name_CPUClock.Text = "Órajel:"
@@ -2087,6 +2156,13 @@ Public Class MainWindow
         StatusLabel_TopMost.ToolTipText = Tip_TopMost
         ScreenshotToolStripMenuItem.ToolTipText = Tip_Screenshot
 
+        ' ComboBox elemek
+        ComboBox_HWList.Items.Clear()
+        ComboBox_HWList.Items.AddRange(New Object() {Str_Motherboard, Str_System, Str_BIOS})
+        If MainWindowDone Then
+            ComboBox_HWList.SelectedIndex = SelectedHardware
+        End If
+
         ' Lemez és videokártya információk újbóli lekérdezése a kiválasztott lemezhez (A nyelvi formázások miatt fontos!)
         If MainWindowDone Then
             SetDiskInformation()
@@ -2110,6 +2186,28 @@ Public Class MainWindow
 
         ' Diagram frissítése
         MakeChart(True)
+
+    End Sub
+
+    ' *** ELJÁRÁS: Hardverkomponens kiválasztása ***
+    ' Eseményvezérelt: ComboBox_UpdateList.SelectedIndexChanged -> Listaelem kiválasztása
+    Private Sub HWList_Change(sender As Object, e As EventArgs) Handles ComboBox_HWList.SelectedIndexChanged
+
+        ' Változás beállítása
+        SelectedHardware = ComboBox_HWList.SelectedIndex
+
+        ' Komponensek kiírásának beállítása
+        If HWVendor(SelectedHardware) = Nothing Then
+            Value_HWVendor.Text = "(" + Str_Unknown + ")"
+        Else
+            Value_HWVendor.Text = StringNormalize(HWVendor(SelectedHardware))
+        End If
+
+        If HWIdentifier(SelectedHardware) = Nothing Then
+            Value_HWIdentifier.Text = "(" + Str_Unknown + ")"
+        Else
+            Value_HWIdentifier.Text = StringNormalize(HWIdentifier(SelectedHardware))
+        End If
 
     End Sub
 

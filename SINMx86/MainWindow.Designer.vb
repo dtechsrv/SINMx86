@@ -25,9 +25,10 @@ Partial Class MainWindow
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainWindow))
         Me.GroupBox_HWInfo = New System.Windows.Forms.GroupBox()
-        Me.Value_HWModel = New System.Windows.Forms.Label()
+        Me.Value_HWIdentifier = New System.Windows.Forms.Label()
+        Me.Name_HWIdentifier = New System.Windows.Forms.Label()
+        Me.Name_HWList = New System.Windows.Forms.Label()
         Me.Value_HWVendor = New System.Windows.Forms.Label()
-        Me.Name_HWModel = New System.Windows.Forms.Label()
         Me.Name_HWVendor = New System.Windows.Forms.Label()
         Me.GroupBox_OSInfo = New System.Windows.Forms.GroupBox()
         Me.Value_OSBuild = New System.Windows.Forms.Label()
@@ -118,6 +119,7 @@ Partial Class MainWindow
         Me.MainMenuItem_Chart = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenu_ChartItem_DownloadVisible = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenu_ChartItem_UploadVisible = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MainMenu_ChartItem_Separator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.MainMenu_ChartItem_ClearChart = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenuItem_Information = New System.Windows.Forms.ToolStripMenuItem()
         Me.MainMenu_ActionItem_UpdateCheck = New System.Windows.Forms.ToolStripMenuItem()
@@ -146,7 +148,7 @@ Partial Class MainWindow
         Me.ComboBox_UpdateList = New SINMx86.RightComboBox()
         Me.ComboBox_VideoList = New SINMx86.LeftComboBox()
         Me.ComboBox_CPUList = New SINMx86.LeftComboBox()
-        Me.MainMenu_ChartItem_Separator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ComboBox_HWList = New SINMx86.LeftComboBox()
         Me.GroupBox_HWInfo.SuspendLayout()
         Me.GroupBox_OSInfo.SuspendLayout()
         Me.GroupBox_CPUInfo.SuspendLayout()
@@ -162,56 +164,69 @@ Partial Class MainWindow
         '
         'GroupBox_HWInfo
         '
-        Me.GroupBox_HWInfo.Controls.Add(Me.Value_HWModel)
+        Me.GroupBox_HWInfo.Controls.Add(Me.Value_HWIdentifier)
+        Me.GroupBox_HWInfo.Controls.Add(Me.Name_HWIdentifier)
+        Me.GroupBox_HWInfo.Controls.Add(Me.ComboBox_HWList)
+        Me.GroupBox_HWInfo.Controls.Add(Me.Name_HWList)
         Me.GroupBox_HWInfo.Controls.Add(Me.Value_HWVendor)
-        Me.GroupBox_HWInfo.Controls.Add(Me.Name_HWModel)
         Me.GroupBox_HWInfo.Controls.Add(Me.Name_HWVendor)
         Me.GroupBox_HWInfo.ForeColor = System.Drawing.SystemColors.Highlight
         Me.GroupBox_HWInfo.Location = New System.Drawing.Point(12, 30)
         Me.GroupBox_HWInfo.Name = "GroupBox_HWInfo"
-        Me.GroupBox_HWInfo.Size = New System.Drawing.Size(455, 76)
+        Me.GroupBox_HWInfo.Size = New System.Drawing.Size(455, 99)
         Me.GroupBox_HWInfo.TabIndex = 6
         Me.GroupBox_HWInfo.TabStop = False
         Me.GroupBox_HWInfo.Text = "Computer system information"
         '
-        'Value_HWModel
+        'Value_HWIdentifier
         '
-        Me.Value_HWModel.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_HWModel.Location = New System.Drawing.Point(111, 48)
-        Me.Value_HWModel.Name = "Value_HWModel"
-        Me.Value_HWModel.Size = New System.Drawing.Size(332, 13)
-        Me.Value_HWModel.TabIndex = 3
-        Me.Value_HWModel.Text = "Not filled by O.E.M."
+        Me.Value_HWIdentifier.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_HWIdentifier.Location = New System.Drawing.Point(114, 71)
+        Me.Value_HWIdentifier.Name = "Value_HWIdentifier"
+        Me.Value_HWIdentifier.Size = New System.Drawing.Size(329, 13)
+        Me.Value_HWIdentifier.TabIndex = 5
+        Me.Value_HWIdentifier.Text = "To Be Filled By O.E.M."
+        '
+        'Name_HWIdentifier
+        '
+        Me.Name_HWIdentifier.AutoSize = True
+        Me.Name_HWIdentifier.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_HWIdentifier.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_HWIdentifier.Location = New System.Drawing.Point(15, 71)
+        Me.Name_HWIdentifier.Name = "Name_HWIdentifier"
+        Me.Name_HWIdentifier.Size = New System.Drawing.Size(61, 13)
+        Me.Name_HWIdentifier.TabIndex = 4
+        Me.Name_HWIdentifier.Text = "Identifier:"
+        '
+        'Name_HWList
+        '
+        Me.Name_HWList.AutoSize = True
+        Me.Name_HWList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_HWList.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_HWList.Location = New System.Drawing.Point(15, 25)
+        Me.Name_HWList.Name = "Name_HWList"
+        Me.Name_HWList.Size = New System.Drawing.Size(74, 13)
+        Me.Name_HWList.TabIndex = 0
+        Me.Name_HWList.Text = "Component:"
         '
         'Value_HWVendor
         '
         Me.Value_HWVendor.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_HWVendor.Location = New System.Drawing.Point(111, 25)
+        Me.Value_HWVendor.Location = New System.Drawing.Point(114, 48)
         Me.Value_HWVendor.Name = "Value_HWVendor"
-        Me.Value_HWVendor.Size = New System.Drawing.Size(332, 13)
-        Me.Value_HWVendor.TabIndex = 1
-        Me.Value_HWVendor.Text = "Not filled by O.E.M."
-        '
-        'Name_HWModel
-        '
-        Me.Name_HWModel.AutoSize = True
-        Me.Name_HWModel.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_HWModel.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_HWModel.Location = New System.Drawing.Point(15, 48)
-        Me.Name_HWModel.Name = "Name_HWModel"
-        Me.Name_HWModel.Size = New System.Drawing.Size(82, 13)
-        Me.Name_HWModel.TabIndex = 2
-        Me.Name_HWModel.Text = "Motherboard:"
+        Me.Value_HWVendor.Size = New System.Drawing.Size(329, 13)
+        Me.Value_HWVendor.TabIndex = 3
+        Me.Value_HWVendor.Text = "To Be Filled By O.E.M."
         '
         'Name_HWVendor
         '
         Me.Name_HWVendor.AutoSize = True
         Me.Name_HWVendor.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_HWVendor.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_HWVendor.Location = New System.Drawing.Point(15, 25)
+        Me.Name_HWVendor.Location = New System.Drawing.Point(15, 48)
         Me.Name_HWVendor.Name = "Name_HWVendor"
         Me.Name_HWVendor.Size = New System.Drawing.Size(51, 13)
-        Me.Name_HWVendor.TabIndex = 0
+        Me.Name_HWVendor.TabIndex = 2
         Me.Name_HWVendor.Text = "Vendor:"
         '
         'GroupBox_OSInfo
@@ -225,7 +240,7 @@ Partial Class MainWindow
         Me.GroupBox_OSInfo.Controls.Add(Me.Value_OSName)
         Me.GroupBox_OSInfo.Controls.Add(Me.Name_OSName)
         Me.GroupBox_OSInfo.ForeColor = System.Drawing.SystemColors.Highlight
-        Me.GroupBox_OSInfo.Location = New System.Drawing.Point(12, 280)
+        Me.GroupBox_OSInfo.Location = New System.Drawing.Point(12, 299)
         Me.GroupBox_OSInfo.Name = "GroupBox_OSInfo"
         Me.GroupBox_OSInfo.Size = New System.Drawing.Size(455, 76)
         Me.GroupBox_OSInfo.TabIndex = 8
@@ -267,9 +282,9 @@ Partial Class MainWindow
         'Value_OSVersion
         '
         Me.Value_OSVersion.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSVersion.Location = New System.Drawing.Point(127, 48)
+        Me.Value_OSVersion.Location = New System.Drawing.Point(119, 48)
         Me.Value_OSVersion.Name = "Value_OSVersion"
-        Me.Value_OSVersion.Size = New System.Drawing.Size(68, 13)
+        Me.Value_OSVersion.Size = New System.Drawing.Size(76, 13)
         Me.Value_OSVersion.TabIndex = 3
         Me.Value_OSVersion.Text = "1.0"
         Me.Value_OSVersion.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -298,9 +313,9 @@ Partial Class MainWindow
         'Value_OSName
         '
         Me.Value_OSName.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSName.Location = New System.Drawing.Point(114, 25)
+        Me.Value_OSName.Location = New System.Drawing.Point(117, 25)
         Me.Value_OSName.Name = "Value_OSName"
-        Me.Value_OSName.Size = New System.Drawing.Size(329, 13)
+        Me.Value_OSName.Size = New System.Drawing.Size(326, 13)
         Me.Value_OSName.TabIndex = 1
         Me.Value_OSName.Text = "Unknown"
         '
@@ -327,9 +342,9 @@ Partial Class MainWindow
         Me.GroupBox_CPUInfo.Controls.Add(Me.Name_CPUClock)
         Me.GroupBox_CPUInfo.Controls.Add(Me.Name_CPUList)
         Me.GroupBox_CPUInfo.ForeColor = System.Drawing.SystemColors.Highlight
-        Me.GroupBox_CPUInfo.Location = New System.Drawing.Point(12, 112)
+        Me.GroupBox_CPUInfo.Location = New System.Drawing.Point(12, 135)
         Me.GroupBox_CPUInfo.Name = "GroupBox_CPUInfo"
-        Me.GroupBox_CPUInfo.Size = New System.Drawing.Size(455, 80)
+        Me.GroupBox_CPUInfo.Size = New System.Drawing.Size(455, 76)
         Me.GroupBox_CPUInfo.TabIndex = 7
         Me.GroupBox_CPUInfo.TabStop = False
         Me.GroupBox_CPUInfo.Text = "Processor information"
@@ -338,7 +353,7 @@ Partial Class MainWindow
         '
         Me.Button_CPUListReload.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Button_CPUListReload.Image = Global.SINMx86.My.Resources.Resources.Control_Refresh
-        Me.Button_CPUListReload.Location = New System.Drawing.Point(414, 23)
+        Me.Button_CPUListReload.Location = New System.Drawing.Point(414, 21)
         Me.Button_CPUListReload.Name = "Button_CPUListReload"
         Me.Button_CPUListReload.Size = New System.Drawing.Size(23, 23)
         Me.Button_CPUListReload.TabIndex = 2
@@ -347,7 +362,7 @@ Partial Class MainWindow
         'Value_CPUMaxClock
         '
         Me.Value_CPUMaxClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUMaxClock.Location = New System.Drawing.Point(382, 52)
+        Me.Value_CPUMaxClock.Location = New System.Drawing.Point(382, 48)
         Me.Value_CPUMaxClock.Name = "Value_CPUMaxClock"
         Me.Value_CPUMaxClock.Size = New System.Drawing.Size(61, 13)
         Me.Value_CPUMaxClock.TabIndex = 8
@@ -359,7 +374,7 @@ Partial Class MainWindow
         Me.Name_CPUMaxClock.AutoSize = True
         Me.Name_CPUMaxClock.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_CPUMaxClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_CPUMaxClock.Location = New System.Drawing.Point(322, 52)
+        Me.Name_CPUMaxClock.Location = New System.Drawing.Point(322, 48)
         Me.Name_CPUMaxClock.Name = "Name_CPUMaxClock"
         Me.Name_CPUMaxClock.Size = New System.Drawing.Size(62, 13)
         Me.Name_CPUMaxClock.TabIndex = 7
@@ -368,9 +383,9 @@ Partial Class MainWindow
         'Value_CPUCore
         '
         Me.Value_CPUCore.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUCore.Location = New System.Drawing.Point(127, 52)
+        Me.Value_CPUCore.Location = New System.Drawing.Point(124, 48)
         Me.Value_CPUCore.Name = "Value_CPUCore"
-        Me.Value_CPUCore.Size = New System.Drawing.Size(68, 13)
+        Me.Value_CPUCore.Size = New System.Drawing.Size(71, 13)
         Me.Value_CPUCore.TabIndex = 4
         Me.Value_CPUCore.Text = "99 / 99"
         Me.Value_CPUCore.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -380,7 +395,7 @@ Partial Class MainWindow
         Me.Name_CPUCore.AutoSize = True
         Me.Name_CPUCore.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_CPUCore.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_CPUCore.Location = New System.Drawing.Point(15, 52)
+        Me.Name_CPUCore.Location = New System.Drawing.Point(15, 48)
         Me.Name_CPUCore.Name = "Name_CPUCore"
         Me.Name_CPUCore.Size = New System.Drawing.Size(103, 13)
         Me.Name_CPUCore.TabIndex = 3
@@ -389,7 +404,7 @@ Partial Class MainWindow
         'Value_CPUClock
         '
         Me.Value_CPUClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUClock.Location = New System.Drawing.Point(256, 52)
+        Me.Value_CPUClock.Location = New System.Drawing.Point(256, 48)
         Me.Value_CPUClock.Name = "Value_CPUClock"
         Me.Value_CPUClock.Size = New System.Drawing.Size(60, 13)
         Me.Value_CPUClock.TabIndex = 6
@@ -401,7 +416,7 @@ Partial Class MainWindow
         Me.Name_CPUClock.AutoSize = True
         Me.Name_CPUClock.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_CPUClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_CPUClock.Location = New System.Drawing.Point(201, 52)
+        Me.Name_CPUClock.Location = New System.Drawing.Point(201, 48)
         Me.Name_CPUClock.Name = "Name_CPUClock"
         Me.Name_CPUClock.Size = New System.Drawing.Size(43, 13)
         Me.Name_CPUClock.TabIndex = 5
@@ -412,7 +427,7 @@ Partial Class MainWindow
         Me.Name_CPUList.AutoSize = True
         Me.Name_CPUList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_CPUList.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_CPUList.Location = New System.Drawing.Point(15, 27)
+        Me.Name_CPUList.Location = New System.Drawing.Point(15, 25)
         Me.Name_CPUList.Name = "Name_CPUList"
         Me.Name_CPUList.Size = New System.Drawing.Size(67, 13)
         Me.Name_CPUList.TabIndex = 0
@@ -433,7 +448,7 @@ Partial Class MainWindow
         Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_VirtualMemory)
         Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_PhysicalMemory)
         Me.GroupBox_MemoryInfo.ForeColor = System.Drawing.SystemColors.Highlight
-        Me.GroupBox_MemoryInfo.Location = New System.Drawing.Point(12, 198)
+        Me.GroupBox_MemoryInfo.Location = New System.Drawing.Point(12, 217)
         Me.GroupBox_MemoryInfo.Name = "GroupBox_MemoryInfo"
         Me.GroupBox_MemoryInfo.Size = New System.Drawing.Size(455, 76)
         Me.GroupBox_MemoryInfo.TabIndex = 3
@@ -648,7 +663,7 @@ Partial Class MainWindow
         '
         'Button_Exit
         '
-        Me.Button_Exit.Location = New System.Drawing.Point(857, 501)
+        Me.Button_Exit.Location = New System.Drawing.Point(856, 511)
         Me.Button_Exit.Name = "Button_Exit"
         Me.Button_Exit.Size = New System.Drawing.Size(75, 23)
         Me.Button_Exit.TabIndex = 0
@@ -735,7 +750,7 @@ Partial Class MainWindow
         Me.GroupBox_Network.ForeColor = System.Drawing.SystemColors.Highlight
         Me.GroupBox_Network.Location = New System.Drawing.Point(477, 112)
         Me.GroupBox_Network.Name = "GroupBox_Network"
-        Me.GroupBox_Network.Size = New System.Drawing.Size(455, 379)
+        Me.GroupBox_Network.Size = New System.Drawing.Size(455, 391)
         Me.GroupBox_Network.TabIndex = 11
         Me.GroupBox_Network.TabStop = False
         Me.GroupBox_Network.Text = "Network interface statistics"
@@ -813,7 +828,7 @@ Partial Class MainWindow
         'Name_UpdateUnit
         '
         Me.Name_UpdateUnit.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_UpdateUnit.Location = New System.Drawing.Point(428, 353)
+        Me.Name_UpdateUnit.Location = New System.Drawing.Point(428, 363)
         Me.Name_UpdateUnit.Name = "Name_UpdateUnit"
         Me.Name_UpdateUnit.Size = New System.Drawing.Size(11, 13)
         Me.Name_UpdateUnit.TabIndex = 19
@@ -824,7 +839,7 @@ Partial Class MainWindow
         Me.Name_UpdateList.AutoSize = True
         Me.Name_UpdateList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_UpdateList.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_UpdateList.Location = New System.Drawing.Point(275, 353)
+        Me.Name_UpdateList.Location = New System.Drawing.Point(275, 363)
         Me.Name_UpdateList.Name = "Name_UpdateList"
         Me.Name_UpdateList.Size = New System.Drawing.Size(98, 13)
         Me.Name_UpdateList.TabIndex = 17
@@ -835,7 +850,7 @@ Partial Class MainWindow
         Me.Name_ChartVisible.AutoSize = True
         Me.Name_ChartVisible.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_ChartVisible.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_ChartVisible.Location = New System.Drawing.Point(14, 353)
+        Me.Name_ChartVisible.Location = New System.Drawing.Point(14, 363)
         Me.Name_ChartVisible.Name = "Name_ChartVisible"
         Me.Name_ChartVisible.Size = New System.Drawing.Size(90, 13)
         Me.Name_ChartVisible.TabIndex = 14
@@ -847,7 +862,7 @@ Partial Class MainWindow
         Me.CheckBoxChart_UploadVisible.Checked = True
         Me.CheckBoxChart_UploadVisible.CheckState = System.Windows.Forms.CheckState.Checked
         Me.CheckBoxChart_UploadVisible.ForeColor = System.Drawing.Color.Red
-        Me.CheckBoxChart_UploadVisible.Location = New System.Drawing.Point(206, 352)
+        Me.CheckBoxChart_UploadVisible.Location = New System.Drawing.Point(206, 362)
         Me.CheckBoxChart_UploadVisible.Name = "CheckBoxChart_UploadVisible"
         Me.CheckBoxChart_UploadVisible.Size = New System.Drawing.Size(60, 17)
         Me.CheckBoxChart_UploadVisible.TabIndex = 16
@@ -860,7 +875,7 @@ Partial Class MainWindow
         Me.CheckBoxChart_DownloadVisible.Checked = True
         Me.CheckBoxChart_DownloadVisible.CheckState = System.Windows.Forms.CheckState.Checked
         Me.CheckBoxChart_DownloadVisible.ForeColor = System.Drawing.Color.Green
-        Me.CheckBoxChart_DownloadVisible.Location = New System.Drawing.Point(121, 352)
+        Me.CheckBoxChart_DownloadVisible.Location = New System.Drawing.Point(121, 362)
         Me.CheckBoxChart_DownloadVisible.Name = "CheckBoxChart_DownloadVisible"
         Me.CheckBoxChart_DownloadVisible.Size = New System.Drawing.Size(74, 17)
         Me.CheckBoxChart_DownloadVisible.TabIndex = 15
@@ -881,9 +896,9 @@ Partial Class MainWindow
         'PictureBox_TrafficChart
         '
         Me.PictureBox_TrafficChart.BackColor = System.Drawing.Color.Gray
-        Me.PictureBox_TrafficChart.Location = New System.Drawing.Point(17, 94)
+        Me.PictureBox_TrafficChart.Location = New System.Drawing.Point(17, 96)
         Me.PictureBox_TrafficChart.Name = "PictureBox_TrafficChart"
-        Me.PictureBox_TrafficChart.Size = New System.Drawing.Size(420, 250)
+        Me.PictureBox_TrafficChart.Size = New System.Drawing.Size(420, 256)
         Me.PictureBox_TrafficChart.TabIndex = 18
         Me.PictureBox_TrafficChart.TabStop = False
         '
@@ -895,7 +910,7 @@ Partial Class MainWindow
         '
         Me.Name_LanguageList.AutoSize = True
         Me.Name_LanguageList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_LanguageList.Location = New System.Drawing.Point(10, 506)
+        Me.Name_LanguageList.Location = New System.Drawing.Point(9, 516)
         Me.Name_LanguageList.Name = "Name_LanguageList"
         Me.Name_LanguageList.Size = New System.Drawing.Size(67, 13)
         Me.Name_LanguageList.TabIndex = 2
@@ -911,7 +926,7 @@ Partial Class MainWindow
         Me.Link_Bottom.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Link_Bottom.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline
         Me.Link_Bottom.LinkColor = System.Drawing.SystemColors.Highlight
-        Me.Link_Bottom.Location = New System.Drawing.Point(220, 506)
+        Me.Link_Bottom.Location = New System.Drawing.Point(219, 516)
         Me.Link_Bottom.Name = "Link_Bottom"
         Me.Link_Bottom.Size = New System.Drawing.Size(507, 13)
         Me.Link_Bottom.TabIndex = 4
@@ -926,7 +941,7 @@ Partial Class MainWindow
         Me.MainStatusStrip.AutoSize = False
         Me.MainStatusStrip.ContextMenuStrip = Me.MainContextMenu
         Me.MainStatusStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.StatusLabel_Host, Me.StatusLabel_Uptime, Me.StatusLabel_ChartStatus, Me.StatusLabel_TopMost})
-        Me.MainStatusStrip.Location = New System.Drawing.Point(0, 533)
+        Me.MainStatusStrip.Location = New System.Drawing.Point(0, 540)
         Me.MainStatusStrip.Name = "MainStatusStrip"
         Me.MainStatusStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode
         Me.MainStatusStrip.ShowItemToolTips = True
@@ -1062,7 +1077,7 @@ Partial Class MainWindow
         'Value_Debug
         '
         Me.Value_Debug.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_Debug.Location = New System.Drawing.Point(733, 506)
+        Me.Value_Debug.Location = New System.Drawing.Point(732, 516)
         Me.Value_Debug.Name = "Value_Debug"
         Me.Value_Debug.Size = New System.Drawing.Size(118, 13)
         Me.Value_Debug.TabIndex = 5
@@ -1117,7 +1132,7 @@ Partial Class MainWindow
         '
         Me.MainMenuItem_Chart.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MainMenu_ChartItem_DownloadVisible, Me.MainMenu_ChartItem_UploadVisible, Me.MainMenu_ChartItem_Separator1, Me.MainMenu_ChartItem_ClearChart})
         Me.MainMenuItem_Chart.Name = "MainMenuItem_Chart"
-        Me.MainMenuItem_Chart.Size = New System.Drawing.Size(94, 20)
+        Me.MainMenuItem_Chart.Size = New System.Drawing.Size(48, 20)
         Me.MainMenuItem_Chart.Text = "&Chart"
         '
         'MainMenu_ChartItem_DownloadVisible
@@ -1131,6 +1146,11 @@ Partial Class MainWindow
         Me.MainMenu_ChartItem_UploadVisible.Name = "MainMenu_ChartItem_UploadVisible"
         Me.MainMenu_ChartItem_UploadVisible.Size = New System.Drawing.Size(189, 22)
         Me.MainMenu_ChartItem_UploadVisible.Text = "Show &upload chart"
+        '
+        'MainMenu_ChartItem_Separator1
+        '
+        Me.MainMenu_ChartItem_Separator1.Name = "MainMenu_ChartItem_Separator1"
+        Me.MainMenu_ChartItem_Separator1.Size = New System.Drawing.Size(186, 6)
         '
         'MainMenu_ChartItem_ClearChart
         '
@@ -1193,9 +1213,9 @@ Partial Class MainWindow
         Me.GroupBox_DiskInfo.Controls.Add(Me.ComboBox_DiskList)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskList)
         Me.GroupBox_DiskInfo.ForeColor = System.Drawing.SystemColors.Highlight
-        Me.GroupBox_DiskInfo.Location = New System.Drawing.Point(12, 362)
+        Me.GroupBox_DiskInfo.Location = New System.Drawing.Point(12, 381)
         Me.GroupBox_DiskInfo.Name = "GroupBox_DiskInfo"
-        Me.GroupBox_DiskInfo.Size = New System.Drawing.Size(455, 129)
+        Me.GroupBox_DiskInfo.Size = New System.Drawing.Size(455, 122)
         Me.GroupBox_DiskInfo.TabIndex = 9
         Me.GroupBox_DiskInfo.TabStop = False
         Me.GroupBox_DiskInfo.Text = "Disk information"
@@ -1203,11 +1223,11 @@ Partial Class MainWindow
         'Value_DiskIndex
         '
         Me.Value_DiskIndex.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskIndex.Location = New System.Drawing.Point(130, 53)
+        Me.Value_DiskIndex.Location = New System.Drawing.Point(130, 48)
         Me.Value_DiskIndex.Name = "Value_DiskIndex"
-        Me.Value_DiskIndex.Size = New System.Drawing.Size(93, 13)
+        Me.Value_DiskIndex.Size = New System.Drawing.Size(95, 13)
         Me.Value_DiskIndex.TabIndex = 4
-        Me.Value_DiskIndex.Text = "# 0"
+        Me.Value_DiskIndex.Text = "# 99"
         Me.Value_DiskIndex.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_DiskIndex
@@ -1215,7 +1235,7 @@ Partial Class MainWindow
         Me.Name_DiskIndex.AutoSize = True
         Me.Name_DiskIndex.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskIndex.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskIndex.Location = New System.Drawing.Point(15, 53)
+        Me.Name_DiskIndex.Location = New System.Drawing.Point(15, 48)
         Me.Name_DiskIndex.Name = "Name_DiskIndex"
         Me.Name_DiskIndex.Size = New System.Drawing.Size(70, 13)
         Me.Name_DiskIndex.TabIndex = 3
@@ -1225,7 +1245,7 @@ Partial Class MainWindow
         '
         Me.Button_DiskListReload.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Button_DiskListReload.Image = Global.SINMx86.My.Resources.Resources.Control_Refresh
-        Me.Button_DiskListReload.Location = New System.Drawing.Point(414, 24)
+        Me.Button_DiskListReload.Location = New System.Drawing.Point(414, 21)
         Me.Button_DiskListReload.Name = "Button_DiskListReload"
         Me.Button_DiskListReload.Size = New System.Drawing.Size(23, 23)
         Me.Button_DiskListReload.TabIndex = 2
@@ -1234,9 +1254,9 @@ Partial Class MainWindow
         'Value_DiskSerial
         '
         Me.Value_DiskSerial.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskSerial.Location = New System.Drawing.Point(103, 103)
+        Me.Value_DiskSerial.Location = New System.Drawing.Point(103, 94)
         Me.Value_DiskSerial.Name = "Value_DiskSerial"
-        Me.Value_DiskSerial.Size = New System.Drawing.Size(120, 13)
+        Me.Value_DiskSerial.Size = New System.Drawing.Size(122, 13)
         Me.Value_DiskSerial.TabIndex = 12
         Me.Value_DiskSerial.Text = "1234567890ABCDEF"
         Me.Value_DiskSerial.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -1246,7 +1266,7 @@ Partial Class MainWindow
         Me.Name_DiskSerial.AutoSize = True
         Me.Name_DiskSerial.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskSerial.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskSerial.Location = New System.Drawing.Point(15, 103)
+        Me.Name_DiskSerial.Location = New System.Drawing.Point(15, 94)
         Me.Name_DiskSerial.Name = "Name_DiskSerial"
         Me.Name_DiskSerial.Size = New System.Drawing.Size(90, 13)
         Me.Name_DiskSerial.TabIndex = 11
@@ -1255,9 +1275,9 @@ Partial Class MainWindow
         'Value_DiskSmart
         '
         Me.Value_DiskSmart.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskSmart.Location = New System.Drawing.Point(343, 103)
+        Me.Value_DiskSmart.Location = New System.Drawing.Point(345, 94)
         Me.Value_DiskSmart.Name = "Value_DiskSmart"
-        Me.Value_DiskSmart.Size = New System.Drawing.Size(100, 13)
+        Me.Value_DiskSmart.Size = New System.Drawing.Size(98, 13)
         Me.Value_DiskSmart.TabIndex = 14
         Me.Value_DiskSmart.Text = "OK"
         Me.Value_DiskSmart.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -1265,9 +1285,9 @@ Partial Class MainWindow
         'Value_DiskFirmware
         '
         Me.Value_DiskFirmware.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskFirmware.Location = New System.Drawing.Point(130, 78)
+        Me.Value_DiskFirmware.Location = New System.Drawing.Point(130, 71)
         Me.Value_DiskFirmware.Name = "Value_DiskFirmware"
-        Me.Value_DiskFirmware.Size = New System.Drawing.Size(93, 13)
+        Me.Value_DiskFirmware.Size = New System.Drawing.Size(95, 13)
         Me.Value_DiskFirmware.TabIndex = 8
         Me.Value_DiskFirmware.Text = "1000"
         Me.Value_DiskFirmware.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -1277,7 +1297,7 @@ Partial Class MainWindow
         Me.Name_DiskSmart.AutoSize = True
         Me.Name_DiskSmart.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskSmart.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskSmart.Location = New System.Drawing.Point(229, 103)
+        Me.Name_DiskSmart.Location = New System.Drawing.Point(231, 94)
         Me.Name_DiskSmart.Name = "Name_DiskSmart"
         Me.Name_DiskSmart.Size = New System.Drawing.Size(108, 13)
         Me.Name_DiskSmart.TabIndex = 13
@@ -1288,7 +1308,7 @@ Partial Class MainWindow
         Me.Name_DiskFirmware.AutoSize = True
         Me.Name_DiskFirmware.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskFirmware.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskFirmware.Location = New System.Drawing.Point(15, 78)
+        Me.Name_DiskFirmware.Location = New System.Drawing.Point(15, 71)
         Me.Name_DiskFirmware.Name = "Name_DiskFirmware"
         Me.Name_DiskFirmware.Size = New System.Drawing.Size(61, 13)
         Me.Name_DiskFirmware.TabIndex = 7
@@ -1297,7 +1317,7 @@ Partial Class MainWindow
         'Value_DiskInterface
         '
         Me.Value_DiskInterface.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskInterface.Location = New System.Drawing.Point(325, 78)
+        Me.Value_DiskInterface.Location = New System.Drawing.Point(325, 71)
         Me.Value_DiskInterface.Name = "Value_DiskInterface"
         Me.Value_DiskInterface.Size = New System.Drawing.Size(118, 13)
         Me.Value_DiskInterface.TabIndex = 10
@@ -1307,11 +1327,11 @@ Partial Class MainWindow
         'Value_DiskCapacity
         '
         Me.Value_DiskCapacity.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskCapacity.Location = New System.Drawing.Point(325, 53)
+        Me.Value_DiskCapacity.Location = New System.Drawing.Point(328, 48)
         Me.Value_DiskCapacity.Name = "Value_DiskCapacity"
-        Me.Value_DiskCapacity.Size = New System.Drawing.Size(118, 13)
+        Me.Value_DiskCapacity.Size = New System.Drawing.Size(115, 13)
         Me.Value_DiskCapacity.TabIndex = 6
-        Me.Value_DiskCapacity.Text = "0 GB"
+        Me.Value_DiskCapacity.Text = "999 GB"
         Me.Value_DiskCapacity.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_DiskInterface
@@ -1319,7 +1339,7 @@ Partial Class MainWindow
         Me.Name_DiskInterface.AutoSize = True
         Me.Name_DiskInterface.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskInterface.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskInterface.Location = New System.Drawing.Point(229, 78)
+        Me.Name_DiskInterface.Location = New System.Drawing.Point(231, 71)
         Me.Name_DiskInterface.Name = "Name_DiskInterface"
         Me.Name_DiskInterface.Size = New System.Drawing.Size(62, 13)
         Me.Name_DiskInterface.TabIndex = 9
@@ -1330,7 +1350,7 @@ Partial Class MainWindow
         Me.Name_DiskCapacity.AutoSize = True
         Me.Name_DiskCapacity.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskCapacity.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskCapacity.Location = New System.Drawing.Point(229, 53)
+        Me.Name_DiskCapacity.Location = New System.Drawing.Point(231, 48)
         Me.Name_DiskCapacity.Name = "Name_DiskCapacity"
         Me.Name_DiskCapacity.Size = New System.Drawing.Size(60, 13)
         Me.Name_DiskCapacity.TabIndex = 5
@@ -1341,7 +1361,7 @@ Partial Class MainWindow
         Me.Name_DiskList.AutoSize = True
         Me.Name_DiskList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskList.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskList.Location = New System.Drawing.Point(15, 28)
+        Me.Name_DiskList.Location = New System.Drawing.Point(15, 25)
         Me.Name_DiskList.Name = "Name_DiskList"
         Me.Name_DiskList.Size = New System.Drawing.Size(68, 13)
         Me.Name_DiskList.TabIndex = 0
@@ -1354,7 +1374,7 @@ Partial Class MainWindow
         Me.ComboBox_DiskList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox_DiskList.FormattingEnabled = True
         Me.ComboBox_DiskList.ItemHeight = 15
-        Me.ComboBox_DiskList.Location = New System.Drawing.Point(111, 25)
+        Me.ComboBox_DiskList.Location = New System.Drawing.Point(111, 22)
         Me.ComboBox_DiskList.Name = "ComboBox_DiskList"
         Me.ComboBox_DiskList.Size = New System.Drawing.Size(297, 21)
         Me.ComboBox_DiskList.TabIndex = 1
@@ -1365,7 +1385,7 @@ Partial Class MainWindow
         Me.ComboBox_LanguageList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox_LanguageList.FormattingEnabled = True
         Me.ComboBox_LanguageList.ItemHeight = 15
-        Me.ComboBox_LanguageList.Location = New System.Drawing.Point(83, 503)
+        Me.ComboBox_LanguageList.Location = New System.Drawing.Point(82, 513)
         Me.ComboBox_LanguageList.Name = "ComboBox_LanguageList"
         Me.ComboBox_LanguageList.Size = New System.Drawing.Size(93, 21)
         Me.ComboBox_LanguageList.TabIndex = 3
@@ -1386,7 +1406,7 @@ Partial Class MainWindow
         Me.ComboBox_UpdateList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox_UpdateList.DropDownWidth = 46
         Me.ComboBox_UpdateList.FormattingEnabled = True
-        Me.ComboBox_UpdateList.Location = New System.Drawing.Point(381, 350)
+        Me.ComboBox_UpdateList.Location = New System.Drawing.Point(381, 360)
         Me.ComboBox_UpdateList.Name = "ComboBox_UpdateList"
         Me.ComboBox_UpdateList.Size = New System.Drawing.Size(41, 21)
         Me.ComboBox_UpdateList.TabIndex = 18
@@ -1406,21 +1426,27 @@ Partial Class MainWindow
         Me.ComboBox_CPUList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
         Me.ComboBox_CPUList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox_CPUList.FormattingEnabled = True
-        Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 24)
+        Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 22)
         Me.ComboBox_CPUList.Name = "ComboBox_CPUList"
         Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
         Me.ComboBox_CPUList.TabIndex = 1
         '
-        'MainMenu_ChartItem_Separator1
+        'ComboBox_HWList
         '
-        Me.MainMenu_ChartItem_Separator1.Name = "MainMenu_ChartItem_Separator1"
-        Me.MainMenu_ChartItem_Separator1.Size = New System.Drawing.Size(186, 6)
+        Me.ComboBox_HWList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_HWList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_HWList.FormattingEnabled = True
+        Me.ComboBox_HWList.Items.AddRange(New Object() {"1", "2", "3"})
+        Me.ComboBox_HWList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_HWList.Name = "ComboBox_HWList"
+        Me.ComboBox_HWList.Size = New System.Drawing.Size(326, 21)
+        Me.ComboBox_HWList.TabIndex = 1
         '
         'MainWindow
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(944, 555)
+        Me.ClientSize = New System.Drawing.Size(944, 562)
         Me.ContextMenuStrip = Me.MainContextMenu
         Me.Controls.Add(Me.GroupBox_DiskInfo)
         Me.Controls.Add(Me.Value_Debug)
@@ -1501,9 +1527,7 @@ Partial Class MainWindow
     Friend WithEvents EventToolTip As System.Windows.Forms.ToolTip
     Friend WithEvents Link_Bottom As System.Windows.Forms.LinkLabel
     Friend WithEvents PictureBox_TrafficChart As System.Windows.Forms.PictureBox
-    Friend WithEvents Value_HWModel As System.Windows.Forms.Label
     Friend WithEvents Value_HWVendor As System.Windows.Forms.Label
-    Friend WithEvents Name_HWModel As System.Windows.Forms.Label
     Friend WithEvents Name_HWVendor As System.Windows.Forms.Label
     Friend WithEvents MainStatusStrip As System.Windows.Forms.StatusStrip
     Friend WithEvents StatusLabel_Uptime As System.Windows.Forms.ToolStripStatusLabel
@@ -1590,6 +1614,10 @@ Partial Class MainWindow
     Friend WithEvents Button_CPUListReload As System.Windows.Forms.Button
     Friend WithEvents ComboBox_CPUList As LeftComboBox
     Friend WithEvents MainMenu_ChartItem_Separator1 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents Name_HWList As System.Windows.Forms.Label
+    Friend WithEvents ComboBox_HWList As SINMx86.LeftComboBox
+    Friend WithEvents Name_HWIdentifier As System.Windows.Forms.Label
+    Friend WithEvents Value_HWIdentifier As System.Windows.Forms.Label
 
 End Class
 
@@ -1597,6 +1625,7 @@ Public Class LeftComboBox
     Inherits ComboBox
     Sub New()
         Me.DrawMode = Windows.Forms.DrawMode.OwnerDrawFixed
+
         Me.DropDownStyle = ComboBoxStyle.DropDownList
     End Sub
 
