@@ -15,28 +15,28 @@ Public Class MainWindow
     Public SplashDefineAsAbout As Boolean = False                           ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objPR, objNI, objVC, objDD As ManagementObjectSearcher
-    Public objMgmt As ManagementObject
+    Public objOS, objBB, objCS, objBS, objPR, objPE, objNI, objVC, objDD, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objMgmt, objRes As ManagementObject
 
     ' Beállításjegyzék változói
     Public RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\\" + MyName, True)
 
     ' Nyelvi sztringek
-    Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Loading, Str_LoadReg, Str_LoadWMI, Str_MemUse, Str_MemFree, Str_Uptime,
-           Str_DayName(7), Str_MonthName(12), Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator,
-           Str_Motherboard, Str_System, Str_BIOS, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak,
+    Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Serv, Str_Loading, Str_LoadReg, Str_LoadWMI, Str_MemUse, Str_MemFree, Str_Uptime,
+           Str_DayName(7), Str_MonthName(12), Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator, Str_Disk,
+           Str_Motherboard, Str_System, Str_BIOS, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak, Str_None,
            Str_ChartTime, Str_ChartDown, Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname,
-           Str_ChartCount, Str_Note, Str_NoDisk, Str_Unknown, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
+           Str_ChartCount, Str_Note, Str_NoDisk, Str_NoName, Str_Unknown, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
 
     ' ToolTip sztringek
-    Public Tip_Language, Tip_CPU, Tip_Disk, Tip_Video, Tip_Interface, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown, Tip_ChartUp,
-           Tip_Refresh, Tip_Exit, Tip_LinkBottom, Tip_Hostname, Tip_Uptime, Tip_Status, Tip_TopMost, Tip_Screenshot As String
+    Public Tip_Language, Tip_HW, Tip_CPU, Tip_Disk, Tip_Part, Tip_Video, Tip_Interface, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown,
+           Tip_ChartUp, Tip_Refresh, Tip_Exit, Tip_LinkBottom, Tip_Hostname, Tip_Uptime, Tip_Status, Tip_TopMost, Tip_Screenshot As String
 
     ' Checkboxok és menüelemek változói
     Public CheckedSplashDisable, CheckedDownChart, CheckedUpChart, CheckedTopMost, CheckedNoQuitAsk, CheckedMinToTray As Boolean
 
     ' Listák kiválasztott elemeinek sorszáma
-    Public SelectedHardware, SelectedCPU, SelectedInterface, SelectedLanguage, SelectedRefresh, SelectedDisk, SelectedVideo As Int32
+    Public SelectedLanguage, SelectedRefresh, SelectedHardware, SelectedCPU, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
 
     ' További változók
     Public ReleaseStatus As String = Nothing                                ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
@@ -54,6 +54,8 @@ Public Class MainWindow
     Public InterfaceName(32) As String                                      ' Interfészek formázott neve (kiírásokhoz)
     Public DiskList(32) As String                                           ' Meghajtóindexek tömbje (lekérdezésekhez)
     Public DiskName(32) As String                                           ' Meghajtók neve (kiírásokhoz)
+    Public PartLabel(32) As String                                          ' Partíció betűjele (kiírásokhoz)
+    Public PartInfo(32) As String                                           ' Partíció információk (kiírásokhoz)
     Public VideoName(32) As String                                          ' Videókártyák nevei (kiírásokhoz)
     Public TraffResolution As Int32 = 60                                    ' Diagramon jelzett értékek száma (ennyi időegységre van felosztva a diagram)
     Public VerticalGrids As Int32 = 1                                       ' Fuggőleges osztóvonalak száma (másodpercre vetítve)
@@ -80,8 +82,8 @@ Public Class MainWindow
         Dim DefaultRefresh As Int32 = 2         ' Frissítési időköz: 3 másodperc
         Dim DefaultHardware As Int32 = 0        ' Kiválasztott komponens: alaplap
 
-        ' Debug sztring kiürítése
-        Value_Debug.Text = Nothing
+        ' Debug sztring beállítása (ha a főablak betöltődik, akkor előtte ki kell üríteni!)
+        Value_Debug.Text = "LOAD_FAIL"
 
         ' Veriószám felbontása (Build-del)
         Dim VersionArray() As String = Split(MyVersion, ".")                ' Verziószámok elemeinek tömbje (Major, Minor, Sub, Build)
@@ -102,7 +104,7 @@ Public Class MainWindow
         ' Verzió sztring beállítása
         VersionString = VersionArray(0) + "." + VersionArray(1) + "." + VersionArray(2) + " (Build " + VersionArray(3) + ")"
 
-        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Operációs rendszer információk, Futási idő ***
+        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Operációs rendszer információk ***
         ' Megjegyzés: Ez több paraméternek is függősége, így a lekérdezést már most meg kell tenni!
         objOS = New ManagementObjectSearcher("SELECT Version FROM Win32_OperatingSystem")
 
@@ -204,13 +206,16 @@ Public Class MainWindow
         TraffGenCounter = ComboBox_UpdateList.SelectedIndex
 
         ' *** LISTAFELTÖLTÉS: Processzorok ***
-        UpdateCPUList()
+        UpdateCPUList(True)
+
+        ' *** LISTAFELTÖLTÉS: Lemez információk ***
+        UpdateDiskList(True)
 
         ' *** LISTAFELTÖLTÉS: Interfészek ***
-        UpdateInterfaceList()
+        UpdateInterfaceList(True)
 
         ' *** LISTAFELTÖLTÉS: Videokártyák ***
-        UpdateVideoList()
+        UpdateVideoList(True)
 
         ' *** REGISTRY ELEMZÉS: Letöltési diagram engedélyezése ***
         If ReadDownChart Is Nothing Or ToInt32(ReadDownChart) <> 0 Then
@@ -295,28 +300,18 @@ Public Class MainWindow
         ' Hosztnév beálítása az állapotsorban
         StatusLabel_Host.Text = Str_Hostname + ": " + Hostname
 
-        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Operációs rendszer információk, Futási idő ***
-        objOS = New ManagementObjectSearcher("SELECT Caption, BuildNumber, LocalDateTime, LastBootUptime FROM Win32_OperatingSystem")
+        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Futási idő ***
+        objOS = New ManagementObjectSearcher("SELECT LocalDateTime, LastBootUptime FROM Win32_OperatingSystem")
 
         ' Értékek definiálása
-        Dim OSName As String = Nothing                          ' OS neve
-        Dim OSBuild As String = Nothing                         ' OS buildszáma
         Dim CurrentTime As String = Nothing                     ' Jelenlegi idő
         Dim SysUpTime As String = Nothing                       ' Indítás ideje
 
         ' Értékek beállítása
         For Each Me.objMgmt In objOS.Get
-            OSName = objMgmt("Caption")
-            OSBuild = objMgmt("BuildNumber")
             CurrentTime = objMgmt("LocalDateTime").ToString
             SysUpTime = objMgmt("LastBootUptime").ToString
         Next
-
-        ' Kiírások értékének frissítése
-        Value_OSName.Text = StringNormalize(OSName)
-        Value_OSRelease.Text = OSRelase.ToString + "-bit"
-        Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString
-        Value_OSBuild.Text = OSBuild
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Futásidő ***
         UptimeSeconds = DateDiff("s", DateTimeConv(SysUpTime), DateTimeConv(CurrentTime))
@@ -325,9 +320,8 @@ Public Class MainWindow
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Memória információk ***
         SetMemoryInformation()
 
-        ' *** LISTAFELTÖLTÉS: Lemez információk ***
-        ' Megjegyzés: A lista feltöltése késleltetve van, mert az OS verzió függősége az egyes értékeknek!
-        UpdateDiskList()
+        ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Operációs rendszer információk ***
+        SetOSInformation()
 
         ' ----- ZÁRÓ MŰVELETEK -----
 
@@ -337,6 +331,11 @@ Public Class MainWindow
 
         ' Diagram frissítése (gyakorlatilag ez a kezdő reset, mert az óra már ketyeg, de betöltés előtt nem mér!)
         MakeChart(True)
+
+        ' Debug sztring kiürítése  (Ha nem lett más célra felhasználva!)
+        If Value_Debug.Text = "LOAD_FAIL" Then
+            Value_Debug.Text = Nothing
+        End If
 
         ' Splash ablak bezárása
         If Not CheckedSplashDisable Then
@@ -474,6 +473,43 @@ Public Class MainWindow
 
     End Function
 
+    ' *** FÜGGVÉNY: Operációs rendszer információk beállítása ***
+    ' Bemenet: Void
+    ' Kimenet: Boolean (False)
+    Private Function SetOSInformation()
+
+        ' Értékek definiálása
+        Dim OSName As String = Nothing                          ' OS neve
+        Dim OSBuild As String = Nothing                         ' OS buildszáma
+        Dim OSService As Int32 = 0                              ' Szervizcsomag
+        Dim OSLanguage(32) As String                            ' Nyelv
+
+        ' WMI érték definiálása
+        objOS = New ManagementObjectSearcher("SELECT Caption, BuildNumber, ServicePackMajorVersion, MUILanguages FROM Win32_OperatingSystem")
+
+        ' Értékek kinyerése a WMI-ből
+        For Each Me.objMgmt In objOS.Get
+            OSName = objMgmt("Caption")
+            OSBuild = objMgmt("BuildNumber")
+            OSService = objMgmt("ServicePackMajorVersion")
+            OSLanguage = objMgmt("MUILanguages")
+        Next
+
+        ' Kiírások értékének frissítése
+        If OSService = 0 Then
+            Value_OSName.Text = RemoveSpaces(OSName)
+        Else
+            Value_OSName.Text = RemoveSpaces(OSName) + ", " + Str_Serv + " " + OSService.ToString
+        End If
+        Value_OSRelease.Text = OSRelase.ToString + "-bit"
+        Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString + "." + OSBuild.ToString
+        Value_OSLang.Text = OSLanguage(0)
+
+        ' Visszatérési érték beállítása
+        Return False
+
+    End Function
+
     ' *** FÜGGVÉNY: Memória információk beállítása ***
     ' Bemenet: Void
     ' Kimenet: Boolean (False)
@@ -542,23 +578,23 @@ Public Class MainWindow
         Dim Connector As String = Nothing                   ' Csatolófelület
         Dim SectorSize As Int32 = 0                         ' Szektorméret
         Dim Firmware As String = Nothing                    ' Firmware revízió
-        Dim SmartInfo As String = Nothing                   ' S.M.A.R.T állapot
         Dim SerialNumber As String = Nothing                ' Sorozatszám
+        Dim DiskID As String = Nothing                      ' Lemez azonosító
 
-        ' WMI érték definiálása (Direkt van wildcard, mert XP alatt nem szerepel minden érték)
+        ' WMI értékek lekérdezése -> Win32_DiskDrive (Szándékosan van wildcard a lekérdezésben, mert XP alatt nem szerepel minden érték!)
         objDD = New ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive WHERE Index = '" + DiskList(SelectedDisk) + "'")
 
-        ' Értékek kinyerése a WMI-ből
+        ' Lemezinformáció kinyerése a WMI-ből
         For Each Me.objMgmt In objDD.Get
             Capacity = objMgmt("Size")
             Connector = objMgmt("InterfaceType")
             DiskIndex = objMgmt("Index")
-            SmartInfo = objMgmt("Status")
+            DiskID = objMgmt("DeviceID")
 
             ' Windows XP alatt nem támogatott néhány érték lekérdezése
             If OSMajorVersion >= 6 Then
-                SerialNumber = objMgmt("SerialNumber")
-                Firmware = objMgmt("FirmwareRevision")
+                SerialNumber = RemoveSpaces(objMgmt("SerialNumber"))
+                Firmware = RemoveSpaces(objMgmt("FirmwareRevision"))
             Else
                 SerialNumber = Nothing
                 Firmware = Nothing
@@ -569,25 +605,7 @@ Public Class MainWindow
         If OSMajorVersion < 6 Then
             SerialNumber = Nothing
         ElseIf OSMajorVersion = 6 And OSMinorVersion <= 1 And SerialNumber <> Nothing Then
-            SerialNumber = DiskSerialNumberConv(SerialNumber)
-        End If
-
-        ' Felesleges szóközök eltávolítása
-        While (InStr(SerialNumber, " "))
-            SerialNumber = Replace(SerialNumber, " ", "")
-        End While
-
-        While (InStr(Firmware, " "))
-            Firmware = Replace(Firmware, " ", "")
-        End While
-
-        ' Üres sztring korrekció
-        If SerialNumber = Nothing Then
-            SerialNumber = "(" + Str_Unknown + ")"
-        End If
-
-        If Firmware = Nothing Then
-            Firmware = "(" + Str_Unknown + ")"
+            SerialNumber = RemoveSpaces(DiskSerialNumberConv(SerialNumber))
         End If
 
         ' Kapacitás konvertálása 
@@ -595,16 +613,29 @@ Public Class MainWindow
 
         ' Nulla bájtos lemezméret korrekció -> Nincs lemez!
         If Capacity = 0 Then
-            Value_DiskCapacity.Text = "(" + Str_NoDisk + ")"
+            Value_DiskCapacity.Enabled = False
+            Value_DiskCapacity.Text = Str_NoDisk
         Else
+            Value_DiskCapacity.Enabled = True
             Value_DiskCapacity.Text = FixDigitSeparator(FormattedCapacity(0), 2, True) + " " + PrefixTable(FormattedCapacity(1)) + "B"
         End If
 
         ' Kiírások formázása
-        Value_DiskIndex.Text = "# " + DiskIndex.ToString
-        Value_DiskFirmware.Text = Firmware
-        Value_DiskSmart.Text = SmartInfo
-        Value_DiskSerial.Text = SerialNumber
+        If SerialNumber = Nothing Then
+            Value_DiskSerial.Enabled = False
+            Value_DiskSerial.Text = Str_Unknown
+        Else
+            Value_DiskSerial.Enabled = True
+            Value_DiskSerial.Text = SerialNumber
+        End If
+
+        If Firmware = Nothing Then
+            Value_DiskFirmware.Enabled = False
+            Value_DiskFirmware.Text = Str_Unknown
+        Else
+            Value_DiskFirmware.Enabled = True
+            Value_DiskFirmware.Text = Firmware
+        End If
 
         If Connector = "IDE" Then
             Value_DiskInterface.Text = "IDE / SATA"
@@ -613,6 +644,82 @@ Public Class MainWindow
         Else
             Value_DiskInterface.Text = Connector
         End If
+
+        ' Partícióelemzéshez használt változók
+        Dim PartNum As Int32 = 0                            ' Partíciók száma
+        Dim PartList(32) As String                          ' Partíciók listája
+        Dim PartCount As Int32 = 0                          ' Partíció sorszáma
+        Dim PartID As String = Nothing                      ' Partíció azonosítója
+        Dim PartName As String = Nothing                    ' Partíció neve
+        Dim PartSize(2) As Double                           ' Partíció mérete
+        Dim PartFS As String = Nothing                      ' Partíció fájlrendszere
+
+        ' WMI értékek lekérdezése -> Win32_DiskPartition
+        objDP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskID + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
+
+        ' Partíciók kinyerése a WMI-ből
+        For Each Me.objMgmt In objDP.Get
+            PartID = objMgmt("DeviceID")
+
+            ' Meghajtóbetűjelek kinyerése a WMI-ből
+            objLP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + PartID + "'} WHERE AssocClass = Win32_LogicalDiskToPartition")
+            For Each Me.objRes In objLP.Get
+                PartList(PartNum) = objRes("DeviceID")
+                PartNum += 1
+            Next
+        Next
+
+        ' Tömbök és lista kiürítése -> Partíció információk
+        Array.Clear(PartLabel, 0, UBound(PartLabel))
+        Array.Clear(PartInfo, 0, UBound(PartInfo))
+        ComboBox_PartList.Items.Clear()
+
+        ' Partíció információk lekérdezése
+        If PartNum = 0 Then
+            ComboBox_PartList.Enabled = False
+            ComboBox_PartList.Items.Add(Str_Unknown)
+        Else
+            ComboBox_PartList.Enabled = True
+            For PartCount = 0 To PartNum - 1
+                objLD = New ManagementObjectSearcher("SELECT DeviceID, FileSystem, Size, VolumeName FROM Win32_LogicalDisk WHERE DeviceID = '" + PartList(PartCount) + "'")
+                For Each Me.objMgmt In objLD.Get
+
+                    ' Meghajtóbetűjel
+                    PartList(PartCount) = objMgmt("DeviceID")
+
+                    If objMgmt("FileSystem") = Nothing Then
+                        PartFS = "RAW"
+                    Else
+                        PartFS = objMgmt("FileSystem")
+                    End If
+
+                    If objMgmt("VolumeName") = Nothing Then
+                        PartName = Str_NoName
+                    Else
+                        PartName = objMgmt("VolumeName")
+                    End If
+
+                    ' Kötetcímke beéllítása
+                    PartLabel(PartCount) = PartList(PartCount) + "\"
+
+                    ' Listaelem hozzáadása
+                    ComboBox_PartList.Items.Add("# " + (PartCount + 1).ToString + "/" + PartNum.ToString + " (" + PartFS + ")")
+
+                    ' Partícióinformáció feltöltése
+                    If objMgmt("Size") = 0 Then
+                        PartInfo(PartCount) = Nothing
+                    Else
+                        ' Partícióméret konvertálása
+                        PartSize = DynByteConv(objMgmt("Size"), 2)
+                        PartInfo(PartCount) = PartName + " (" + FixDigitSeparator(PartSize(0), 2, True) + " " + PrefixTable(PartSize(1)) + "B)"
+                    End If
+
+                Next
+            Next
+        End If
+
+        ' Partíciólista beállítása (kiválasztott elem)
+        ComboBox_PartList.SelectedIndex = SelectedPartition
 
         ' Visszatérési érték beállítása
         Return False
@@ -625,7 +732,7 @@ Public Class MainWindow
     Private Function SetVideoInformation()
 
         ' WMI LEKÉRDEZÉS: Win32_VideoController -> Elsődleges videóvezérlő
-        objVC = New ManagementObjectSearcher("SELECT * FROM Win32_VideoController")
+        objVC = New ManagementObjectSearcher("SELECT AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentBitsPerPixel FROM Win32_VideoController")
 
         ' Értékek definiálása
         Dim VideoMemory As Int64                                ' Video memória
@@ -645,19 +752,23 @@ Public Class MainWindow
 
         ' Nulla bájtos memória korrekció -> Ismeretlen!
         If VideoMemory = 0 Then
-            Value_VideoMemory.Text = "(" + Str_Unknown + ")"
+            Value_VideoMemory.Enabled = False
+            Value_VideoMemory.Text = Str_Unknown
         Else
             ' Memóriaérték formázása
             Dim VideoMemoryConv(2) As Double
             VideoMemoryConv = DynByteConv(VideoMemory, 2)
 
             ' Kiírás értékének frissítése
+            Value_VideoMemory.Enabled = True
             Value_VideoMemory.Text = FixDigitSeparator(VideoMemoryConv(0), 2, True) + " " + PrefixTable(VideoMemoryConv(1)) + "B"
 
             ' Ismeretlen felbontás (Pl.: 0 x 0, 0 bit)
             If VideoResolution(0) = 0 Or VideoResolution(1) = 0 Or VideoResolution(2) = 0 Then
+                Value_VideoResolution.Enabled = False
                 Value_VideoResolution.Text = Str_Inactive
             Else
+                Value_VideoResolution.Enabled = True
                 Value_VideoResolution.Text = VideoResolution(0).ToString + " x " + VideoResolution(1).ToString + " (" + VideoResolution(2).ToString + " bit)"
             End If
         End If
@@ -701,71 +812,78 @@ Public Class MainWindow
 
     End Function
 
-    ' *** FÜGGVÉNY: Karakterek javítása ***
+    ' *** FÜGGVÉNY: Felesleges szóközök eltávolítása ***
     ' Bemenet: RawString -> Formázandó sztring (String)
     ' Kimenet: RawString -> Formázott sztring (String)
-    Private Function StringNormalize(ByVal RawString As String)
+    Private Function RemoveSpaces(ByVal RawString As String)
 
         ' Értékek definiálása
-        Dim str2char() As Char          ' Sztring-karakter konverzió tömbje
-        Dim strTemp As String = Nothing ' Ideiglenes szting elemz
+        Dim Str2Char() As Char          ' Sztring-karakter konverzió tömbje
+        Dim StrTemp As String = Nothing ' Ideiglenes sztring az elemzéshez
 
-        ' Karaktertömbre bontás
-        str2char = RawString.ToCharArray()
-
-        ' Dupla szóközök eltávolítása (meg kell, hogy előzze a kezdőszóköz eltávolítását)
+        ' Dupla szóközök eltávolítása
         While (InStr(RawString, "  "))
             RawString = Replace(RawString, "  ", " ")
         End While
 
         ' Kezdőszóköz eltávolítása
-        If str2char(0) = " " Then
-            For i As Int32 = 1 To UBound(str2char)
-                strTemp += str2char(i)
-            Next
-            RawString = strTemp
+        If RawString <> Nothing Then
+
+            ' Karaktertömbre bontás
+            Str2Char = RawString.ToCharArray()
+
+            ' Kezdőszóköz eltávolítása
+            If Str2Char(0) = " " Then
+                For i As Int32 = 1 To UBound(Str2Char)
+                    StrTemp += Str2Char(i)
+                Next
+                RawString = StrTemp
+            End If
+
+            ' Zárószóköz eltávolítása
+            If Str2Char(UBound(Str2Char)) = " " Then
+
+                ' Ideiglenes sztring kiürítése
+                StrTemp = Nothing
+
+                ' Karaktertömbre bontás (újra)
+                Str2Char = RawString.ToCharArray()
+
+                For i As Int32 = 0 To (UBound(Str2Char) - 1)
+                    StrTemp += Str2Char(i)
+                Next
+                RawString = StrTemp
+            End If
+
         End If
 
-        ' Szögletes zárójelek átalakítása
-        While (InStr(RawString, "["))
-            RawString = Replace(RawString, "[", "(")
+        ' Visszatérési érték beállítása
+        Return RawString
+
+    End Function
+
+    ' *** FÜGGVÉNY: Statisztikai név konverzió (Nem visszafordítható névátalakítás!) ***
+    ' Bemenet: RawString -> Formázandó sztring (String)
+    ' Kimenet: RawString -> Formázott sztring (String)
+    Private Function StatNameConv(ByVal RawString As String)
+
+        ' Zárójelek átalakítása
+        While (InStr(RawString, "("))
+            RawString = Replace(RawString, "(", "[")
         End While
-        While (InStr(RawString, "]"))
-            RawString = Replace(RawString, "]", ")")
+        While (InStr(RawString, ")"))
+            RawString = Replace(RawString, ")", "]")
         End While
 
-        ' Packet Scheduler Miniport kiírás eltávolítása
-        While (InStr(RawString, " - Packet Scheduler Miniport"))
-            RawString = Replace(RawString, " - Packet Scheduler Miniport", "")
-        End While
+        ' További karakterek átalakítása
+        Dim RepChar As String() = {"/", "\", "#", "+"}
+        Dim RepCount As Int32 = 0
 
-        ' FE/GbE (*/100*, */1000*) javítása
-        While (InStr(RawString, "_100"))
-            RawString = Replace(RawString, "_100", "/100")
-        End While
-
-        ' Atheros (*/AR*) nevek javítása - Felsorolás
-        While (InStr(RawString, "_AR"))
-            RawString = Replace(RawString, "_AR", "/AR")
-        End While
-
-        ' Intel (*/Wireless*, *PRO/*) nevek javítása - Mindenhol
-        While (InStr(RawString, "_Wireless"))
-            RawString = Replace(RawString, "_Wireless", "/Wireless")
-        End While
-        While (InStr(RawString, "PRO_"))
-            RawString = Replace(RawString, "PRO_", "PRO/")
-        End While
-
-        ' Realtek (*/RTL*) nevek javítása - Felsorolás
-        While (InStr(RawString, "_RTL"))
-            RawString = Replace(RawString, "_RTL", "/RTL")
-        End While
-
-        ' Alsóvonások eltávolítása (főleg az adapter sorszámánál mutat rosszul)
-        While (InStr(RawString, "_"))
-            RawString = Replace(RawString, "_", "")
-        End While
+        For i As Int32 = 0 To UBound(RepChar)
+            While (InStr(RawString, RepChar(i)))
+                RawString = Replace(RawString, RepChar(i), "_")
+            End While
+        Next
 
         ' Visszatérési érték beállítása
         Return RawString
@@ -1154,9 +1272,9 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Processzor lista újratöltése ***
-    ' Bemenet: Void
+    ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
     ' Kimenet: Boolean (False)
-    Private Function UpdateCPUList()
+    Private Function UpdateCPUList(ByVal ResetFlag As Boolean)
 
         ' Lista kiürítése
         ComboBox_CPUList.Items.Clear()
@@ -1166,19 +1284,33 @@ Public Class MainWindow
 
         ' Értékek definiálása
         Dim CPUCount As Int32 = 0                               ' Processzor sorszáma
-        Dim CPUString As String = Nothing                       ' Processzor neve
+        Dim CPUString(32) As String                             ' Processzor neve
         Dim CPUAddressWidth As Int32 = 0                        ' Processzor címbusz szélessége
 
         ' Értékek beállítása
         For Each Me.objMgmt In objPR.Get
-            CPUString = objMgmt("Name")
+            CPUString(CPUCount) = objMgmt("Name")
             CPUAddressWidth = ToInt32(objMgmt("AddressWidth"))
-            CPUName(CPUCount) = ComboBox_CPUList.Items.Add("CPU #" + CPUCount.ToString + " - " + StringNormalize(CPUString))
             CPUCount += 1
         Next
 
-        ' Alapértelmezett kiválasztás visszaállítása (Legelső lemez!)
-        SelectedCPU = 0
+        ' CPU nevéből a felesleges karakterek eltávolítása
+        For i As Int32 = 0 To CPUCount - 1
+
+            ' CPU megjelölés eltávolítása
+            While (InStr(CPUString(i), "CPU"))
+                CPUString(i) = Replace(CPUString(i), "CPU", "")
+            End While
+
+            CPUName(i) = ComboBox_CPUList.Items.Add("CPU #" + i.ToString + " - " + RemoveSpaces(CPUString(i)))
+        Next
+
+        ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
+        If ResetFlag Then
+            SelectedCPU = 0
+        End If
+
+        ' Utoljára kiválasztott érték beállítása
         ComboBox_CPUList.SelectedIndex = SelectedCPU
 
         ' OS kiadás korrekció
@@ -1190,9 +1322,9 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Lemezlista újratöltése ***
-    ' Bemenet: Void
+    ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
     ' Kimenet: Boolean (False)
-    Private Function UpdateDiskList()
+    Private Function UpdateDiskList(ByVal ResetFlag As Boolean)
 
         ' Lista kiürítése
         ComboBox_DiskList.Items.Clear()
@@ -1212,19 +1344,49 @@ Public Class MainWindow
 
         ' Sorbarendezés index alapján
         Dim DiskSort(DiskCount - 1) As Int32                    ' Lemezek sorrendje
+
         For SortCount = 0 To DiskCount - 1
             DiskSort(SortCount) = DiskList(SortCount)
         Next
+
         Array.Sort(DiskSort)
+
+        ' Lemezek nevéből a felesleges jelölése eltávolítása
+        For ListCount = 0 To DiskCount - 1
+
+            ' Felesleges szóközök eltávolítása (OEM lemezek esetén előfordul, hogy telenyomják szóközzel)
+            DiskName(DiskSort(ListCount)) = RemoveSpaces(DiskName(DiskSort(ListCount)))
+
+            ' USB megjelölés eltávolítása
+            While (InStr(DiskName(DiskSort(ListCount)), " USB Device"))
+                DiskName(DiskSort(ListCount)) = Replace(DiskName(DiskSort(ListCount)), " USB Device", "")
+            End While
+
+            ' SCSI megjelölés eltávolítása
+            While (InStr(DiskName(DiskSort(ListCount)), " SCSI Disk Device"))
+                DiskName(DiskSort(ListCount)) = Replace(DiskName(DiskSort(ListCount)), " SCSI Disk Device", "")
+            End While
+
+            ' ATA megjelölés eltávolítása
+            While (InStr(DiskName(DiskSort(ListCount)), " ATA Device"))
+                DiskName(DiskSort(ListCount)) = Replace(DiskName(DiskSort(ListCount)), " ATA Device", "")
+            End While
+
+        Next
 
         ' Lemezlista feltöltése
         For ListCount = 0 To DiskCount - 1
-            DiskName(ListCount) = ComboBox_DiskList.Items.Add(DiskName(DiskSort(ListCount)))
+            DiskName(ListCount) = ComboBox_DiskList.Items.Add(Str_Disk + " #" + ListCount.ToString + " - " + DiskName(DiskSort(ListCount)))
             DiskList(ListCount) = DiskSort(ListCount)
         Next
 
-        ' Alapértelmezett kiválasztás visszaállítása (Legelső lemez!)
-        SelectedDisk = 0
+        ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
+        If ResetFlag Then
+            SelectedDisk = 0
+            SelectedPartition = 0
+        End If
+
+        ' Utoljára kiválasztott érték beállítása
         ComboBox_DiskList.SelectedIndex = SelectedDisk
 
         ' Visszatérési érték beállítása
@@ -1233,9 +1395,9 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Videokártya lista újratöltése ***
-    ' Bemenet: Void
+    ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
     ' Kimenet: Boolean (False)
-    Private Function UpdateVideoList()
+    Private Function UpdateVideoList(ByVal ResetFlag As Boolean)
 
         ' Lista kiürítése
         ComboBox_VideoList.Items.Clear()
@@ -1252,8 +1414,12 @@ Public Class MainWindow
             VideoCount += 1
         Next
 
-        ' Alapértelmezett kiválasztás visszaállítása (Legelső lemez!)
-        SelectedVideo = 0
+        ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
+        If ResetFlag Then
+            SelectedVideo = 0
+        End If
+
+        ' Utoljára kiválasztott érték beállítása
         ComboBox_VideoList.SelectedIndex = SelectedVideo
 
         ' Visszatérési érték beállítása
@@ -1262,9 +1428,32 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Interfész lista újratöltése ***
-    ' Bemenet: Void
+    ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
     ' Kimenet: Boolean (False)
-    Private Function UpdateInterfaceList()
+    Private Function UpdateInterfaceList(ByVal ResetFlag As Boolean)
+
+        ' Értékek definiálása
+        Dim PnPNum As Int32 = 0                                 ' Listaelemek darabszáma
+
+        ' WMI lekérdezés: Win32_PnPEntity -> Interfészek
+        objPE = New ManagementObjectSearcher("SELECT Name FROM Win32_PnPEntity")
+
+        ' Eszközszám meghatározása
+        For Each Me.objMgmt In objPE.Get
+            PnPNum += 1
+        Next
+
+        ' Értékek definiálása
+        Dim PnPList(PnPNum - 1) As String                       ' PnP eszhöznevek tömbje
+        Dim PnPName(PnPNum - 1) As String                       ' Előformázott eszköznevek tömbje (összehasonlításhoz)
+        Dim PnPCount As Int32 = 0                               ' Eszköz sorszáma
+
+        ' PnP hálózati kártya nevek lekérdezése 
+        For Each Me.objMgmt In objPE.Get
+            PnPList(PnPCount) = RemoveSpaces(objMgmt("Name"))
+            PnPName(PnPCount) = StatNameConv(objMgmt("Name"))
+            PnPCount += 1
+        Next
 
         ' Lista kiürítése
         ComboBox_InterfaceList.Items.Clear()
@@ -1275,16 +1464,33 @@ Public Class MainWindow
         ' Számláló beállítása
         Dim InterfaceCount As Int32 = 0                         ' Interfészek sorszáma
 
-        ' Interfészlista feltöltése
+        ' Interfészlista feltöltése (isatap adapterek higahyása a listából)
         For Each Me.objMgmt In objNI.Get
-            InterfaceList(InterfaceCount) = objMgmt("Name")
-            InterfaceName(InterfaceCount) = StringNormalize(objMgmt("Name"))
-            ComboBox_InterfaceList.Items.Add(InterfaceName(InterfaceCount))
-            InterfaceCount += 1
+            If InStr(objMgmt("Name"), "isatap") = False Then
+                InterfaceList(InterfaceCount) = objMgmt("Name")
+
+                ' Statisztikához átalakított eszköznevek keresése (Ha van egyezés, akkor az lesz a név, egyébként a gyári!)
+                For i As Int32 = 0 To (PnPNum - 1)
+                    If (PnPName(i) = objMgmt("Name")) Then
+                        InterfaceName(InterfaceCount) = PnPList(i)
+                    End If
+                Next
+
+                If InterfaceName(InterfaceCount) = Nothing Then
+                    InterfaceName(InterfaceCount) = RemoveSpaces(objMgmt("Name"))
+                End If
+
+                ComboBox_InterfaceList.Items.Add(InterfaceName(InterfaceCount))
+                InterfaceCount += 1
+            End If
         Next
 
-        ' Alapértelmezett kiválasztás visszaállítása (Legelső interfész!)
-        SelectedInterface = 0
+        ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
+        If ResetFlag Then
+            SelectedInterface = 0
+        End If
+
+        ' Utoljára kiválasztott érték beállítása
         ComboBox_InterfaceList.SelectedIndex = SelectedInterface
 
         ' Visszatérési érték beállítása
@@ -1844,12 +2050,14 @@ Public Class MainWindow
                 Str_Motherboard = "Motherboard"
                 Str_System = "Computer"
                 Str_BIOS = "BIOS"
+                Str_Serv = "Service Pack"
                 Str_Interface = "Interface"
                 Str_ChartTime = "Chart created on"
                 Str_Time = "Time"
                 Str_Update = "Update"
                 Str_Current = "Current"
                 Str_Peak = "Peak"
+                Str_None = "None"
                 Str_DayName = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
                 Str_MonthName = {"January", "February", "March", "April", "May", "June", "July",
                                  "August", "September", "October", "November", "December"}
@@ -1872,7 +2080,9 @@ Public Class MainWindow
                 Str_Note = "Notification"
                 Str_Taskbar = "The process is still running in the background."
                 Str_ImageSaved = "Image saved"
+                Str_Disk = "Disk"
                 Str_NoDisk = "No disk"
+                Str_NoName = "No name"
                 Str_Unknown = "Not available"
                 Str_Invalid = "Invalid"
                 Str_Inactive = "Inactive"
@@ -1880,8 +2090,10 @@ Public Class MainWindow
 
                 ' ToolTip sztringek
                 Tip_Language = "Language selection"
+                Tip_HW = "Component selection"
                 Tip_CPU = "Processor selection"
                 Tip_Disk = "Disk selection"
+                Tip_Part = "Volume selection"
                 Tip_Video = "Graphics card selection"
                 Tip_Interface = "Network adapter selection"
                 Tip_Reload = "Reload list"
@@ -1905,23 +2117,22 @@ Public Class MainWindow
                 Name_CPUList.Text = "Processor:"
                 Name_CPUCore.Text = "Cores / Threads:"
                 Name_CPUClock.Text = "Clock:"
-                Name_CPUMaxClock.Text = "Maximum:"
+                Name_CPUMaxClock.Text = "Native:"
                 Name_PhysicalMemory.Text = "Physical memory:"
                 Name_PhysicalMemoryUsage.Text = "Usage:"
                 Name_PhysicalMemoryFree.Text = "Free:"
                 Name_VirtualMemory.Text = "Virtual memory:"
                 Name_VirtualMemoryUsage.Text = "Usage:"
                 Name_VirtualMemoryFree.Text = "Free:"
-                Name_OSName.Text = "Product name:"
-                Name_OSVersion.Text = "Version number:"
-                Name_OSBuild.Text = "Build:"
+                Name_OSName.Text = "Product:"
+                Name_OSVersion.Text = "Version:"
+                Name_OSLang.Text = "Language:"
                 Name_OSRelease.Text = "Release:"
                 Name_DiskList.Text = "Disk drive:"
-                Name_DiskIndex.Text = "Disk index:"
                 Name_DiskCapacity.Text = "Capacity:"
                 Name_DiskInterface.Text = "Interface:"
                 Name_DiskFirmware.Text = "Firmware:"
-                Name_DiskSmart.Text = "S.M.A.R.T status:"
+                Name_PartList.Text = "Volume:"
                 Name_DiskSerial.Text = "Serial number:"
                 Name_VideoList.Text = "Graphics card:"
                 Name_VideoMemory.Text = "Video memory:"
@@ -1981,12 +2192,14 @@ Public Class MainWindow
                 Str_Motherboard = "Alaplap"
                 Str_System = "Számítógép"
                 Str_BIOS = "BIOS"
+                Str_Serv = "Szervizcsomag"
                 Str_Interface = "Interfész"
                 Str_ChartTime = "Diagram elkészítve:"
                 Str_Time = "Idő"
                 Str_Update = "Frissítés"
                 Str_Current = "Jelenlegi"
                 Str_Peak = "Csúcs"
+                Str_None = "Nincs"
                 Str_DayName = {"vasárnap", "hétfő", "kedd", "szerda", "csütörtök", "péntek", "szombat"}
                 Str_MonthName = {"január", "február", "március", "április", "május", "június", "július",
                                  "augusztus", "szeptember", "október", "november", "december"}
@@ -2009,7 +2222,9 @@ Public Class MainWindow
                 Str_Note = "Értesítés"
                 Str_Taskbar = "A folyamat továbbra is fut a háttérben."
                 Str_ImageSaved = "Kép elmentve"
+                Str_Disk = "Lemez"
                 Str_NoDisk = "Nincs lemez"
+                Str_NoName = "Névtelen"
                 Str_Unknown = "Nem elérhető"
                 Str_Invalid = "Érvénytelen"
                 Str_Inactive = "Inaktív"
@@ -2017,8 +2232,10 @@ Public Class MainWindow
 
                 ' ToolTip sztringek
                 Tip_Language = "Nyelv kiválasztása"
+                Tip_HW = "Komponens kiválasztása"
                 Tip_CPU = "Processzor kiválasztása"
                 Tip_Disk = "Lemez kiválasztása"
+                Tip_Part = "Kötet kiválasztása"
                 Tip_Video = "Graphics card selection"
                 Tip_Interface = "Hálózati adapter kiválasztása"
                 Tip_Reload = "Lista újratöltése"
@@ -2042,23 +2259,22 @@ Public Class MainWindow
                 Name_CPUList.Text = "Processzor:"
                 Name_CPUCore.Text = "Magok / Szálak:"
                 Name_CPUClock.Text = "Órajel:"
-                Name_CPUMaxClock.Text = "Maximum:"
+                Name_CPUMaxClock.Text = "Eredeti:"
                 Name_PhysicalMemory.Text = "Fizikai memória:"
-                Name_PhysicalMemoryUsage.Text = "Kihasználtság:"
+                Name_PhysicalMemoryUsage.Text = "Foglaltság:"
                 Name_PhysicalMemoryFree.Text = "Szabad:"
                 Name_VirtualMemory.Text = "Virtuális memória:"
-                Name_VirtualMemoryUsage.Text = "Kihasználtság:"
+                Name_VirtualMemoryUsage.Text = "Foglaltság:"
                 Name_VirtualMemoryFree.Text = "Szabad:"
-                Name_OSName.Text = "Termék neve:"
-                Name_OSVersion.Text = "Verziószám:"
-                Name_OSBuild.Text = "Build:"
+                Name_OSName.Text = "Termék:"
+                Name_OSVersion.Text = "Verzió:"
+                Name_OSLang.Text = "Nyelv:"
                 Name_OSRelease.Text = "Kiadás:"
                 Name_DiskList.Text = "Meghajtó:"
-                Name_DiskIndex.Text = "Sorszám:"
                 Name_DiskCapacity.Text = "Tárterület:"
                 Name_DiskInterface.Text = "Interfész:"
                 Name_DiskFirmware.Text = "Firmware:"
-                Name_DiskSmart.Text = "S.M.A.R.T állapot:"
+                Name_PartList.Text = "Kötet:"
                 Name_DiskSerial.Text = "Sorozatszám:"
                 Name_VideoList.Text = "Videokártya:"
                 Name_VideoMemory.Text = "Videomemória:"
@@ -2131,8 +2347,10 @@ Public Class MainWindow
 
         ' Checkbox és Combobox ToolTip értékek beállítása
         EventToolTip.SetToolTip(ComboBox_LanguageList, Tip_Language)
+        EventToolTip.SetToolTip(ComboBox_HWList, Tip_HW)
         EventToolTip.SetToolTip(ComboBox_CPUList, Tip_CPU)
         EventToolTip.SetToolTip(ComboBox_DiskList, Tip_Disk)
+        EventToolTip.SetToolTip(ComboBox_PartList, Tip_Part)
         EventToolTip.SetToolTip(ComboBox_VideoList, Tip_Video)
         EventToolTip.SetToolTip(ComboBox_InterfaceList, Tip_Interface)
         EventToolTip.SetToolTip(Button_CPUListReload, Tip_Reload)
@@ -2162,9 +2380,12 @@ Public Class MainWindow
 
         ' Lemez és videokártya információk újbóli lekérdezése a kiválasztott lemezhez (A nyelvi formázások miatt fontos!)
         If MainWindowDone Then
+            SetOSInformation()
             SetDiskInformation()
             SetVideoInformation()
         End If
+
+        UpdateDiskList(False)
 
         ' Diagram frissítése
         MakeChart(False)
@@ -2195,15 +2416,19 @@ Public Class MainWindow
 
         ' Komponensek kiírásának beállítása
         If HWVendor(SelectedHardware) = Nothing Then
-            Value_HWVendor.Text = "(" + Str_Unknown + ")"
+            Value_HWVendor.Enabled = False
+            Value_HWVendor.Text = Str_Unknown
         Else
-            Value_HWVendor.Text = StringNormalize(HWVendor(SelectedHardware))
+            Value_HWVendor.Enabled = True
+            Value_HWVendor.Text = RemoveSpaces(HWVendor(SelectedHardware))
         End If
 
         If HWIdentifier(SelectedHardware) = Nothing Then
-            Value_HWIdentifier.Text = "(" + Str_Unknown + ")"
+            Value_HWIdentifier.Enabled = False
+            Value_HWIdentifier.Text = Str_Unknown
         Else
-            Value_HWIdentifier.Text = StringNormalize(HWIdentifier(SelectedHardware))
+            Value_HWIdentifier.Enabled = True
+            Value_HWIdentifier.Text = RemoveSpaces(HWIdentifier(SelectedHardware))
         End If
 
     End Sub
@@ -2224,11 +2449,45 @@ Public Class MainWindow
     ' Eseményvezérelt: ComboBox_DiskList.SelectedIndexChanged -> Listaelem kiválasztása
     Private Sub DiskList_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox_DiskList.SelectedIndexChanged
 
-        ' Változás beállítása
-        SelectedDisk = ComboBox_DiskList.SelectedIndex
+        ' Változás ellenőrzése
+        If ComboBox_DiskList.SelectedIndex <> SelectedDisk Then
+
+            ' Változás beállítása
+            SelectedDisk = ComboBox_DiskList.SelectedIndex
+
+            ' Partíciólista beállításra alapértelmezettre 
+            SelectedPartition = 0
+        End If
 
         ' Értékek lekérdezése
         SetDiskInformation()
+
+    End Sub
+
+    ' *** ELJÁRÁS: Partíció kiválasztása ***
+    ' Eseményvezérelt: ComboBox_DiskList.SelectedIndexChanged -> Listaelem kiválasztása
+    Private Sub PartList_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox_PartList.SelectedIndexChanged
+
+        ' Változás beállítása
+        SelectedPartition = ComboBox_PartList.SelectedIndex
+
+        ' Meghajtóbetűjelek kiírása
+        If PartLabel(SelectedPartition) = Nothing Then
+            Value_PartLabel.Enabled = False
+            Value_PartLabel.Text = Str_None
+        Else
+            Value_PartLabel.Enabled = True
+            Value_PartLabel.Text = PartLabel(SelectedPartition)
+        End If
+
+        ' Partícióinformációk kiírása
+        If PartInfo(SelectedPartition) = Nothing Then
+            Value_PartInfo.Enabled = False
+            Value_PartInfo.Text = Str_Unknown
+        Else
+            Value_PartInfo.Enabled = True
+            Value_PartInfo.Text = PartInfo(SelectedPartition)
+        End If
 
     End Sub
 
@@ -2264,7 +2523,7 @@ Public Class MainWindow
     Private Sub CPUList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_CPUListReload.Click
 
         ' Processzor lista újratöltése -> függvény
-        UpdateCPUList()
+        UpdateCPUList(True)
 
     End Sub
 
@@ -2273,7 +2532,7 @@ Public Class MainWindow
     Private Sub DiskList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_DiskListReload.Click
 
         ' Lemezlista újratöltése -> függvény
-        UpdateDiskList()
+        UpdateDiskList(True)
 
     End Sub
 
@@ -2282,7 +2541,7 @@ Public Class MainWindow
     Private Sub VideoList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_VideoListReload.Click
 
         ' Videokártya lista újratöltése -> függvény
-        UpdateVideoList()
+        UpdateVideoList(True)
 
     End Sub
 
@@ -2291,7 +2550,7 @@ Public Class MainWindow
     Private Sub InterfaceList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_InterfaceListReload.Click
 
         ' Interfész lista újratöltése -> függvény
-        UpdateInterfaceList()
+        UpdateInterfaceList(True)
 
     End Sub
 

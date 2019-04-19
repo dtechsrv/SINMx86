@@ -31,8 +31,8 @@ Partial Class MainWindow
         Me.Value_HWVendor = New System.Windows.Forms.Label()
         Me.Name_HWVendor = New System.Windows.Forms.Label()
         Me.GroupBox_OSInfo = New System.Windows.Forms.GroupBox()
-        Me.Value_OSBuild = New System.Windows.Forms.Label()
-        Me.Name_OSBuild = New System.Windows.Forms.Label()
+        Me.Value_OSLang = New System.Windows.Forms.Label()
+        Me.Name_OSLang = New System.Windows.Forms.Label()
         Me.Name_OSRelease = New System.Windows.Forms.Label()
         Me.Value_OSVersion = New System.Windows.Forms.Label()
         Me.Name_OSVersion = New System.Windows.Forms.Label()
@@ -128,20 +128,20 @@ Partial Class MainWindow
         Me.MainMenu_ActionItem_Exit = New System.Windows.Forms.ToolStripMenuItem()
         Me.ScreenshotToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GroupBox_DiskInfo = New System.Windows.Forms.GroupBox()
-        Me.Value_DiskIndex = New System.Windows.Forms.Label()
-        Me.Name_DiskIndex = New System.Windows.Forms.Label()
+        Me.Value_PartLabel = New System.Windows.Forms.Label()
+        Me.Value_PartInfo = New System.Windows.Forms.Label()
         Me.Button_DiskListReload = New System.Windows.Forms.Button()
         Me.Value_DiskSerial = New System.Windows.Forms.Label()
         Me.Name_DiskSerial = New System.Windows.Forms.Label()
-        Me.Value_DiskSmart = New System.Windows.Forms.Label()
         Me.Value_DiskFirmware = New System.Windows.Forms.Label()
-        Me.Name_DiskSmart = New System.Windows.Forms.Label()
+        Me.Name_PartList = New System.Windows.Forms.Label()
         Me.Name_DiskFirmware = New System.Windows.Forms.Label()
         Me.Value_DiskInterface = New System.Windows.Forms.Label()
         Me.Value_DiskCapacity = New System.Windows.Forms.Label()
         Me.Name_DiskInterface = New System.Windows.Forms.Label()
         Me.Name_DiskCapacity = New System.Windows.Forms.Label()
         Me.Name_DiskList = New System.Windows.Forms.Label()
+        Me.ComboBox_PartList = New SINMx86.LeftComboBox()
         Me.ComboBox_DiskList = New SINMx86.LeftComboBox()
         Me.ComboBox_LanguageList = New SINMx86.LeftComboBox()
         Me.ComboBox_InterfaceList = New SINMx86.LeftComboBox()
@@ -183,7 +183,7 @@ Partial Class MainWindow
         Me.Value_HWIdentifier.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_HWIdentifier.Location = New System.Drawing.Point(114, 71)
         Me.Value_HWIdentifier.Name = "Value_HWIdentifier"
-        Me.Value_HWIdentifier.Size = New System.Drawing.Size(329, 13)
+        Me.Value_HWIdentifier.Size = New System.Drawing.Size(323, 13)
         Me.Value_HWIdentifier.TabIndex = 5
         Me.Value_HWIdentifier.Text = "To Be Filled By O.E.M."
         '
@@ -214,7 +214,7 @@ Partial Class MainWindow
         Me.Value_HWVendor.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_HWVendor.Location = New System.Drawing.Point(114, 48)
         Me.Value_HWVendor.Name = "Value_HWVendor"
-        Me.Value_HWVendor.Size = New System.Drawing.Size(329, 13)
+        Me.Value_HWVendor.Size = New System.Drawing.Size(323, 13)
         Me.Value_HWVendor.TabIndex = 3
         Me.Value_HWVendor.Text = "To Be Filled By O.E.M."
         '
@@ -231,8 +231,8 @@ Partial Class MainWindow
         '
         'GroupBox_OSInfo
         '
-        Me.GroupBox_OSInfo.Controls.Add(Me.Value_OSBuild)
-        Me.GroupBox_OSInfo.Controls.Add(Me.Name_OSBuild)
+        Me.GroupBox_OSInfo.Controls.Add(Me.Value_OSLang)
+        Me.GroupBox_OSInfo.Controls.Add(Me.Name_OSLang)
         Me.GroupBox_OSInfo.Controls.Add(Me.Name_OSRelease)
         Me.GroupBox_OSInfo.Controls.Add(Me.Value_OSVersion)
         Me.GroupBox_OSInfo.Controls.Add(Me.Name_OSVersion)
@@ -247,47 +247,46 @@ Partial Class MainWindow
         Me.GroupBox_OSInfo.TabStop = False
         Me.GroupBox_OSInfo.Text = "Operating system information"
         '
-        'Value_OSBuild
+        'Value_OSLang
         '
-        Me.Value_OSBuild.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSBuild.Location = New System.Drawing.Point(259, 48)
-        Me.Value_OSBuild.Name = "Value_OSBuild"
-        Me.Value_OSBuild.Size = New System.Drawing.Size(57, 13)
-        Me.Value_OSBuild.TabIndex = 5
-        Me.Value_OSBuild.Text = "1000"
-        Me.Value_OSBuild.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Value_OSLang.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_OSLang.Location = New System.Drawing.Point(395, 48)
+        Me.Value_OSLang.Name = "Value_OSLang"
+        Me.Value_OSLang.Size = New System.Drawing.Size(42, 13)
+        Me.Value_OSLang.TabIndex = 7
+        Me.Value_OSLang.Text = "en-GB"
+        Me.Value_OSLang.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
-        'Name_OSBuild
+        'Name_OSLang
         '
-        Me.Name_OSBuild.AutoSize = True
-        Me.Name_OSBuild.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_OSBuild.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_OSBuild.Location = New System.Drawing.Point(201, 48)
-        Me.Name_OSBuild.Name = "Name_OSBuild"
-        Me.Name_OSBuild.Size = New System.Drawing.Size(39, 13)
-        Me.Name_OSBuild.TabIndex = 4
-        Me.Name_OSBuild.Text = "Build:"
+        Me.Name_OSLang.AutoSize = True
+        Me.Name_OSLang.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_OSLang.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_OSLang.Location = New System.Drawing.Point(322, 48)
+        Me.Name_OSLang.Name = "Name_OSLang"
+        Me.Name_OSLang.Size = New System.Drawing.Size(67, 13)
+        Me.Name_OSLang.TabIndex = 6
+        Me.Name_OSLang.Text = "Language:"
         '
         'Name_OSRelease
         '
         Me.Name_OSRelease.AutoSize = True
         Me.Name_OSRelease.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_OSRelease.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_OSRelease.Location = New System.Drawing.Point(322, 48)
+        Me.Name_OSRelease.Location = New System.Drawing.Point(201, 48)
         Me.Name_OSRelease.Name = "Name_OSRelease"
         Me.Name_OSRelease.Size = New System.Drawing.Size(57, 13)
-        Me.Name_OSRelease.TabIndex = 6
+        Me.Name_OSRelease.TabIndex = 4
         Me.Name_OSRelease.Text = "Release:"
         '
         'Value_OSVersion
         '
         Me.Value_OSVersion.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSVersion.Location = New System.Drawing.Point(119, 48)
+        Me.Value_OSVersion.Location = New System.Drawing.Point(114, 48)
         Me.Value_OSVersion.Name = "Value_OSVersion"
-        Me.Value_OSVersion.Size = New System.Drawing.Size(76, 13)
+        Me.Value_OSVersion.Size = New System.Drawing.Size(81, 13)
         Me.Value_OSVersion.TabIndex = 3
         Me.Value_OSVersion.Text = "1.0"
-        Me.Value_OSVersion.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_OSVersion
         '
@@ -296,28 +295,28 @@ Partial Class MainWindow
         Me.Name_OSVersion.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Name_OSVersion.Location = New System.Drawing.Point(15, 48)
         Me.Name_OSVersion.Name = "Name_OSVersion"
-        Me.Name_OSVersion.Size = New System.Drawing.Size(98, 13)
+        Me.Name_OSVersion.Size = New System.Drawing.Size(53, 13)
         Me.Name_OSVersion.TabIndex = 2
-        Me.Name_OSVersion.Text = "Version number:"
+        Me.Name_OSVersion.Text = "Version:"
         '
         'Value_OSRelease
         '
         Me.Value_OSRelease.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSRelease.Location = New System.Drawing.Point(398, 48)
+        Me.Value_OSRelease.Location = New System.Drawing.Point(275, 48)
         Me.Value_OSRelease.Name = "Value_OSRelease"
-        Me.Value_OSRelease.Size = New System.Drawing.Size(45, 13)
-        Me.Value_OSRelease.TabIndex = 7
+        Me.Value_OSRelease.Size = New System.Drawing.Size(41, 13)
+        Me.Value_OSRelease.TabIndex = 5
         Me.Value_OSRelease.Text = "32-bit"
         Me.Value_OSRelease.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_OSName
         '
         Me.Value_OSName.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSName.Location = New System.Drawing.Point(117, 25)
+        Me.Value_OSName.Location = New System.Drawing.Point(114, 25)
         Me.Value_OSName.Name = "Value_OSName"
-        Me.Value_OSName.Size = New System.Drawing.Size(326, 13)
+        Me.Value_OSName.Size = New System.Drawing.Size(323, 13)
         Me.Value_OSName.TabIndex = 1
-        Me.Value_OSName.Text = "Unknown"
+        Me.Value_OSName.Text = "Unknown Operating System, Service Pack 99"
         '
         'Name_OSName
         '
@@ -326,9 +325,9 @@ Partial Class MainWindow
         Me.Name_OSName.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Name_OSName.Location = New System.Drawing.Point(15, 25)
         Me.Name_OSName.Name = "Name_OSName"
-        Me.Name_OSName.Size = New System.Drawing.Size(89, 13)
+        Me.Name_OSName.Size = New System.Drawing.Size(55, 13)
         Me.Name_OSName.TabIndex = 0
-        Me.Name_OSName.Text = "Product name:"
+        Me.Name_OSName.Text = "Product:"
         '
         'GroupBox_CPUInfo
         '
@@ -362,7 +361,7 @@ Partial Class MainWindow
         'Value_CPUMaxClock
         '
         Me.Value_CPUMaxClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUMaxClock.Location = New System.Drawing.Point(382, 48)
+        Me.Value_CPUMaxClock.Location = New System.Drawing.Point(376, 48)
         Me.Value_CPUMaxClock.Name = "Value_CPUMaxClock"
         Me.Value_CPUMaxClock.Size = New System.Drawing.Size(61, 13)
         Me.Value_CPUMaxClock.TabIndex = 8
@@ -376,9 +375,9 @@ Partial Class MainWindow
         Me.Name_CPUMaxClock.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Name_CPUMaxClock.Location = New System.Drawing.Point(322, 48)
         Me.Name_CPUMaxClock.Name = "Name_CPUMaxClock"
-        Me.Name_CPUMaxClock.Size = New System.Drawing.Size(62, 13)
+        Me.Name_CPUMaxClock.Size = New System.Drawing.Size(48, 13)
         Me.Name_CPUMaxClock.TabIndex = 7
-        Me.Name_CPUMaxClock.Text = "Maximum:"
+        Me.Name_CPUMaxClock.Text = "Native:"
         '
         'Value_CPUCore
         '
@@ -511,9 +510,9 @@ Partial Class MainWindow
         'Value_VirtualMemoryUsage
         '
         Me.Value_VirtualMemoryUsage.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VirtualMemoryUsage.Location = New System.Drawing.Point(407, 48)
+        Me.Value_VirtualMemoryUsage.Location = New System.Drawing.Point(393, 48)
         Me.Value_VirtualMemoryUsage.Name = "Value_VirtualMemoryUsage"
-        Me.Value_VirtualMemoryUsage.Size = New System.Drawing.Size(36, 13)
+        Me.Value_VirtualMemoryUsage.Size = New System.Drawing.Size(44, 13)
         Me.Value_VirtualMemoryUsage.TabIndex = 11
         Me.Value_VirtualMemoryUsage.Text = "100 %"
         Me.Value_VirtualMemoryUsage.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -521,9 +520,9 @@ Partial Class MainWindow
         'Value_PhysicalMemoryUsage
         '
         Me.Value_PhysicalMemoryUsage.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_PhysicalMemoryUsage.Location = New System.Drawing.Point(407, 25)
+        Me.Value_PhysicalMemoryUsage.Location = New System.Drawing.Point(393, 25)
         Me.Value_PhysicalMemoryUsage.Name = "Value_PhysicalMemoryUsage"
-        Me.Value_PhysicalMemoryUsage.Size = New System.Drawing.Size(36, 13)
+        Me.Value_PhysicalMemoryUsage.Size = New System.Drawing.Size(44, 13)
         Me.Value_PhysicalMemoryUsage.TabIndex = 5
         Me.Value_PhysicalMemoryUsage.Text = "100 %"
         Me.Value_PhysicalMemoryUsage.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -663,7 +662,7 @@ Partial Class MainWindow
         '
         'Button_Exit
         '
-        Me.Button_Exit.Location = New System.Drawing.Point(856, 511)
+        Me.Button_Exit.Location = New System.Drawing.Point(857, 513)
         Me.Button_Exit.Name = "Button_Exit"
         Me.Button_Exit.Size = New System.Drawing.Size(75, 23)
         Me.Button_Exit.TabIndex = 0
@@ -910,7 +909,7 @@ Partial Class MainWindow
         '
         Me.Name_LanguageList.AutoSize = True
         Me.Name_LanguageList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_LanguageList.Location = New System.Drawing.Point(9, 516)
+        Me.Name_LanguageList.Location = New System.Drawing.Point(9, 518)
         Me.Name_LanguageList.Name = "Name_LanguageList"
         Me.Name_LanguageList.Size = New System.Drawing.Size(67, 13)
         Me.Name_LanguageList.TabIndex = 2
@@ -926,7 +925,7 @@ Partial Class MainWindow
         Me.Link_Bottom.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Link_Bottom.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline
         Me.Link_Bottom.LinkColor = System.Drawing.SystemColors.Highlight
-        Me.Link_Bottom.Location = New System.Drawing.Point(219, 516)
+        Me.Link_Bottom.Location = New System.Drawing.Point(219, 518)
         Me.Link_Bottom.Name = "Link_Bottom"
         Me.Link_Bottom.Size = New System.Drawing.Size(507, 13)
         Me.Link_Bottom.TabIndex = 4
@@ -941,7 +940,7 @@ Partial Class MainWindow
         Me.MainStatusStrip.AutoSize = False
         Me.MainStatusStrip.ContextMenuStrip = Me.MainContextMenu
         Me.MainStatusStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.StatusLabel_Host, Me.StatusLabel_Uptime, Me.StatusLabel_ChartStatus, Me.StatusLabel_TopMost})
-        Me.MainStatusStrip.Location = New System.Drawing.Point(0, 540)
+        Me.MainStatusStrip.Location = New System.Drawing.Point(0, 545)
         Me.MainStatusStrip.Name = "MainStatusStrip"
         Me.MainStatusStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode
         Me.MainStatusStrip.ShowItemToolTips = True
@@ -1077,7 +1076,7 @@ Partial Class MainWindow
         'Value_Debug
         '
         Me.Value_Debug.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_Debug.Location = New System.Drawing.Point(732, 516)
+        Me.Value_Debug.Location = New System.Drawing.Point(732, 518)
         Me.Value_Debug.Name = "Value_Debug"
         Me.Value_Debug.Size = New System.Drawing.Size(118, 13)
         Me.Value_Debug.TabIndex = 5
@@ -1197,14 +1196,14 @@ Partial Class MainWindow
         '
         'GroupBox_DiskInfo
         '
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskIndex)
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskIndex)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.Value_PartLabel)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.Value_PartInfo)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.ComboBox_PartList)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Button_DiskListReload)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskSerial)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskSerial)
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskSmart)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskFirmware)
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskSmart)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.Name_PartList)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskFirmware)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskInterface)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskCapacity)
@@ -1220,26 +1219,26 @@ Partial Class MainWindow
         Me.GroupBox_DiskInfo.TabStop = False
         Me.GroupBox_DiskInfo.Text = "Disk information"
         '
-        'Value_DiskIndex
+        'Value_PartLabel
         '
-        Me.Value_DiskIndex.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskIndex.Location = New System.Drawing.Point(130, 48)
-        Me.Value_DiskIndex.Name = "Value_DiskIndex"
-        Me.Value_DiskIndex.Size = New System.Drawing.Size(95, 13)
-        Me.Value_DiskIndex.TabIndex = 4
-        Me.Value_DiskIndex.Text = "# 99"
-        Me.Value_DiskIndex.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Value_PartLabel.AutoSize = True
+        Me.Value_PartLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Value_PartLabel.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_PartLabel.Location = New System.Drawing.Point(231, 94)
+        Me.Value_PartLabel.Name = "Value_PartLabel"
+        Me.Value_PartLabel.Size = New System.Drawing.Size(30, 13)
+        Me.Value_PartLabel.TabIndex = 13
+        Me.Value_PartLabel.Text = "N/A"
         '
-        'Name_DiskIndex
+        'Value_PartInfo
         '
-        Me.Name_DiskIndex.AutoSize = True
-        Me.Name_DiskIndex.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_DiskIndex.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskIndex.Location = New System.Drawing.Point(15, 48)
-        Me.Name_DiskIndex.Name = "Name_DiskIndex"
-        Me.Name_DiskIndex.Size = New System.Drawing.Size(70, 13)
-        Me.Name_DiskIndex.TabIndex = 3
-        Me.Name_DiskIndex.Text = "Disk index:"
+        Me.Value_PartInfo.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_PartInfo.Location = New System.Drawing.Point(267, 94)
+        Me.Value_PartInfo.Name = "Value_PartInfo"
+        Me.Value_PartInfo.Size = New System.Drawing.Size(170, 13)
+        Me.Value_PartInfo.TabIndex = 14
+        Me.Value_PartInfo.Text = "Unknown"
+        Me.Value_PartInfo.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Button_DiskListReload
         '
@@ -1254,10 +1253,10 @@ Partial Class MainWindow
         'Value_DiskSerial
         '
         Me.Value_DiskSerial.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskSerial.Location = New System.Drawing.Point(103, 94)
+        Me.Value_DiskSerial.Location = New System.Drawing.Point(315, 71)
         Me.Value_DiskSerial.Name = "Value_DiskSerial"
         Me.Value_DiskSerial.Size = New System.Drawing.Size(122, 13)
-        Me.Value_DiskSerial.TabIndex = 12
+        Me.Value_DiskSerial.TabIndex = 10
         Me.Value_DiskSerial.Text = "1234567890ABCDEF"
         Me.Value_DiskSerial.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -1266,42 +1265,32 @@ Partial Class MainWindow
         Me.Name_DiskSerial.AutoSize = True
         Me.Name_DiskSerial.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskSerial.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskSerial.Location = New System.Drawing.Point(15, 94)
+        Me.Name_DiskSerial.Location = New System.Drawing.Point(231, 71)
         Me.Name_DiskSerial.Name = "Name_DiskSerial"
-        Me.Name_DiskSerial.Size = New System.Drawing.Size(90, 13)
-        Me.Name_DiskSerial.TabIndex = 11
-        Me.Name_DiskSerial.Text = "Serial Number:"
-        '
-        'Value_DiskSmart
-        '
-        Me.Value_DiskSmart.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskSmart.Location = New System.Drawing.Point(345, 94)
-        Me.Value_DiskSmart.Name = "Value_DiskSmart"
-        Me.Value_DiskSmart.Size = New System.Drawing.Size(98, 13)
-        Me.Value_DiskSmart.TabIndex = 14
-        Me.Value_DiskSmart.Text = "OK"
-        Me.Value_DiskSmart.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Name_DiskSerial.Size = New System.Drawing.Size(88, 13)
+        Me.Name_DiskSerial.TabIndex = 9
+        Me.Name_DiskSerial.Text = "Serial number:"
         '
         'Value_DiskFirmware
         '
         Me.Value_DiskFirmware.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskFirmware.Location = New System.Drawing.Point(130, 71)
+        Me.Value_DiskFirmware.Location = New System.Drawing.Point(111, 71)
         Me.Value_DiskFirmware.Name = "Value_DiskFirmware"
-        Me.Value_DiskFirmware.Size = New System.Drawing.Size(95, 13)
+        Me.Value_DiskFirmware.Size = New System.Drawing.Size(114, 13)
         Me.Value_DiskFirmware.TabIndex = 8
         Me.Value_DiskFirmware.Text = "1000"
         Me.Value_DiskFirmware.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
-        'Name_DiskSmart
+        'Name_PartList
         '
-        Me.Name_DiskSmart.AutoSize = True
-        Me.Name_DiskSmart.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_DiskSmart.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskSmart.Location = New System.Drawing.Point(231, 94)
-        Me.Name_DiskSmart.Name = "Name_DiskSmart"
-        Me.Name_DiskSmart.Size = New System.Drawing.Size(108, 13)
-        Me.Name_DiskSmart.TabIndex = 13
-        Me.Name_DiskSmart.Text = "S.M.A.R.T status:"
+        Me.Name_PartList.AutoSize = True
+        Me.Name_PartList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_PartList.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_PartList.Location = New System.Drawing.Point(15, 94)
+        Me.Name_PartList.Name = "Name_PartList"
+        Me.Name_PartList.Size = New System.Drawing.Size(52, 13)
+        Me.Name_PartList.TabIndex = 11
+        Me.Name_PartList.Text = "Volume:"
         '
         'Name_DiskFirmware
         '
@@ -1317,19 +1306,19 @@ Partial Class MainWindow
         'Value_DiskInterface
         '
         Me.Value_DiskInterface.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskInterface.Location = New System.Drawing.Point(325, 71)
+        Me.Value_DiskInterface.Location = New System.Drawing.Point(111, 48)
         Me.Value_DiskInterface.Name = "Value_DiskInterface"
-        Me.Value_DiskInterface.Size = New System.Drawing.Size(118, 13)
-        Me.Value_DiskInterface.TabIndex = 10
+        Me.Value_DiskInterface.Size = New System.Drawing.Size(114, 13)
+        Me.Value_DiskInterface.TabIndex = 4
         Me.Value_DiskInterface.Text = "SCSI / SAS"
         Me.Value_DiskInterface.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_DiskCapacity
         '
         Me.Value_DiskCapacity.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_DiskCapacity.Location = New System.Drawing.Point(328, 48)
+        Me.Value_DiskCapacity.Location = New System.Drawing.Point(329, 48)
         Me.Value_DiskCapacity.Name = "Value_DiskCapacity"
-        Me.Value_DiskCapacity.Size = New System.Drawing.Size(115, 13)
+        Me.Value_DiskCapacity.Size = New System.Drawing.Size(108, 13)
         Me.Value_DiskCapacity.TabIndex = 6
         Me.Value_DiskCapacity.Text = "999 GB"
         Me.Value_DiskCapacity.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -1339,10 +1328,10 @@ Partial Class MainWindow
         Me.Name_DiskInterface.AutoSize = True
         Me.Name_DiskInterface.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_DiskInterface.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskInterface.Location = New System.Drawing.Point(231, 71)
+        Me.Name_DiskInterface.Location = New System.Drawing.Point(15, 48)
         Me.Name_DiskInterface.Name = "Name_DiskInterface"
         Me.Name_DiskInterface.Size = New System.Drawing.Size(62, 13)
-        Me.Name_DiskInterface.TabIndex = 9
+        Me.Name_DiskInterface.TabIndex = 3
         Me.Name_DiskInterface.Text = "Interface:"
         '
         'Name_DiskCapacity
@@ -1367,6 +1356,18 @@ Partial Class MainWindow
         Me.Name_DiskList.TabIndex = 0
         Me.Name_DiskList.Text = "Disk drive:"
         '
+        'ComboBox_PartList
+        '
+        Me.ComboBox_PartList.Anchor = System.Windows.Forms.AnchorStyles.Left
+        Me.ComboBox_PartList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_PartList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_PartList.FormattingEnabled = True
+        Me.ComboBox_PartList.ItemHeight = 15
+        Me.ComboBox_PartList.Location = New System.Drawing.Point(111, 91)
+        Me.ComboBox_PartList.Name = "ComboBox_PartList"
+        Me.ComboBox_PartList.Size = New System.Drawing.Size(114, 21)
+        Me.ComboBox_PartList.TabIndex = 12
+        '
         'ComboBox_DiskList
         '
         Me.ComboBox_DiskList.Anchor = System.Windows.Forms.AnchorStyles.Left
@@ -1385,7 +1386,7 @@ Partial Class MainWindow
         Me.ComboBox_LanguageList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox_LanguageList.FormattingEnabled = True
         Me.ComboBox_LanguageList.ItemHeight = 15
-        Me.ComboBox_LanguageList.Location = New System.Drawing.Point(82, 513)
+        Me.ComboBox_LanguageList.Location = New System.Drawing.Point(82, 515)
         Me.ComboBox_LanguageList.Name = "ComboBox_LanguageList"
         Me.ComboBox_LanguageList.Size = New System.Drawing.Size(93, 21)
         Me.ComboBox_LanguageList.TabIndex = 3
@@ -1446,7 +1447,7 @@ Partial Class MainWindow
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(944, 562)
+        Me.ClientSize = New System.Drawing.Size(944, 567)
         Me.ContextMenuStrip = Me.MainContextMenu
         Me.Controls.Add(Me.GroupBox_DiskInfo)
         Me.Controls.Add(Me.Value_Debug)
@@ -1559,8 +1560,8 @@ Partial Class MainWindow
     Friend WithEvents MainContextMenuItem_About As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Name_VirtualMemoryFree As System.Windows.Forms.Label
     Friend WithEvents Name_PhysicalMemoryFree As System.Windows.Forms.Label
-    Friend WithEvents Name_OSBuild As System.Windows.Forms.Label
-    Friend WithEvents Value_OSBuild As System.Windows.Forms.Label
+    Friend WithEvents Name_OSLang As System.Windows.Forms.Label
+    Friend WithEvents Value_OSLang As System.Windows.Forms.Label
     Friend WithEvents Value_PhysicalMemoryFree As System.Windows.Forms.Label
     Friend WithEvents Value_VirtualMemoryFree As System.Windows.Forms.Label
     Friend WithEvents Value_CPUMaxClock As System.Windows.Forms.Label
@@ -1597,9 +1598,8 @@ Partial Class MainWindow
     Friend WithEvents ComboBox_DiskList As LeftComboBox
     Friend WithEvents Value_DiskSerial As System.Windows.Forms.Label
     Friend WithEvents Name_DiskSerial As System.Windows.Forms.Label
-    Friend WithEvents Value_DiskSmart As System.Windows.Forms.Label
     Friend WithEvents Value_DiskFirmware As System.Windows.Forms.Label
-    Friend WithEvents Name_DiskSmart As System.Windows.Forms.Label
+    Friend WithEvents Name_PartList As System.Windows.Forms.Label
     Friend WithEvents Name_DiskFirmware As System.Windows.Forms.Label
     Friend WithEvents Value_DiskInterface As System.Windows.Forms.Label
     Friend WithEvents Value_DiskCapacity As System.Windows.Forms.Label
@@ -1607,8 +1607,6 @@ Partial Class MainWindow
     Friend WithEvents Name_DiskCapacity As System.Windows.Forms.Label
     Friend WithEvents Button_DiskListReload As System.Windows.Forms.Button
     Friend WithEvents ScreenshotToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents Value_DiskIndex As System.Windows.Forms.Label
-    Friend WithEvents Name_DiskIndex As System.Windows.Forms.Label
     Friend WithEvents ComboBox_VideoList As LeftComboBox
     Friend WithEvents Button_VideoListReload As System.Windows.Forms.Button
     Friend WithEvents Button_CPUListReload As System.Windows.Forms.Button
@@ -1618,6 +1616,9 @@ Partial Class MainWindow
     Friend WithEvents ComboBox_HWList As SINMx86.LeftComboBox
     Friend WithEvents Name_HWIdentifier As System.Windows.Forms.Label
     Friend WithEvents Value_HWIdentifier As System.Windows.Forms.Label
+    Friend WithEvents ComboBox_PartList As SINMx86.LeftComboBox
+    Friend WithEvents Value_PartInfo As System.Windows.Forms.Label
+    Friend WithEvents Value_PartLabel As System.Windows.Forms.Label
 
 End Class
 
