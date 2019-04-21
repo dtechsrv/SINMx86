@@ -373,18 +373,18 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> Alaplap
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Then
+        If RemoveSpaces(Vendor) = Nothing Or Vendor = "To be filled by O.E.M." Then
             HWVendor(0) = Nothing
         Else
-            HWVendor(0) = Vendor
+            HWVendor(0) = RemoveSpaces(Vendor)
         End If
 
-        If Model = Nothing Or Model = "To be filled by O.E.M." Then
+        If RemoveSpaces(Model) = Nothing Or Model = "To be filled by O.E.M." Then
             HWIdentifier(0) = Nothing
-        ElseIf Identifier = Nothing Or Identifier = "To be filled by O.E.M." Then
-            HWIdentifier(0) = Model
+        ElseIf RemoveSpaces(Identifier) = Nothing Or Identifier = "To be filled by O.E.M." Then
+            HWIdentifier(0) = RemoveSpaces(Model)
         Else
-            HWIdentifier(0) = Model + ", S/N: " + Identifier
+            HWIdentifier(0) = RemoveSpaces(Model) + ", S/N: " + RemoveSpaces(Identifier)
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
@@ -397,16 +397,16 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> Számítógép
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Then
+        If RemoveSpaces(Vendor) = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Then
             HWVendor(1) = Nothing
         Else
-            HWVendor(1) = Vendor
+            HWVendor(1) = RemoveSpaces(Vendor)
         End If
 
-        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
+        If RemoveSpaces(Model) = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
             HWIdentifier(1) = Nothing
         Else
-            HWIdentifier(1) = Model
+            HWIdentifier(1) = RemoveSpaces(Model)
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> BIOS információi ***
@@ -420,16 +420,16 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> BIOS
-        If Vendor = Nothing Then
+        If RemoveSpaces(Vendor) = Nothing Then
             HWVendor(2) = Nothing
         Else
-            HWVendor(2) = Vendor
+            HWVendor(2) = RemoveSpaces(Vendor)
         End If
 
-        If Model = Nothing Then
+        If RemoveSpaces(Model) = Nothing Then
             HWIdentifier(2) = Nothing
         Else
-            HWIdentifier(2) = Model + " (" + Identifier + ")"
+            HWIdentifier(2) = RemoveSpaces(Model) + " (" + Identifier + ")"
         End If
 
         ' Visszatérési érték beállítása
@@ -841,7 +841,7 @@ Public Class MainWindow
             End If
 
             ' Zárószóköz eltávolítása
-            If Str2Char(UBound(Str2Char)) = " " Then
+            If Str2Char(UBound(Str2Char)) = " " And RawString <> Nothing Then
 
                 ' Ideiglenes sztring kiürítése
                 StrTemp = Nothing
