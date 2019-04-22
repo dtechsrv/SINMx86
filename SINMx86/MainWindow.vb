@@ -485,14 +485,16 @@ Public Class MainWindow
         Dim OSLanguage(32) As String                            ' Nyelv
 
         ' WMI érték definiálása
-        objOS = New ManagementObjectSearcher("SELECT Caption, BuildNumber, ServicePackMajorVersion, MUILanguages FROM Win32_OperatingSystem")
+        objOS = New ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem")
 
         ' Értékek kinyerése a WMI-ből
         For Each Me.objMgmt In objOS.Get
             OSName = objMgmt("Caption")
             OSBuild = objMgmt("BuildNumber")
             OSService = objMgmt("ServicePackMajorVersion")
-            OSLanguage = objMgmt("MUILanguages")
+            If OSMajorVersion > 5 Then
+                OSLanguage = objMgmt("MUILanguages")
+            End If
         Next
 
         ' Kiírások értékének frissítése
@@ -501,9 +503,18 @@ Public Class MainWindow
         Else
             Value_OSName.Text = RemoveSpaces(OSName) + ", " + Str_Serv + " " + OSService.ToString
         End If
+
         Value_OSRelease.Text = OSRelase.ToString + "-bit"
         Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString + "." + OSBuild.ToString
-        Value_OSLang.Text = OSLanguage(0)
+
+        If OSMajorVersion > 5 Then
+            Value_OSLang.Enabled = True
+            Value_OSLang.Text = OSLanguage(0)
+        Else
+            Value_OSLang.Enabled = False
+            Value_OSLang.Text = Str_None
+        End If
+
 
         ' Visszatérési érték beállítása
         Return False
@@ -762,15 +773,15 @@ Public Class MainWindow
             ' Kiírás értékének frissítése
             Value_VideoMemory.Enabled = True
             Value_VideoMemory.Text = FixDigitSeparator(VideoMemoryConv(0), 2, True) + " " + PrefixTable(VideoMemoryConv(1)) + "B"
+        End If
 
-            ' Ismeretlen felbontás (Pl.: 0 x 0, 0 bit)
-            If VideoResolution(0) = 0 Or VideoResolution(1) = 0 Or VideoResolution(2) = 0 Then
-                Value_VideoResolution.Enabled = False
-                Value_VideoResolution.Text = Str_Inactive
-            Else
-                Value_VideoResolution.Enabled = True
-                Value_VideoResolution.Text = VideoResolution(0).ToString + " x " + VideoResolution(1).ToString + " (" + VideoResolution(2).ToString + " bit)"
-            End If
+        ' Ismeretlen felbontás (Pl.: 0 x 0, 0 bit)
+        If VideoResolution(0) = 0 Or VideoResolution(1) = 0 Or VideoResolution(2) = 0 Then
+            Value_VideoResolution.Enabled = False
+            Value_VideoResolution.Text = Str_Inactive
+        Else
+            Value_VideoResolution.Enabled = True
+            Value_VideoResolution.Text = VideoResolution(0).ToString + " x " + VideoResolution(1).ToString + " (" + VideoResolution(2).ToString + " bit)"
         End If
 
         ' Visszatérési érték beállítása
@@ -1451,6 +1462,9 @@ Public Class MainWindow
         ' PnP hálózati kártya nevek lekérdezése 
         For Each Me.objMgmt In objPE.Get
             PnPList(PnPCount) = RemoveSpaces(objMgmt("Name"))
+            If InStr(PnPList(PnPCount), " - Packet Scheduler Miniport") Then
+                PnPList(PnPCount) = Replace(PnPList(PnPCount), " - Packet Scheduler Miniport", "")
+            End If
             PnPName(PnPCount) = StatNameConv(objMgmt("Name"))
             PnPCount += 1
         Next
@@ -1472,7 +1486,7 @@ Public Class MainWindow
                 ' Statisztikához átalakított eszköznevek keresése (Ha van egyezés, akkor az lesz a név, egyébként a gyári!)
                 For i As Int32 = 0 To (PnPNum - 1)
                     If (PnPName(i) = objMgmt("Name")) Then
-                        InterfaceName(InterfaceCount) = PnPList(i)
+                        InterfaceName(InterfaceCount) = RemoveSpaces(PnPList(i))
                     End If
                 Next
 
