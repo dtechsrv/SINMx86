@@ -250,11 +250,11 @@ Partial Class MainWindow
         'Value_OSLang
         '
         Me.Value_OSLang.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSLang.Location = New System.Drawing.Point(395, 48)
+        Me.Value_OSLang.Location = New System.Drawing.Point(381, 48)
         Me.Value_OSLang.Name = "Value_OSLang"
-        Me.Value_OSLang.Size = New System.Drawing.Size(42, 13)
+        Me.Value_OSLang.Size = New System.Drawing.Size(56, 13)
         Me.Value_OSLang.TabIndex = 7
-        Me.Value_OSLang.Text = "en-GB"
+        Me.Value_OSLang.Text = "Unknown"
         Me.Value_OSLang.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_OSLang
@@ -262,7 +262,7 @@ Partial Class MainWindow
         Me.Name_OSLang.AutoSize = True
         Me.Name_OSLang.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_OSLang.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_OSLang.Location = New System.Drawing.Point(322, 48)
+        Me.Name_OSLang.Location = New System.Drawing.Point(318, 48)
         Me.Name_OSLang.Name = "Name_OSLang"
         Me.Name_OSLang.Size = New System.Drawing.Size(67, 13)
         Me.Name_OSLang.TabIndex = 6
@@ -273,7 +273,7 @@ Partial Class MainWindow
         Me.Name_OSRelease.AutoSize = True
         Me.Name_OSRelease.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_OSRelease.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_OSRelease.Location = New System.Drawing.Point(201, 48)
+        Me.Name_OSRelease.Location = New System.Drawing.Point(199, 48)
         Me.Name_OSRelease.Name = "Name_OSRelease"
         Me.Name_OSRelease.Size = New System.Drawing.Size(57, 13)
         Me.Name_OSRelease.TabIndex = 4
@@ -302,7 +302,7 @@ Partial Class MainWindow
         'Value_OSRelease
         '
         Me.Value_OSRelease.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSRelease.Location = New System.Drawing.Point(275, 48)
+        Me.Value_OSRelease.Location = New System.Drawing.Point(271, 48)
         Me.Value_OSRelease.Name = "Value_OSRelease"
         Me.Value_OSRelease.Size = New System.Drawing.Size(41, 13)
         Me.Value_OSRelease.TabIndex = 5
@@ -373,7 +373,7 @@ Partial Class MainWindow
         Me.Name_CPUMaxClock.AutoSize = True
         Me.Name_CPUMaxClock.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_CPUMaxClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_CPUMaxClock.Location = New System.Drawing.Point(322, 48)
+        Me.Name_CPUMaxClock.Location = New System.Drawing.Point(318, 48)
         Me.Name_CPUMaxClock.Name = "Name_CPUMaxClock"
         Me.Name_CPUMaxClock.Size = New System.Drawing.Size(48, 13)
         Me.Name_CPUMaxClock.TabIndex = 7
@@ -384,7 +384,7 @@ Partial Class MainWindow
         Me.Value_CPUCore.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_CPUCore.Location = New System.Drawing.Point(124, 48)
         Me.Value_CPUCore.Name = "Value_CPUCore"
-        Me.Value_CPUCore.Size = New System.Drawing.Size(71, 13)
+        Me.Value_CPUCore.Size = New System.Drawing.Size(69, 13)
         Me.Value_CPUCore.TabIndex = 4
         Me.Value_CPUCore.Text = "99 / 99"
         Me.Value_CPUCore.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -403,7 +403,7 @@ Partial Class MainWindow
         'Value_CPUClock
         '
         Me.Value_CPUClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUClock.Location = New System.Drawing.Point(256, 48)
+        Me.Value_CPUClock.Location = New System.Drawing.Point(252, 48)
         Me.Value_CPUClock.Name = "Value_CPUClock"
         Me.Value_CPUClock.Size = New System.Drawing.Size(60, 13)
         Me.Value_CPUClock.TabIndex = 6
@@ -415,7 +415,7 @@ Partial Class MainWindow
         Me.Name_CPUClock.AutoSize = True
         Me.Name_CPUClock.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_CPUClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_CPUClock.Location = New System.Drawing.Point(201, 48)
+        Me.Name_CPUClock.Location = New System.Drawing.Point(199, 48)
         Me.Name_CPUClock.Name = "Name_CPUClock"
         Me.Name_CPUClock.Size = New System.Drawing.Size(43, 13)
         Me.Name_CPUClock.TabIndex = 5
@@ -457,7 +457,7 @@ Partial Class MainWindow
         'Value_PhysicalMemoryFree
         '
         Me.Value_PhysicalMemoryFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_PhysicalMemoryFree.Location = New System.Drawing.Point(250, 25)
+        Me.Value_PhysicalMemoryFree.Location = New System.Drawing.Point(246, 25)
         Me.Value_PhysicalMemoryFree.Name = "Value_PhysicalMemoryFree"
         Me.Value_PhysicalMemoryFree.Size = New System.Drawing.Size(66, 13)
         Me.Value_PhysicalMemoryFree.TabIndex = 3
@@ -467,7 +467,7 @@ Partial Class MainWindow
         'Value_VirtualMemoryFree
         '
         Me.Value_VirtualMemoryFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VirtualMemoryFree.Location = New System.Drawing.Point(250, 48)
+        Me.Value_VirtualMemoryFree.Location = New System.Drawing.Point(246, 48)
         Me.Value_VirtualMemoryFree.Name = "Value_VirtualMemoryFree"
         Me.Value_VirtualMemoryFree.Size = New System.Drawing.Size(66, 13)
         Me.Value_VirtualMemoryFree.TabIndex = 9
@@ -479,7 +479,7 @@ Partial Class MainWindow
         Me.Name_VirtualMemoryFree.AutoSize = True
         Me.Name_VirtualMemoryFree.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_VirtualMemoryFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_VirtualMemoryFree.Location = New System.Drawing.Point(201, 48)
+        Me.Name_VirtualMemoryFree.Location = New System.Drawing.Point(199, 48)
         Me.Name_VirtualMemoryFree.Name = "Name_VirtualMemoryFree"
         Me.Name_VirtualMemoryFree.Size = New System.Drawing.Size(36, 13)
         Me.Name_VirtualMemoryFree.TabIndex = 8
@@ -490,7 +490,7 @@ Partial Class MainWindow
         Me.Name_PhysicalMemoryUsage.AutoSize = True
         Me.Name_PhysicalMemoryUsage.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_PhysicalMemoryUsage.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_PhysicalMemoryUsage.Location = New System.Drawing.Point(322, 25)
+        Me.Name_PhysicalMemoryUsage.Location = New System.Drawing.Point(318, 25)
         Me.Name_PhysicalMemoryUsage.Name = "Name_PhysicalMemoryUsage"
         Me.Name_PhysicalMemoryUsage.Size = New System.Drawing.Size(47, 13)
         Me.Name_PhysicalMemoryUsage.TabIndex = 4
@@ -501,7 +501,7 @@ Partial Class MainWindow
         Me.Name_PhysicalMemoryFree.AutoSize = True
         Me.Name_PhysicalMemoryFree.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_PhysicalMemoryFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_PhysicalMemoryFree.Location = New System.Drawing.Point(201, 25)
+        Me.Name_PhysicalMemoryFree.Location = New System.Drawing.Point(199, 25)
         Me.Name_PhysicalMemoryFree.Name = "Name_PhysicalMemoryFree"
         Me.Name_PhysicalMemoryFree.Size = New System.Drawing.Size(36, 13)
         Me.Name_PhysicalMemoryFree.TabIndex = 2
@@ -532,7 +532,7 @@ Partial Class MainWindow
         Me.Name_VirtualMemoryUsage.AutoSize = True
         Me.Name_VirtualMemoryUsage.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_VirtualMemoryUsage.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_VirtualMemoryUsage.Location = New System.Drawing.Point(322, 48)
+        Me.Name_VirtualMemoryUsage.Location = New System.Drawing.Point(318, 48)
         Me.Name_VirtualMemoryUsage.Name = "Name_VirtualMemoryUsage"
         Me.Name_VirtualMemoryUsage.Size = New System.Drawing.Size(47, 13)
         Me.Name_VirtualMemoryUsage.TabIndex = 10
@@ -543,7 +543,7 @@ Partial Class MainWindow
         Me.Value_VirtualMemorySize.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_VirtualMemorySize.Location = New System.Drawing.Point(127, 48)
         Me.Value_VirtualMemorySize.Name = "Value_VirtualMemorySize"
-        Me.Value_VirtualMemorySize.Size = New System.Drawing.Size(68, 13)
+        Me.Value_VirtualMemorySize.Size = New System.Drawing.Size(66, 13)
         Me.Value_VirtualMemorySize.TabIndex = 7
         Me.Value_VirtualMemorySize.Text = "1000.00 MB"
         Me.Value_VirtualMemorySize.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -553,7 +553,7 @@ Partial Class MainWindow
         Me.Value_PhysicalMemorySize.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_PhysicalMemorySize.Location = New System.Drawing.Point(127, 25)
         Me.Value_PhysicalMemorySize.Name = "Value_PhysicalMemorySize"
-        Me.Value_PhysicalMemorySize.Size = New System.Drawing.Size(68, 13)
+        Me.Value_PhysicalMemorySize.Size = New System.Drawing.Size(66, 13)
         Me.Value_PhysicalMemorySize.TabIndex = 1
         Me.Value_PhysicalMemorySize.Text = "1000.00 MB"
         Me.Value_PhysicalMemorySize.TextAlign = System.Drawing.ContentAlignment.TopRight

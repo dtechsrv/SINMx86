@@ -4,6 +4,7 @@ Imports System.Management
 Imports System.Math
 Imports System.Drawing
 Imports System.Convert
+Imports System.Text.RegularExpressions
 Imports Microsoft.Win32
 
 Public Class MainWindow
@@ -15,18 +16,18 @@ Public Class MainWindow
     Public SplashDefineAsAbout As Boolean = False                           ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objPR, objPE, objNI, objVC, objDD, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objBT, objPR, objPE, objNI, objVC, objDD, objDP, objLP, objLD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
     ' Beállításjegyzék változói
     Public RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\\" + MyName, True)
 
     ' Nyelvi sztringek
-    Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Serv, Str_Loading, Str_LoadReg, Str_LoadWMI, Str_MemUse, Str_MemFree, Str_Uptime,
-           Str_DayName(7), Str_MonthName(12), Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator, Str_Disk,
-           Str_Motherboard, Str_System, Str_BIOS, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak, Str_None,
-           Str_ChartTime, Str_ChartDown, Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname,
-           Str_ChartCount, Str_Note, Str_NoDisk, Str_NoName, Str_Unknown, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
+    Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Serv, Str_Loading, Str_LoadReg, Str_LoadWMI, Str_MemUse, Str_MemFree, Str_Uptime, Str_Date,
+           Str_DayName(7), Str_MonthName(12), Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator, Str_Disk, Str_Motherboard,
+           Str_System, Str_BIOS, Str_Battery, Str_Serial, Str_Volt, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak,
+           Str_ChartTime, Str_ChartDown, Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname, Str_ChartCount,
+           Str_Note, Str_NoDisk, Str_NoName, Str_NotAvailable, Str_Unknown, Str_None, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
 
     ' ToolTip sztringek
     Public Tip_Language, Tip_HW, Tip_CPU, Tip_Disk, Tip_Part, Tip_Video, Tip_Interface, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown,
@@ -41,9 +42,9 @@ Public Class MainWindow
     ' További változók
     Public ReleaseStatus As String = Nothing                                ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
     Public VersionString As String                                          ' Formázott verziószám
-    Public HWVendor(2), HWIdentifier(2) As String                           ' Komponensinformációs tömbök
-    Public OSMajorVersion, OSMinorVersion As Int32                          ' OS fő- és alverzió száma (hibakereséshez)
-    Public OSRelase As Int32                                                ' Kiadás típusa (32/64 bit)
+    Public HWVendor(3), HWIdentifier(3) As String                           ' Komponensinformációs tömbök
+    Public OSMajorVersion, OSMinorVersion, OSBuildVersion As Int32          ' OS fő-, al- és build verziószáma (hibakereséshez)
+    Public OSRelease As Int32                                               ' Kiadás típusa (32/64 bit)
     Public RefreshInterval() As Int32 = {1, 2, 3, 4, 5, 10, 15, 30, 60}     ' Frissítési intervallumok
     Public PrefixTable() As String = {"", "k", "M", "G", "T"}               ' Prefixumok tömbje (amíg szükséges lehet)
     Public TraffGenCounter As Int32                                         ' Diagram generálási időköz visszaszámlálója
@@ -80,7 +81,6 @@ Public Class MainWindow
         ' Alapértelmezett értékek beállítása (Ismeretlen érték vagy üres registryváltozó esetén)
         Dim DefaultLaguage As Int32 = 0         ' Nyelv: angol
         Dim DefaultRefresh As Int32 = 2         ' Frissítési időköz: 3 másodperc
-        Dim DefaultHardware As Int32 = 0        ' Kiválasztott komponens: alaplap
 
         ' Debug sztring beállítása (ha a főablak betöltődik, akkor előtte ki kell üríteni!)
         Value_Debug.Text = "LOAD_FAIL"
@@ -104,7 +104,7 @@ Public Class MainWindow
         ' Verzió sztring beállítása
         VersionString = VersionArray(0) + "." + VersionArray(1) + "." + VersionArray(2) + " (Build " + VersionArray(3) + ")"
 
-        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Operációs rendszer információk ***
+        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Operációs rendszer verzió ***
         ' Megjegyzés: Ez több paraméternek is függősége, így a lekérdezést már most meg kell tenni!
         objOS = New ManagementObjectSearcher("SELECT Version FROM Win32_OperatingSystem")
 
@@ -117,12 +117,26 @@ Public Class MainWindow
         Next
 
         ' OS fő- és alverzió beállítása
-        ReDim Preserve OSVersionArray(0 To 1)
+        ReDim Preserve OSVersionArray(0 To 2)
         OSMajorVersion = OSVersionArray(0)
         OSMinorVersion = OSVersionArray(1)
+        OSBuildVersion = OSVersionArray(2)
 
-        ' Lista állapotának beállítása (Komponensek -> első elem: alaplap)
-        SelectedHardware = DefaultHardware
+        ' *** WMI LEKÉRDEZÉS: Win32_Processor -> Operációs rendszer kiadás (32/64-bit) ***
+        ' Megjegyzés: Az OS kiadásnál egyes esetekben sajnos le van fordítva a sztring (pl. '32-bites'),
+        ' de a processzor címbusz szélessége mindig megegyezik vele, mivel ezt az OS korlátozza, ez viszont integer!
+        ' XP-nél nincs alapból az OS kiadásnál ilyen WMI érték, de a CPU címbuszból ott is származtatható.
+        objPR = New ManagementObjectSearcher("SELECT AddressWidth FROM Win32_Processor")
+
+        Dim CPUAddressWidth As Int32 = 0                                    ' Processzor címbusz szélessége
+
+        ' Értékek beállítása
+        For Each Me.objMgmt In objPR.Get
+            CPUAddressWidth = ToInt32(objMgmt("AddressWidth"))
+        Next
+
+        ' OS kiadás korrekció
+        OSRelease = CPUAddressWidth
 
         ' ----- REGISTRY LEKÉRDEZÉSEK ÉS LISTÁK FELTÖLTÉSE -----
 
@@ -136,8 +150,6 @@ Public Class MainWindow
         Dim ReadLanguage As String = RegPath.GetValue("SelectedLanguage")               ' Nyelv beállítása
         Dim ReadSplash As String = RegPath.GetValue("DisableLoadSplash")                ' Splash Screen megjelenítése
         Dim ReadRefresh As String = RegPath.GetValue("SelectedRefreshIndex")            ' Frissítési időköz
-        Dim ReadDownChart As String = RegPath.GetValue("ChartVisibleDownload")          ' Letöltési diagram
-        Dim ReadUpChart As String = RegPath.GetValue("ChartVisibleUpload")              ' Feltöltési diagram
         Dim ReadTopMost As String = RegPath.GetValue("EnableTopMost")                   ' Láthatóság
         Dim ReadMinToTray As String = RegPath.GetValue("MinimizeToTaskbar")             ' Kicsinyítés állapota
         Dim ReadNoQuitAsk As String = RegPath.GetValue("DisableExitConfirmation")       ' Kilépési megerősítés
@@ -205,6 +217,13 @@ Public Class MainWindow
         ComboBox_UpdateList.SelectedIndex = RefreshList(SelectedRefresh)
         TraffGenCounter = ComboBox_UpdateList.SelectedIndex
 
+        ' Diagramleképezés beállítása
+        CheckedDownChart = True
+        CheckedUpChart = True
+
+        ' *** LISTAFELTÖLTÉS: Hardver komponensek ***
+        UpdateHWList(True)
+
         ' *** LISTAFELTÖLTÉS: Processzorok ***
         UpdateCPUList(True)
 
@@ -216,24 +235,6 @@ Public Class MainWindow
 
         ' *** LISTAFELTÖLTÉS: Videokártyák ***
         UpdateVideoList(True)
-
-        ' *** REGISTRY ELEMZÉS: Letöltési diagram engedélyezése ***
-        If ReadDownChart Is Nothing Or ToInt32(ReadDownChart) <> 0 Then
-            CheckedDownChart = True
-        Else
-            CheckedDownChart = False
-        End If
-
-        ' Checkbox és menüelemek állapotának beállítása
-        CheckBoxChart_DownloadVisible.Checked = CheckedDownChart
-        MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
-
-        ' *** REGISTRY ELEMZÉS: Feltöltési diagram engedélyezése ***
-        If ReadUpChart Is Nothing Or ToInt32(ReadUpChart) <> 0 Then
-            CheckedUpChart = True
-        Else
-            CheckedUpChart = False
-        End If
 
         ' Checkbox és menüelemek állapotának beállítása
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
@@ -284,11 +285,6 @@ Public Class MainWindow
             LoadSplash.Splash_Status.Text = Str_Loading + ": " + Str_LoadWMI + "..."
         End If
 
-        ' Hardverinformációk lekérdezése
-        SelectedHardware = DefaultHardware
-        SetHWInformation()
-        ComboBox_HWList.SelectedIndex = SelectedHardware
-
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem" -> Hosztnév ***
         objCS = New ManagementObjectSearcher("SELECT Name FROM Win32_ComputerSystem")
 
@@ -319,9 +315,6 @@ Public Class MainWindow
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Memória információk ***
         SetMemoryInformation()
-
-        ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Operációs rendszer információk ***
-        SetOSInformation()
 
         ' ----- ZÁRÓ MŰVELETEK -----
 
@@ -376,15 +369,15 @@ Public Class MainWindow
         If RemoveSpaces(Vendor) = Nothing Or Vendor = "To be filled by O.E.M." Then
             HWVendor(0) = Nothing
         Else
-            HWVendor(0) = RemoveSpaces(Vendor)
+            HWVendor(0) = RemoveSpaces(RemoveInvalidChars(Vendor))
         End If
 
         If RemoveSpaces(Model) = Nothing Or Model = "To be filled by O.E.M." Then
             HWIdentifier(0) = Nothing
         ElseIf RemoveSpaces(Identifier) = Nothing Or Identifier = "To be filled by O.E.M." Then
-            HWIdentifier(0) = RemoveSpaces(Model)
+            HWIdentifier(0) = RemoveSpaces(RemoveInvalidChars(Model))
         Else
-            HWIdentifier(0) = RemoveSpaces(Model) + ", S/N: " + RemoveSpaces(Identifier)
+            HWIdentifier(0) = RemoveSpaces(RemoveInvalidChars(Model)) + " (" + Str_Serial + ": " + RemoveSpaces(RemoveInvalidChars(Identifier)) + ")"
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
@@ -400,13 +393,13 @@ Public Class MainWindow
         If RemoveSpaces(Vendor) = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Then
             HWVendor(1) = Nothing
         Else
-            HWVendor(1) = RemoveSpaces(Vendor)
+            HWVendor(1) = RemoveSpaces(RemoveInvalidChars(Vendor))
         End If
 
         If RemoveSpaces(Model) = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
             HWIdentifier(1) = Nothing
         Else
-            HWIdentifier(1) = RemoveSpaces(Model)
+            HWIdentifier(1) = RemoveSpaces(RemoveInvalidChars(Model))
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> BIOS információi ***
@@ -423,13 +416,59 @@ Public Class MainWindow
         If RemoveSpaces(Vendor) = Nothing Then
             HWVendor(2) = Nothing
         Else
-            HWVendor(2) = RemoveSpaces(Vendor)
+            HWVendor(2) = RemoveSpaces(RemoveInvalidChars(Vendor))
         End If
 
         If RemoveSpaces(Model) = Nothing Then
             HWIdentifier(2) = Nothing
         Else
-            HWIdentifier(2) = RemoveSpaces(Model) + " (" + Identifier + ")"
+            HWIdentifier(2) = RemoveSpaces(RemoveInvalidChars(Model)) + " (" + Str_Date + ": " + Identifier + ")"
+        End If
+
+        ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> Akkumulátor információk ***
+        objBT = New ManagementObjectSearcher("SELECT Name, DeviceID, DesignVoltage FROM Win32_Battery")
+
+        Dim BattCount As Int32 = 0                          ' Akkumulátorok száma
+        Dim BattVolt As Int32 = 0                           ' Akkumulátor névleges feszültsége
+
+        For Each Me.objMgmt In objBT.Get
+            BattCount += 1
+        Next
+
+        If BattCount = 0 Then
+            HWVendor(3) = Nothing
+            HWIdentifier(3) = Nothing
+        Else
+            For Each Me.objMgmt In objBT.Get
+                Vendor = RemoveInvalidChars(objMgmt("DeviceID"))
+                Model = RemoveInvalidChars(objMgmt("Name"))
+                BattVolt = objMgmt("DesignVoltage")
+            Next
+
+            ' Gyártó leválasztása a modellről
+            Vendor = Replace(Vendor, Model, "")
+
+            If BattVolt <> 0 Then
+                Identifier = FixDigitSeparator((BattVolt / 1000), 1, False).ToString + " V"
+            Else
+                Identifier = Nothing
+            End If
+
+            If RemoveSpaces(Vendor) = Nothing Then
+                HWVendor(3) = Nothing
+            Else
+                HWVendor(3) = RemoveSpaces(Vendor)
+            End If
+
+            If RemoveSpaces(Model) = Nothing Then
+                HWIdentifier(3) = Nothing
+            Else
+                If Identifier = Nothing Then
+                    HWIdentifier(3) = RemoveSpaces(Model)
+                Else
+                    HWIdentifier(3) = RemoveSpaces(Model) + " (" + Str_Volt + ": " + Identifier + ")"
+                End If
+            End If
         End If
 
         ' Visszatérési érték beállítása
@@ -480,7 +519,6 @@ Public Class MainWindow
 
         ' Értékek definiálása
         Dim OSName As String = Nothing                          ' OS neve
-        Dim OSBuild As String = Nothing                         ' OS buildszáma
         Dim OSService As Int32 = 0                              ' Szervizcsomag
         Dim OSLanguage(32) As String                            ' Nyelv
 
@@ -490,7 +528,6 @@ Public Class MainWindow
         ' Értékek kinyerése a WMI-ből
         For Each Me.objMgmt In objOS.Get
             OSName = objMgmt("Caption")
-            OSBuild = objMgmt("BuildNumber")
             OSService = objMgmt("ServicePackMajorVersion")
             If OSMajorVersion > 5 Then
                 OSLanguage = objMgmt("MUILanguages")
@@ -504,15 +541,15 @@ Public Class MainWindow
             Value_OSName.Text = RemoveSpaces(OSName) + ", " + Str_Serv + " " + OSService.ToString
         End If
 
-        Value_OSRelease.Text = OSRelase.ToString + "-bit"
-        Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString + "." + OSBuild.ToString
+        Value_OSRelease.Text = OSRelease.ToString + "-bit"
+        Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString + "." + OSBuildVersion.ToString
 
         If OSMajorVersion > 5 Then
             Value_OSLang.Enabled = True
             Value_OSLang.Text = OSLanguage(0)
         Else
             Value_OSLang.Enabled = False
-            Value_OSLang.Text = Str_None
+            Value_OSLang.Text = Str_Unknown
         End If
 
 
@@ -604,8 +641,8 @@ Public Class MainWindow
 
             ' Windows XP alatt nem támogatott néhány érték lekérdezése
             If OSMajorVersion >= 6 Then
-                SerialNumber = RemoveSpaces(objMgmt("SerialNumber"))
-                Firmware = RemoveSpaces(objMgmt("FirmwareRevision"))
+                SerialNumber = objMgmt("SerialNumber")
+                Firmware = objMgmt("FirmwareRevision")
             Else
                 SerialNumber = Nothing
                 Firmware = Nothing
@@ -616,7 +653,16 @@ Public Class MainWindow
         If OSMajorVersion < 6 Then
             SerialNumber = Nothing
         ElseIf OSMajorVersion = 6 And OSMinorVersion <= 1 And SerialNumber <> Nothing Then
-            SerialNumber = RemoveSpaces(DiskSerialNumberConv(SerialNumber))
+            SerialNumber = DiskSerialNumberConv(SerialNumber)
+        End If
+
+        ' Érvénytelen karakterek eltávolítása
+        If SerialNumber <> Nothing Then
+            SerialNumber = RemoveInvalidChars(SerialNumber)
+        End If
+
+        If Firmware <> Nothing Then
+            Firmware = RemoveInvalidChars(Firmware)
         End If
 
         ' Kapacitás konvertálása 
@@ -634,24 +680,24 @@ Public Class MainWindow
         ' Kiírások formázása
         If SerialNumber = Nothing Then
             Value_DiskSerial.Enabled = False
-            Value_DiskSerial.Text = Str_Unknown
+            Value_DiskSerial.Text = Str_NotAvailable
         Else
             Value_DiskSerial.Enabled = True
-            Value_DiskSerial.Text = SerialNumber
+            Value_DiskSerial.Text = RemoveSpaces(SerialNumber)
         End If
 
         If Firmware = Nothing Then
             Value_DiskFirmware.Enabled = False
-            Value_DiskFirmware.Text = Str_Unknown
+            Value_DiskFirmware.Text = Str_NotAvailable
         Else
             Value_DiskFirmware.Enabled = True
-            Value_DiskFirmware.Text = Firmware
+            Value_DiskFirmware.Text = RemoveSpaces(Firmware)
         End If
 
         If Connector = "IDE" Then
             Value_DiskInterface.Text = "IDE / SATA"
         ElseIf Connector = "SCSI" Then
-            Value_DiskInterface.Text = "SCSI / SAS"
+            Value_DiskInterface.Text = "SCSI / SAS (RAID)"
         Else
             Value_DiskInterface.Text = Connector
         End If
@@ -688,7 +734,7 @@ Public Class MainWindow
         ' Partíció információk lekérdezése
         If PartNum = 0 Then
             ComboBox_PartList.Enabled = False
-            ComboBox_PartList.Items.Add(Str_Unknown)
+            ComboBox_PartList.Items.Add(Str_NotAvailable)
         Else
             ComboBox_PartList.Enabled = True
             For PartCount = 0 To PartNum - 1
@@ -764,7 +810,7 @@ Public Class MainWindow
         ' Nulla bájtos memória korrekció -> Ismeretlen!
         If VideoMemory = 0 Then
             Value_VideoMemory.Enabled = False
-            Value_VideoMemory.Text = Str_Unknown
+            Value_VideoMemory.Text = Str_NotAvailable
         Else
             ' Memóriaérték formázása
             Dim VideoMemoryConv(2) As Double
@@ -829,8 +875,8 @@ Public Class MainWindow
     Private Function RemoveSpaces(ByVal RawString As String)
 
         ' Értékek definiálása
-        Dim Str2Char() As Char          ' Sztring-karakter konverzió tömbje
-        Dim StrTemp As String = Nothing ' Ideiglenes sztring az elemzéshez
+        Dim Str2Char() As Char             ' Sztring-karakter konverzió tömbje
+        Dim TempString As String = Nothing ' Ideiglenes sztring az elemzéshez
 
         ' Dupla szóközök eltávolítása
         While (InStr(RawString, "  "))
@@ -846,24 +892,24 @@ Public Class MainWindow
             ' Kezdőszóköz eltávolítása
             If Str2Char(0) = " " Then
                 For i As Int32 = 1 To UBound(Str2Char)
-                    StrTemp += Str2Char(i)
+                    TempString += Str2Char(i)
                 Next
-                RawString = StrTemp
+                RawString = TempString
             End If
 
             ' Zárószóköz eltávolítása
             If Str2Char(UBound(Str2Char)) = " " And RawString <> Nothing Then
 
                 ' Ideiglenes sztring kiürítése
-                StrTemp = Nothing
+                TempString = Nothing
 
                 ' Karaktertömbre bontás (újra)
                 Str2Char = RawString.ToCharArray()
 
                 For i As Int32 = 0 To (UBound(Str2Char) - 1)
-                    StrTemp += Str2Char(i)
+                    TempString += Str2Char(i)
                 Next
-                RawString = StrTemp
+                RawString = TempString
             End If
 
         End If
@@ -963,6 +1009,34 @@ Public Class MainWindow
 
         ' Visszatérési érték beállítása
         Return Converted
+
+    End Function
+
+    ' *** FÜGGVÉNY: Nem elfogadhatóü karakterek eltávolítása ***
+    ' Bemenet: RawString -> Formázandó sztring (String)
+    ' Kimenet: RawString -> Formázott érték (String)
+    Private Function RemoveInvalidChars(ByVal RawString As String)
+
+        ' Értékek definiálása
+        Dim Str2Char() As Char             ' Sztring-karakter konverzió tömbje
+        Dim TempString As String = Nothing ' Ideiglenes sztring az összefűzéshez
+
+        ' Bemeneti érték formázása
+        If RawString <> Nothing Then
+
+            ' Karaktertömbre bontás
+            Str2Char = RawString.ToCharArray()
+
+            ' Elemzés: az ismert és elfogadható karakterek kivételével minden egyéb eltávolítása
+            For i As Int32 = 0 To UBound(Str2Char)
+                TempString += Regex.Replace(Str2Char(i), "[^a-zA-Z0-9 \(\)\[\]\\/\-_~\*?$#&'%+=!|<>{},.:;@]", "")
+            Next
+
+            RawString = TempString
+        End If
+
+        ' Visszatérési érték beállítása
+        Return RawString
 
     End Function
 
@@ -1282,6 +1356,30 @@ Public Class MainWindow
 
     End Function
 
+    ' *** FÜGGVÉNY: Hardver lista újratöltése ***
+    ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
+    ' Kimenet: Boolean (False)
+    Private Function UpdateHWList(ByVal ResetFlag As Boolean)
+
+        ' Lista kiürítése
+        ComboBox_HWList.Items.Clear()
+
+        ' Lista feltöltése
+        ComboBox_HWList.Items.AddRange(New Object() {Str_Motherboard, Str_System, Str_BIOS, Str_Battery})
+
+        ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
+        If ResetFlag Then
+            SelectedHardware = 0
+        End If
+
+        ' Utoljára kiválasztott érték beállítása
+        ComboBox_HWList.SelectedIndex = SelectedHardware
+
+        ' Visszatérési érték beállítása
+        Return False
+
+    End Function
+
     ' *** FÜGGVÉNY: Processzor lista újratöltése ***
     ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
     ' Kimenet: Boolean (False)
@@ -1291,17 +1389,17 @@ Public Class MainWindow
         ComboBox_CPUList.Items.Clear()
 
         ' WMI lekérdezés: Win32_Processor -> Processzor információk
-        objPR = New ManagementObjectSearcher("SELECT Name, AddressWidth FROM Win32_Processor")
+        objPR = New ManagementObjectSearcher("SELECT Name, DataWidth FROM Win32_Processor")
 
         ' Értékek definiálása
         Dim CPUCount As Int32 = 0                               ' Processzor sorszáma
         Dim CPUString(32) As String                             ' Processzor neve
-        Dim CPUAddressWidth As Int32 = 0                        ' Processzor címbusz szélessége
+        Dim CPUDataWidth As Int32 = 0                           ' Processzor adatbusz szélessége
 
         ' Értékek beállítása
         For Each Me.objMgmt In objPR.Get
             CPUString(CPUCount) = objMgmt("Name")
-            CPUAddressWidth = ToInt32(objMgmt("AddressWidth"))
+            CPUDataWidth = objMgmt("DataWidth")
             CPUCount += 1
         Next
 
@@ -1313,7 +1411,7 @@ Public Class MainWindow
                 CPUString(i) = Replace(CPUString(i), "CPU", "")
             End While
 
-            CPUName(i) = ComboBox_CPUList.Items.Add("CPU #" + i.ToString + " - " + RemoveSpaces(CPUString(i)))
+            CPUName(i) = ComboBox_CPUList.Items.Add("CPU #" + i.ToString + " - " + RemoveSpaces(CPUString(i)) + " (" + CPUDataWidth.ToString + "-bit)")
         Next
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
@@ -1323,9 +1421,6 @@ Public Class MainWindow
 
         ' Utoljára kiválasztott érték beállítása
         ComboBox_CPUList.SelectedIndex = SelectedCPU
-
-        ' OS kiadás korrekció
-        OSRelase = CPUAddressWidth
 
         ' Visszatérési érték beállítása
         Return False
@@ -2064,6 +2159,9 @@ Public Class MainWindow
                 Str_Motherboard = "Motherboard"
                 Str_System = "Computer"
                 Str_BIOS = "BIOS"
+                Str_Battery = "Battery"
+                Str_Serial = "Serial number"
+                Str_Volt = "Nominal voltage"
                 Str_Serv = "Service Pack"
                 Str_Interface = "Interface"
                 Str_ChartTime = "Chart created on"
@@ -2071,7 +2169,6 @@ Public Class MainWindow
                 Str_Update = "Update"
                 Str_Current = "Current"
                 Str_Peak = "Peak"
-                Str_None = "None"
                 Str_DayName = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
                 Str_MonthName = {"January", "February", "March", "April", "May", "June", "July",
                                  "August", "September", "October", "November", "December"}
@@ -2084,6 +2181,7 @@ Public Class MainWindow
                 Str_ChartCount = "seconds"
                 Str_Hostname = "Hostname"
                 Str_Uptime = "Uptime"
+                Str_Date = "Date"
                 Str_Days = "days"
                 Str_Hours = "hours"
                 Str_Mins = "minutes"
@@ -2097,7 +2195,9 @@ Public Class MainWindow
                 Str_Disk = "Disk"
                 Str_NoDisk = "No disk"
                 Str_NoName = "No name"
-                Str_Unknown = "Not available"
+                Str_NotAvailable = "Not available"
+                Str_Unknown = "Unknown"
+                Str_None = "None"
                 Str_Invalid = "Invalid"
                 Str_Inactive = "Inactive"
                 Str_Close = "Close"
@@ -2206,6 +2306,9 @@ Public Class MainWindow
                 Str_Motherboard = "Alaplap"
                 Str_System = "Számítógép"
                 Str_BIOS = "BIOS"
+                Str_Battery = "Akkumulátor"
+                Str_Serial = "Sorozatszám"
+                Str_Volt = "Névleges feszültség"
                 Str_Serv = "Szervizcsomag"
                 Str_Interface = "Interfész"
                 Str_ChartTime = "Diagram elkészítve:"
@@ -2213,7 +2316,6 @@ Public Class MainWindow
                 Str_Update = "Frissítés"
                 Str_Current = "Jelenlegi"
                 Str_Peak = "Csúcs"
-                Str_None = "Nincs"
                 Str_DayName = {"vasárnap", "hétfő", "kedd", "szerda", "csütörtök", "péntek", "szombat"}
                 Str_MonthName = {"január", "február", "március", "április", "május", "június", "július",
                                  "augusztus", "szeptember", "október", "november", "december"}
@@ -2226,6 +2328,7 @@ Public Class MainWindow
                 Str_ChartCount = "másodperc múlva"
                 Str_Hostname = "Hosztnév"
                 Str_Uptime = "Futási idő"
+                Str_Date = "Dátum"
                 Str_Days = "nap"
                 Str_Hours = "óra"
                 Str_Mins = "perc"
@@ -2239,7 +2342,9 @@ Public Class MainWindow
                 Str_Disk = "Lemez"
                 Str_NoDisk = "Nincs lemez"
                 Str_NoName = "Névtelen"
-                Str_Unknown = "Nem elérhető"
+                Str_NotAvailable = "Nem elérhető"
+                Str_Unknown = "Ismeretlen"
+                Str_None = "Nincs"
                 Str_Invalid = "Érvénytelen"
                 Str_Inactive = "Inaktív"
                 Str_Close = "Bezárás"
@@ -2385,20 +2490,20 @@ Public Class MainWindow
         StatusLabel_TopMost.ToolTipText = Tip_TopMost
         ScreenshotToolStripMenuItem.ToolTipText = Tip_Screenshot
 
-        ' ComboBox elemek
-        ComboBox_HWList.Items.Clear()
-        ComboBox_HWList.Items.AddRange(New Object() {Str_Motherboard, Str_System, Str_BIOS})
-        If MainWindowDone Then
-            ComboBox_HWList.SelectedIndex = SelectedHardware
-        End If
+        ' Hardver és OS információk frissítése (Minden esetben!)
+        SetHWInformation()
+        SetOSInformation()
 
-        ' Lemez és videokártya információk újbóli lekérdezése a kiválasztott lemezhez (A nyelvi formázások miatt fontos!)
+        ' Lemez és videokártya információk frissítése (Csak újratöltés, mivel listaelemtől függenek!)
         If MainWindowDone Then
-            SetOSInformation()
             SetDiskInformation()
             SetVideoInformation()
         End If
 
+        ' Hardverlista frissítése
+        UpdateHWList(False)
+
+        ' Lemezilista frissítése
         UpdateDiskList(False)
 
         ' Diagram frissítése
@@ -2431,18 +2536,18 @@ Public Class MainWindow
         ' Komponensek kiírásának beállítása
         If HWVendor(SelectedHardware) = Nothing Then
             Value_HWVendor.Enabled = False
-            Value_HWVendor.Text = Str_Unknown
+            Value_HWVendor.Text = Str_NotAvailable
         Else
             Value_HWVendor.Enabled = True
-            Value_HWVendor.Text = RemoveSpaces(HWVendor(SelectedHardware))
+            Value_HWVendor.Text = HWVendor(SelectedHardware)
         End If
 
         If HWIdentifier(SelectedHardware) = Nothing Then
             Value_HWIdentifier.Enabled = False
-            Value_HWIdentifier.Text = Str_Unknown
+            Value_HWIdentifier.Text = Str_NotAvailable
         Else
             Value_HWIdentifier.Enabled = True
-            Value_HWIdentifier.Text = RemoveSpaces(HWIdentifier(SelectedHardware))
+            Value_HWIdentifier.Text = HWIdentifier(SelectedHardware)
         End If
 
     End Sub
@@ -2497,7 +2602,7 @@ Public Class MainWindow
         ' Partícióinformációk kiírása
         If PartInfo(SelectedPartition) = Nothing Then
             Value_PartInfo.Enabled = False
-            Value_PartInfo.Text = Str_Unknown
+            Value_PartInfo.Text = Str_NotAvailable
         Else
             Value_PartInfo.Enabled = True
             Value_PartInfo.Text = PartInfo(SelectedPartition)
@@ -2630,9 +2735,6 @@ Public Class MainWindow
             RegPath.SetValue("DisableLoadSplash", ToInt32(CheckedSplashDisable), RegistryValueKind.DWord)
             RegPath.SetValue("SelectedLanguage", SelectedLanguage, RegistryValueKind.DWord)
             RegPath.SetValue("SelectedRefreshIndex", SelectedRefresh, RegistryValueKind.DWord)
-            RegPath.SetValue("SelectedInterface", SelectedInterface, RegistryValueKind.DWord)
-            RegPath.SetValue("ChartVisibleDownload", ToInt32(CheckedDownChart), RegistryValueKind.DWord)
-            RegPath.SetValue("ChartVisibleUpload", ToInt32(CheckedUpChart), RegistryValueKind.DWord)
             RegPath.SetValue("EnableTopMost", ToInt32(CheckedTopMost), RegistryValueKind.DWord)
             RegPath.SetValue("DisableExitConfirmation", ToInt32(CheckedNoQuitAsk), RegistryValueKind.DWord)
             RegPath.SetValue("MinimizeToTaskbar", ToInt32(CheckedMinToTray), RegistryValueKind.DWord)
