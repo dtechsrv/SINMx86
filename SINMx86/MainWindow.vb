@@ -355,10 +355,10 @@ Public Class MainWindow
         Dim Model As String = Nothing                       ' Modell
         Dim Identifier As String = Nothing                  ' Azonosító
 
-        ' *** WMI LEKÉRDEZÉS: Win32_Baseboard -> Alaplap információi ***
+        ' *** WMI LEKÉRDEZÉS: Win32_Baseboard -> Alaplap információ ***
         objBB = New ManagementObjectSearcher("SELECT Manufacturer, Product, SerialNumber FROM Win32_Baseboard")
 
-        ' Értékek beállítása
+        ' Értékek beállítása -> Alaplap: gyártó, modell, sorozatszám
         For Each Me.objMgmt In objBB.Get
             Vendor = objMgmt("Manufacturer")
             Model = objMgmt("Product")
@@ -383,10 +383,19 @@ Public Class MainWindow
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
         objCS = New ManagementObjectSearcher("SELECT Manufacturer, Model FROM Win32_ComputerSystem")
 
-        ' Értékek beállítása
+        ' Értékek beállítása -> Számítógép: gyártó, modell
         For Each Me.objMgmt In objCS.Get
             Vendor = objMgmt("Manufacturer")
             Model = objMgmt("Model")
+        Next
+
+        ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> BIOS információk ***
+        ' Megjegyzés: A rendszer sorozatszáma is itt van tárolva!
+        objBS = New ManagementObjectSearcher("SELECT SerialNumber, Manufacturer, SMBIOSBIOSVersion, ReleaseDate FROM Win32_BIOS")
+
+        ' Értékek beállítása -> Számítógép: sorozatszám
+        For Each Me.objMgmt In objBS.Get
+            Identifier = objMgmt("SerialNumber")
         Next
 
         ' Értéktároló tömb frissítése -> Számítógép
@@ -399,13 +408,14 @@ Public Class MainWindow
         If RemoveSpaces(Model) = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
             HWIdentifier(1) = Nothing
         Else
-            HWIdentifier(1) = RemoveSpaces(RemoveInvalidChars(Model))
+            If RemoveSpaces(Identifier) = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "System Serial Number" Then
+                HWIdentifier(1) = RemoveSpaces(RemoveInvalidChars(Model))
+            Else
+                HWIdentifier(1) = RemoveSpaces(RemoveInvalidChars(Model)) + " (" + Str_Serial + ": " + RemoveSpaces(RemoveInvalidChars(Identifier)) + ")"
+            End If
         End If
 
-        ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> BIOS információi ***
-        objBS = New ManagementObjectSearcher("SELECT Manufacturer, SMBIOSBIOSVersion, ReleaseDate FROM Win32_BIOS")
-
-        ' Értékek beállítása
+        ' Értékek beállítása -> BIOS: gyártó, verziószám, dátum
         For Each Me.objMgmt In objBS.Get
             Vendor = objMgmt("Manufacturer")
             Model = objMgmt("SMBIOSBIOSVersion")
@@ -431,10 +441,12 @@ Public Class MainWindow
         Dim BattCount As Int32 = 0                          ' Akkumulátorok száma
         Dim BattVolt As Int32 = 0                           ' Akkumulátor névleges feszültsége
 
+        ' Akkumulátorok számának meghatározása
         For Each Me.objMgmt In objBT.Get
             BattCount += 1
         Next
 
+        ' Értékek beállítása -> Akkumulátor: név, azonosító, feszültség
         If BattCount = 0 Then
             HWVendor(3) = Nothing
             HWIdentifier(3) = Nothing
@@ -1509,14 +1521,14 @@ Public Class MainWindow
         ComboBox_VideoList.Items.Clear()
 
         ' WMI lekérdezés: Win32_DiskDrive -> Lemezmeghajtók
-        objVC = New ManagementObjectSearcher("SELECT Caption FROM Win32_VideoController")
+        objVC = New ManagementObjectSearcher("SELECT Name FROM Win32_VideoController")
 
         ' Értékek definiálása
         Dim VideoCount As Int32 = 0                             ' Kártya sorszáma
 
         ' Értékek beállítása
         For Each Me.objMgmt In objVC.Get
-            VideoName(VideoCount) = ComboBox_VideoList.Items.Add(objMgmt("Caption").ToString)
+            VideoName(VideoCount) = ComboBox_VideoList.Items.Add(RemoveSpaces(objMgmt("Name")))
             VideoCount += 1
         Next
 
@@ -2943,12 +2955,16 @@ Public Class MainWindow
     ' Eseményvezérelt: MainNotifyIcon.BalloonTipClicked -> Klikk (Taskbar ikon buboréküzenet)
     Private Sub MainNotifyIcon_BalloonTipClicked(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainNotifyIcon.BalloonTipClicked
 
-        ' Kép megnyitása, a buboréközenet fájl mentésére vonatkozik
+        ' Kép megnyitása, a buboréközenet fájl mentésére vonatkozik (egyébként a főablak előtérbe hozása)
         If OpenFile Then
             Process.Start(SavePath)
 
             ' Buboréküzenet állapot visszaállítása
             OpenFile = False
+        Else
+            ' Főablak előtérbe hozása
+            Me.Visible = True
+            Me.WindowState = FormWindowState.Normal
         End If
 
     End Sub
