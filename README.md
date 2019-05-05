@@ -1,4 +1,4 @@
-# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
+﻿# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
 ### System Information and Network Monitor
 
 A simple system information and real-time network monitoring utility.\
@@ -17,9 +17,29 @@ __License:__ GNU General Public License v2.0.
 
 ## Screenshot
 
-![](Screenshots/SINMx86_MainWindow.png)
+![](Screenshots/SINMx86_MainWindow_Win7.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__ 2019-05-05 - Version 2.5.0 / Build 4980 Release Candidate__
+
+- Komponenslista az alaplap információi helyett (számítógép és BIOS is),
+- Szövegkiírások pozíciójának egységesítése, diagram méretének növelése,
+- Diagram leképezés javítása a referenciaértékekhez (dinamikus képméret korrekció),
+- Felesleges sztring -> sztring korrekciók eltávolítása,
+- Lemezek nevének rövidítése (SCSI/ATA/USB jelölések eltávolítása),
+- ISATAP adapterek kihagyása az interfészlistából,
+- Szring formázó függvény javítása (üres sztring és kezdőszóköz eltávolítás javítva),
+- SMART állapot eltávolítása (a WMI által adott információk sok esetben irrelevánsak),
+- Külön mező helyett a lemez indexek feltüntetése a lemezlistában,
+- Partíciós lista és kötetinformációk megjelenítése az adott lemeznél,
+- Reset címke beállítása a listafrissítő függvényeknél,
+- Névkorrekció helyett a hálózati kártya nevek kinyerése a PnP azonosítóból,
+- Operációs rendszer információk kiírásának átalakítása,
+- Akkumulátor információk hozzáadása a hardverlistához,
+- Érvénytelen karakterek szűrésének hozzáadása,
+- Windows XP UInt32 visszaállítása a forgalom lekérdezésénél (NT6 felett Uint64),
+- Hálózati kártya nélküli gépek lekezelése.
 
 __2019-04-09 - Version 2.3.2 / Build 4725 (stable)__
 

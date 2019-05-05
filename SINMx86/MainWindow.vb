@@ -53,6 +53,7 @@ Public Class MainWindow
     Public CPUName(32) As String                                            ' Processzorok nevei (kiírásokhoz)
     Public InterfaceList(32) As String                                      ' Interfészlista tömbje (lekérdezésekhez)
     Public InterfaceName(32) As String                                      ' Interfészek formázott neve (kiírásokhoz)
+    Public InterfacePresent As Boolean                                      ' Interfészek ellenőrzése (Ha nincs egy sem, akkor hamis!)
     Public DiskList(32) As String                                           ' Meghajtóindexek tömbje (lekérdezésekhez)
     Public DiskName(32) As String                                           ' Meghajtók neve (kiírásokhoz)
     Public PartLabel(32) As String                                          ' Partíció betűjele (kiírásokhoz)
@@ -63,7 +64,7 @@ Public Class MainWindow
     Public GridSlip As Int32                                                ' Függőleges rács eltolás
     Public GridUpdate As Boolean = False                                    ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
     Public TimerSeconds, UptimeSeconds As Int32                             ' Időértékek: időzítő, futásidő
-    Public LatestDownload, LatestUpload As Int64                            ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
+    Public LatestDownload, LatestUpload As Double                           ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
     Public ChartCreationTime As DateTime                                    ' Az utolsó diagram elkészülésének ideje
     Public DisableBalloon As Boolean = False                                ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
     Public OpenFile As Boolean = False                                      ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
@@ -72,7 +73,7 @@ Public Class MainWindow
     Public MainWindowDone As Boolean = False                                ' A főablak betöltődésének indikátora, néhány szükséges lekérdezés csak ezután történhet meg!
 
     ' Forgalmi diagramok (2-vel több eleműnek kell lennie, mint a kijelzett érték!)
-    Public TraffDownArray(TraffResolution + 2), TraffUpArray(TraffResolution + 2) As Int64
+    Public TraffDownArray(TraffResolution + 2), TraffUpArray(TraffResolution + 2) As Double
 
     ' *** FŐ ELJÁRÁS: Főablak betöltése (MyBase.Load -> MainWindow) ***
     ' Eseményvezérelt: Indítás
@@ -237,7 +238,9 @@ Public Class MainWindow
         UpdateVideoList(True)
 
         ' Checkbox és menüelemek állapotának beállítása
+        MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
+        CheckBoxChart_DownloadVisible.Checked = CheckedDownChart
         CheckBoxChart_UploadVisible.Checked = CheckedUpChart
 
         ' *** REGISTRY ELEMZÉS: Állandó láthatóság ellenőrzése ***
@@ -804,7 +807,7 @@ Public Class MainWindow
         objVC = New ManagementObjectSearcher("SELECT AdapterRAM, CurrentHorizontalResolution, CurrentVerticalResolution, CurrentBitsPerPixel FROM Win32_VideoController")
 
         ' Értékek definiálása
-        Dim VideoMemory As Int64                                ' Video memória
+        Dim VideoMemory As Double                               ' Video memória
         Dim VideoResolution(3) As Int32                         ' Képernyőfelbontás
         Dim VideoCount As Int32 = 0                             ' Videokártya sorszáma
 
@@ -1216,41 +1219,70 @@ Public Class MainWindow
         ' Értékek definiálása
         Dim MaxBandwidth(2) As Double                           ' Maximális sávszélesség (érték, prefixum sorszáma)
         Dim MaxRelativeSpeed As Double                          ' Legnagyobb felvehető sebesség érték
-        Dim CurrentDownload, CurrentUpload As Int64             ' Jelenlegi le- és feltöltött bájtok száma
+        Dim CurrentDownload, CurrentUpload As Double            ' Jelenlegi le- és feltöltött bájtok száma
         Dim DownloadSpeed(2), UploadSpeed(2) As Double          ' Jelenlegi sebesség értékek (2 dimenziós: érték, prefixum sorszáma)
         Dim CurrentUsage As Int32                               ' Jelenlegi kihasználtság
         Dim UsageValue As Double                                ' Kihasználtsági érték
+        Dim UIntCorrection As Double                            ' Előjel nélküli integer korrekció
 
-        ' WMI érték definiálása
-        objNI = New ManagementObjectSearcher("SELECT CurrentBandwidth, BytesReceivedPersec, BytesSentPersec FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
+        ' Előjel nélküli integer korrekció -> Előjel átfordulás: NT 6.0-tól UInt64, XP-nél még UInt32 volt!
+        If OSMajorVersion < 6 Then
+            UIntCorrection = 2 ^ 31
+        Else
+            UIntCorrection = 2 ^ 63
+        End If
 
-        ' Lekérdezett értékek feldolgozása
-        For Each Me.objMgmt In objNI.Get
+        ' Interfész jelenlétének ellenőrzése
+        If InterfacePresent Then
 
-            ' Maximálisan felvehető sebességérték (Sávszélesség / 8)
-            If objMgmt("CurrentBandwidth") <> 0 Then
-                MaxRelativeSpeed = objMgmt("CurrentBandwidth") / 8
-            Else
-                MaxRelativeSpeed = 1 ' Nullával való osztás elkerülésére
-            End If
+            ' WMI érték definiálása
+            objNI = New ManagementObjectSearcher("SELECT CurrentBandwidth, BytesReceivedPersec, BytesSentPersec FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
 
-            ' Aktuális érték az első helyre (UInt64 korrekció) -> Letöltés (NT6.0-tól, XP-nél még uint32 volt!)
-            If objMgmt("BytesReceivedPersec") > (2 ^ 63 - 1) Then
-                CurrentDownload = objMgmt("BytesReceivedPersec") - (2 ^ 63)
-            Else
-                CurrentDownload = objMgmt("BytesReceivedPersec")
-            End If
+            ' Lekérdezett értékek feldolgozása
+            For Each Me.objMgmt In objNI.Get
 
-            ' Aktuális érték az első helyre (UInt64 korrekció) -> Feltöltés (NT6.0-tól, XP-nél még uint32 volt!)
-            If objMgmt("BytesSentPersec") > (2 ^ 63 - 1) Then
-                CurrentUpload = objMgmt("BytesSentPersec") - (2 ^ 63)
-            Else
-                CurrentUpload = objMgmt("BytesSentPersec")
-            End If
-        Next
+                ' Maximálisan felvehető sebességérték (Sávszélesség / 8)
+                If objMgmt("CurrentBandwidth") <> 0 Then
+                    MaxRelativeSpeed = objMgmt("CurrentBandwidth") / 8
+                Else
+                    MaxRelativeSpeed = 1 ' Nullával való osztás elkerülésére
+                End If
+
+                ' Aktuális érték az első helyre
+                If objMgmt("BytesReceivedPersec") > (UIntCorrection - 1) Then
+                    CurrentDownload = objMgmt("BytesReceivedPersec") - (UIntCorrection)
+                Else
+                    CurrentDownload = objMgmt("BytesReceivedPersec")
+                End If
+
+                ' Aktuális érték az első helyre
+                If objMgmt("BytesSentPersec") > (UIntCorrection - 1) Then
+                    CurrentUpload = objMgmt("BytesSentPersec") - (UIntCorrection)
+                Else
+                    CurrentUpload = objMgmt("BytesSentPersec")
+                End If
+            Next
+
+            ' Sávszélesség érték konverziója
+            MaxBandwidth = DynBitConv(objMgmt("CurrentBandwidth"), 2)
+
+            ' Kiírási értékek láthatóságának beállítása
+            Value_Bandwidth.Enabled = True
+            Value_BandwidthUnit.Enabled = True
+
+        Else
+
+            ' Sávszélesség alapérték beállítása (nincs hálózati interfész)
+            MaxBandwidth = {0, 0}
+            TraffReset = True
+
+            ' Kiírási értékek láthatóságának beállítása
+            Value_Bandwidth.Enabled = False
+            Value_BandwidthUnit.Enabled = False
+
+        End If
 
         ' Sávszélesség kiírás formázása
-        MaxBandwidth = DynBitConv(objMgmt("CurrentBandwidth"), 2)
         Value_Bandwidth.Text = FixDigitSeparator(MaxBandwidth(0), 2, True)
         Value_BandwidthUnit.Text = PrefixTable(MaxBandwidth(1)) + "bps"
 
@@ -1263,6 +1295,13 @@ Public Class MainWindow
 
             ' Interfész kihasználtság nullázása
             CurrentUsage = 0
+
+            ' Kiírási értékek láthatóságának beállítása
+            Value_InterfaceUsage.Enabled = False
+            Value_DownloadSpeed.Enabled = False
+            Value_DownloadSpeedUnit.Enabled = False
+            Value_UploadSpeed.Enabled = False
+            Value_UploadSpeedUnit.Enabled = False
 
         Else
 
@@ -1279,6 +1318,13 @@ Public Class MainWindow
             ' Kihasználtsági érték kiszámítása (Mivel duplexitást nem lehet lekérdezni, ezért a kettő összege adja a kihasználtság mértékét -> Ez csak half-duplex kapcsolatnál igaz ebben a formában!)
             UsageValue = (CurrentDownload - LatestDownload) + (CurrentUpload - LatestUpload)
             CurrentUsage = Round(Abs(UsageValue / (MaxRelativeSpeed) * 100))
+
+            ' Kiírási értékek láthatóságának beállítása
+            Value_InterfaceUsage.Enabled = True
+            Value_DownloadSpeed.Enabled = True
+            Value_DownloadSpeedUnit.Enabled = True
+            Value_UploadSpeed.Enabled = True
+            Value_UploadSpeedUnit.Enabled = True
 
         End If
 
@@ -1315,8 +1361,16 @@ Public Class MainWindow
     Private Function UpdateTraffArray(ByVal TraffReset As Boolean)
 
         ' Értékek definiálása
-        Dim Download(UBound(TraffDownArray)) As Int64   ' Letöltött bájtok tömbje
-        Dim Upload(UBound(TraffUpArray)) As Int64       ' Feltöltött bájtok tömbje
+        Dim Download(UBound(TraffDownArray)) As Double  ' Letöltött bájtok tömbje
+        Dim Upload(UBound(TraffUpArray)) As Double      ' Feltöltött bájtok tömbje
+        Dim UIntCorrection As Double                    ' Előjel nélküli integer korrekció
+
+        ' Előjel nélküli integer korrekció -> Előjel átfordulás: NT 6.0-tól UInt64, XP-nél még UInt32 volt!
+        If OSMajorVersion < 6 Then
+            UIntCorrection = 2 ^ 31
+        Else
+            UIntCorrection = 2 ^ 63
+        End If
 
         ' WMI érték definiálása
         objNI = New ManagementObjectSearcher("SELECT * FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
@@ -1324,16 +1378,16 @@ Public Class MainWindow
         ' Lekérdezett értékek feldolgozása
         For Each Me.objMgmt In objNI.Get
 
-            ' Aktuális letöltési érték az első helyre (UInt64 korrekció -> NT6.0-tól, XP-nél még UInt32 volt!)
-            If objMgmt("BytesReceivedPersec") >= 2 ^ 63 Then
-                Download(0) = objMgmt("BytesReceivedPersec") - (2 ^ 63)
+            ' Aktuális letöltési érték az első helyre
+            If objMgmt("BytesReceivedPersec") >= UIntCorrection Then
+                Download(0) = objMgmt("BytesReceivedPersec") - UIntCorrection
             Else
                 Download(0) = objMgmt("BytesReceivedPersec")
             End If
 
-            ' Aktuális feltöltési érték az első helyre (UInt64 korrekció -> NT6.0-tól, XP-nél még UInt32 volt!)
-            If objMgmt("BytesSentPersec") >= 2 ^ 63 Then
-                Upload(0) = objMgmt("BytesSentPersec") - (2 ^ 63)
+            ' Aktuális feltöltési érték az első helyre
+            If objMgmt("BytesSentPersec") >= UIntCorrection Then
+                Upload(0) = objMgmt("BytesSentPersec") - UIntCorrection
             Else
                 Upload(0) = objMgmt("BytesSentPersec")
             End If
@@ -1585,7 +1639,7 @@ Public Class MainWindow
         ' Számláló beállítása
         Dim InterfaceCount As Int32 = 0                         ' Interfészek sorszáma
 
-        ' Interfészlista feltöltése (isatap adapterek higahyása a listából)
+        ' Interfészlista feltöltése (isatap adapterek kihagyása a listából)
         For Each Me.objMgmt In objNI.Get
             If InStr(objMgmt("Name"), "isatap") = False Then
                 InterfaceList(InterfaceCount) = objMgmt("Name")
@@ -1605,6 +1659,19 @@ Public Class MainWindow
                 InterfaceCount += 1
             End If
         Next
+
+        ' Interfész jelenlét ellenőrzése
+        If InterfaceCount = 0 Then
+            InterfacePresent = False
+            ComboBox_InterfaceList.Enabled = False
+
+            ' Hamis listaelem hozzáadása
+            ComboBox_InterfaceList.Items.Add(Str_NotAvailable)
+            InterfaceName(0) = Str_NotAvailable
+        Else
+            InterfacePresent = True
+            ComboBox_InterfaceList.Enabled = True
+        End If
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
         If ResetFlag Then
@@ -1723,7 +1790,7 @@ Public Class MainWindow
         Dim TraffDigit As Int32 = 2                                 ' Forgalmi értékek tizedesvessző utáni helyiértékeinek száma
 
         ' Rács időbeli csúszásának megállapítása (Reset-nél visszaállít, egyébként göngyölítve hoizzáadódik)
-        If TraffReset Then
+        If TraffReset Or InterfacePresent = False Then
 
             ' Rácscsúszás alaphelyzetbe állítása
             GridSlip = 0
@@ -1835,7 +1902,7 @@ Public Class MainWindow
         End If
 
         ' Feltöltési segédegyenes megrajzolása
-        If CheckedUpChart Then
+        If CheckedUpChart And InterfacePresent Then
             For Vertical As Int32 = 0 To LineCuts ' Kétszer akkora területre kell kirajzolni, ha mozog!
 
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
@@ -1878,7 +1945,7 @@ Public Class MainWindow
         End If
 
         ' Letöltési segédegyenes megrajzolása
-        If CheckedDownChart Then
+        If CheckedDownChart And InterfacePresent Then
             For Vertical As Int32 = 0 To LineCuts ' Kétszer akkora területre kell kirajzolni, ha mozog!
 
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
@@ -2043,7 +2110,7 @@ Public Class MainWindow
         ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
         DownCurrentConv = DynByteConv(ChartDownNumbers(0), TraffDigit)
 
-        If CheckedDownChart Then
+        If CheckedDownChart And InterfacePresent Then
             Chart.DrawString(Str_Current + ": " + FixDigitSeparator(DownCurrentConv(0), TraffDigit, True) + " " +
                              PrefixTable(DownCurrentConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
             Chart.DrawString(Str_Peak + ": " + FixDigitSeparator(DownPeakConv(0), TraffDigit, True) + " " +
@@ -2070,7 +2137,7 @@ Public Class MainWindow
         ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
         UpCurrentConv = DynByteConv(ChartUpNumbers(0), TraffDigit)
 
-        If CheckedUpChart Then
+        If CheckedUpChart And InterfacePresent Then
             Chart.DrawString(Str_Current + ": " + FixDigitSeparator(UpCurrentConv(0), TraffDigit, True) + " " +
                              PrefixTable(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(0), TextOffset(1))
             Chart.DrawString(Str_Peak + ": " + FixDigitSeparator(UpPeakConv(0), TraffDigit, True) + " " +
@@ -2132,15 +2199,15 @@ Public Class MainWindow
         UpdateSpeedStatistics(False)
 
         ' Diagramgenerálás időközének beálltása és kiírása az állapotsorban
-        If TraffGenCounter <> 0 Then
-            StatusLabel_ChartStatus.Text = Str_ChartRedraw + " " + TraffGenCounter.ToString + " " + Str_ChartCount + "..."
-            StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
-            TraffGenCounter = TraffGenCounter - 1
-        Else
+        If TraffGenCounter = 0 Then
             TraffRefresh()
             TraffGenCounter = RefreshInterval(SelectedRefresh) - 1
             StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
             StatusLabel_ChartStatus.Text = Str_ChartDone + " " + (TraffGenCounter + 1).ToString + " " + Str_ChartCount + "..."
+        Else
+            StatusLabel_ChartStatus.Text = Str_ChartRedraw + " " + TraffGenCounter.ToString + " " + Str_ChartCount + "..."
+            StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
+            TraffGenCounter = TraffGenCounter - 1
         End If
 
     End Sub
@@ -2517,6 +2584,14 @@ Public Class MainWindow
 
         ' Lemezilista frissítése
         UpdateDiskList(False)
+
+        ' Hamis listaelem hozzáadása, ha nincs jelen interfész
+        If InterfacePresent = False Then
+            ComboBox_InterfaceList.Items.Clear()
+            InterfaceName(0) = Str_NotAvailable
+            ComboBox_InterfaceList.Items.Add(InterfaceName(0))
+            ComboBox_InterfaceList.SelectedIndex = 0
+        End If
 
         ' Diagram frissítése
         MakeChart(False)
