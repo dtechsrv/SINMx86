@@ -1,4 +1,4 @@
-﻿# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
+# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
 ### System Information and Network Monitor
 
 A simple system information and real-time network monitoring utility.\
@@ -21,7 +21,7 @@ __License:__ GNU General Public License v2.0.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__ 2019-05-05 - Version 2.5.0 / Build 4980 Release Candidate__
+__2019-05-05 - Version 2.5.0 / Build 4980 Release Candidate__
 
 - Komponenslista az alaplap információi helyett (számítógép és BIOS is),
 - Szövegkiírások pozíciójának egységesítése, diagram méretének növelése,
