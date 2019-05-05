@@ -40,7 +40,6 @@ Partial Class MainWindow
         Me.Value_OSName = New System.Windows.Forms.Label()
         Me.Name_OSName = New System.Windows.Forms.Label()
         Me.GroupBox_CPUInfo = New System.Windows.Forms.GroupBox()
-        Me.Button_CPUListReload = New System.Windows.Forms.Button()
         Me.Value_CPUMaxClock = New System.Windows.Forms.Label()
         Me.Name_CPUMaxClock = New System.Windows.Forms.Label()
         Me.Value_CPUCore = New System.Windows.Forms.Label()
@@ -331,7 +330,6 @@ Partial Class MainWindow
         '
         'GroupBox_CPUInfo
         '
-        Me.GroupBox_CPUInfo.Controls.Add(Me.Button_CPUListReload)
         Me.GroupBox_CPUInfo.Controls.Add(Me.ComboBox_CPUList)
         Me.GroupBox_CPUInfo.Controls.Add(Me.Value_CPUMaxClock)
         Me.GroupBox_CPUInfo.Controls.Add(Me.Name_CPUMaxClock)
@@ -348,23 +346,13 @@ Partial Class MainWindow
         Me.GroupBox_CPUInfo.TabStop = False
         Me.GroupBox_CPUInfo.Text = "Processor information"
         '
-        'Button_CPUListReload
-        '
-        Me.Button_CPUListReload.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_CPUListReload.Image = Global.SINMx86.My.Resources.Resources.Control_Refresh
-        Me.Button_CPUListReload.Location = New System.Drawing.Point(414, 21)
-        Me.Button_CPUListReload.Name = "Button_CPUListReload"
-        Me.Button_CPUListReload.Size = New System.Drawing.Size(23, 23)
-        Me.Button_CPUListReload.TabIndex = 2
-        Me.Button_CPUListReload.UseVisualStyleBackColor = True
-        '
         'Value_CPUMaxClock
         '
         Me.Value_CPUMaxClock.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_CPUMaxClock.Location = New System.Drawing.Point(376, 48)
         Me.Value_CPUMaxClock.Name = "Value_CPUMaxClock"
         Me.Value_CPUMaxClock.Size = New System.Drawing.Size(61, 13)
-        Me.Value_CPUMaxClock.TabIndex = 8
+        Me.Value_CPUMaxClock.TabIndex = 7
         Me.Value_CPUMaxClock.Text = "9999 MHz"
         Me.Value_CPUMaxClock.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -376,7 +364,7 @@ Partial Class MainWindow
         Me.Name_CPUMaxClock.Location = New System.Drawing.Point(318, 48)
         Me.Name_CPUMaxClock.Name = "Name_CPUMaxClock"
         Me.Name_CPUMaxClock.Size = New System.Drawing.Size(48, 13)
-        Me.Name_CPUMaxClock.TabIndex = 7
+        Me.Name_CPUMaxClock.TabIndex = 6
         Me.Name_CPUMaxClock.Text = "Native:"
         '
         'Value_CPUCore
@@ -385,7 +373,7 @@ Partial Class MainWindow
         Me.Value_CPUCore.Location = New System.Drawing.Point(124, 48)
         Me.Value_CPUCore.Name = "Value_CPUCore"
         Me.Value_CPUCore.Size = New System.Drawing.Size(69, 13)
-        Me.Value_CPUCore.TabIndex = 4
+        Me.Value_CPUCore.TabIndex = 3
         Me.Value_CPUCore.Text = "99 / 99"
         Me.Value_CPUCore.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -397,7 +385,7 @@ Partial Class MainWindow
         Me.Name_CPUCore.Location = New System.Drawing.Point(15, 48)
         Me.Name_CPUCore.Name = "Name_CPUCore"
         Me.Name_CPUCore.Size = New System.Drawing.Size(103, 13)
-        Me.Name_CPUCore.TabIndex = 3
+        Me.Name_CPUCore.TabIndex = 2
         Me.Name_CPUCore.Text = "Cores / Threads:"
         '
         'Value_CPUClock
@@ -406,7 +394,7 @@ Partial Class MainWindow
         Me.Value_CPUClock.Location = New System.Drawing.Point(252, 48)
         Me.Value_CPUClock.Name = "Value_CPUClock"
         Me.Value_CPUClock.Size = New System.Drawing.Size(60, 13)
-        Me.Value_CPUClock.TabIndex = 6
+        Me.Value_CPUClock.TabIndex = 5
         Me.Value_CPUClock.Text = "9999 MHz"
         Me.Value_CPUClock.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -418,7 +406,7 @@ Partial Class MainWindow
         Me.Name_CPUClock.Location = New System.Drawing.Point(199, 48)
         Me.Name_CPUClock.Name = "Name_CPUClock"
         Me.Name_CPUClock.Size = New System.Drawing.Size(43, 13)
-        Me.Name_CPUClock.TabIndex = 5
+        Me.Name_CPUClock.TabIndex = 4
         Me.Name_CPUClock.Text = "Clock:"
         '
         'Name_CPUList
@@ -1429,7 +1417,7 @@ Partial Class MainWindow
         Me.ComboBox_CPUList.FormattingEnabled = True
         Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 22)
         Me.ComboBox_CPUList.Name = "ComboBox_CPUList"
-        Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
+        Me.ComboBox_CPUList.Size = New System.Drawing.Size(326, 21)
         Me.ComboBox_CPUList.TabIndex = 1
         '
         'ComboBox_HWList
@@ -1609,7 +1597,6 @@ Partial Class MainWindow
     Friend WithEvents ScreenshotToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ComboBox_VideoList As LeftComboBox
     Friend WithEvents Button_VideoListReload As System.Windows.Forms.Button
-    Friend WithEvents Button_CPUListReload As System.Windows.Forms.Button
     Friend WithEvents ComboBox_CPUList As LeftComboBox
     Friend WithEvents MainMenu_ChartItem_Separator1 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents Name_HWList As System.Windows.Forms.Label

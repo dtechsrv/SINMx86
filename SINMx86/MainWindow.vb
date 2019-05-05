@@ -2551,7 +2551,6 @@ Public Class MainWindow
         EventToolTip.SetToolTip(ComboBox_PartList, Tip_Part)
         EventToolTip.SetToolTip(ComboBox_VideoList, Tip_Video)
         EventToolTip.SetToolTip(ComboBox_InterfaceList, Tip_Interface)
-        EventToolTip.SetToolTip(Button_CPUListReload, Tip_Reload)
         EventToolTip.SetToolTip(Button_DiskListReload, Tip_Reload)
         EventToolTip.SetToolTip(Button_VideoListReload, Tip_Reload)
         EventToolTip.SetToolTip(Button_InterfaceListReload, Tip_Reload)
@@ -2721,15 +2720,6 @@ Public Class MainWindow
 
         ' Diagram frissítése
         MakeChart(True)
-
-    End Sub
-
-    ' *** ELJÁRÁS: Processzor lista újratöltése ***
-    ' Eseményvezérelt: Button_CPUListReload.Click -> Gomb megnyomása
-    Private Sub CPUList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_CPUListReload.Click
-
-        ' Processzor lista újratöltése -> függvény
-        UpdateCPUList(True)
 
     End Sub
 
