@@ -1613,7 +1613,6 @@ Public Class LeftComboBox
     Inherits ComboBox
     Sub New()
         Me.DrawMode = Windows.Forms.DrawMode.OwnerDrawFixed
-
         Me.DropDownStyle = ComboBoxStyle.DropDownList
     End Sub
 

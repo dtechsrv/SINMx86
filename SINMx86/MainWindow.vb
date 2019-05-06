@@ -363,24 +363,24 @@ Public Class MainWindow
 
         ' Értékek beállítása -> Alaplap: gyártó, modell, sorozatszám
         For Each Me.objMgmt In objBB.Get
-            Vendor = objMgmt("Manufacturer")
-            Model = objMgmt("Product")
-            Identifier = objMgmt("SerialNumber")
+            Vendor = RemoveSpaces(objMgmt("Manufacturer"))
+            Model = RemoveSpaces(objMgmt("Product"))
+            Identifier = RemoveSpaces(objMgmt("SerialNumber"))
         Next
 
         ' Értéktároló tömb frissítése -> Alaplap
-        If RemoveSpaces(Vendor) = Nothing Or Vendor = "To be filled by O.E.M." Then
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Then
             HWVendor(0) = Nothing
         Else
-            HWVendor(0) = RemoveSpaces(RemoveInvalidChars(Vendor))
+            HWVendor(0) = RemoveInvalidChars(Vendor)
         End If
 
-        If RemoveSpaces(Model) = Nothing Or Model = "To be filled by O.E.M." Then
+        If Model = Nothing Or Model = "To be filled by O.E.M." Then
             HWIdentifier(0) = Nothing
-        ElseIf RemoveSpaces(Identifier) = Nothing Or Identifier = "To be filled by O.E.M." Then
-            HWIdentifier(0) = RemoveSpaces(RemoveInvalidChars(Model))
+        ElseIf Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "Base Board Serial Number" Then
+            HWIdentifier(0) = RemoveInvalidChars(Model)
         Else
-            HWIdentifier(0) = RemoveSpaces(RemoveInvalidChars(Model)) + " (" + Str_Serial + ": " + RemoveSpaces(RemoveInvalidChars(Identifier)) + ")"
+            HWIdentifier(0) = RemoveInvalidChars(Model) + " (" + Str_Serial + ": " + RemoveInvalidChars(Identifier) + ")"
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
@@ -388,8 +388,8 @@ Public Class MainWindow
 
         ' Értékek beállítása -> Számítógép: gyártó, modell
         For Each Me.objMgmt In objCS.Get
-            Vendor = objMgmt("Manufacturer")
-            Model = objMgmt("Model")
+            Vendor = RemoveSpaces(objMgmt("Manufacturer"))
+            Model = RemoveSpaces(objMgmt("Model"))
         Next
 
         ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> BIOS információk ***
@@ -398,44 +398,44 @@ Public Class MainWindow
 
         ' Értékek beállítása -> Számítógép: sorozatszám
         For Each Me.objMgmt In objBS.Get
-            Identifier = objMgmt("SerialNumber")
+            Identifier = RemoveSpaces(objMgmt("SerialNumber"))
         Next
 
         ' Értéktároló tömb frissítése -> Számítógép
-        If RemoveSpaces(Vendor) = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Then
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Then
             HWVendor(1) = Nothing
         Else
-            HWVendor(1) = RemoveSpaces(RemoveInvalidChars(Vendor))
+            HWVendor(1) = RemoveInvalidChars(Vendor)
         End If
 
-        If RemoveSpaces(Model) = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
+        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
             HWIdentifier(1) = Nothing
         Else
-            If RemoveSpaces(Identifier) = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "System Serial Number" Then
-                HWIdentifier(1) = RemoveSpaces(RemoveInvalidChars(Model))
+            If Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "System Serial Number" Then
+                HWIdentifier(1) = RemoveInvalidChars(Model)
             Else
-                HWIdentifier(1) = RemoveSpaces(RemoveInvalidChars(Model)) + " (" + Str_Serial + ": " + RemoveSpaces(RemoveInvalidChars(Identifier)) + ")"
+                HWIdentifier(1) = RemoveInvalidChars(Model) + " (" + Str_Serial + ": " + RemoveInvalidChars(Identifier) + ")"
             End If
         End If
 
         ' Értékek beállítása -> BIOS: gyártó, verziószám, dátum
         For Each Me.objMgmt In objBS.Get
-            Vendor = objMgmt("Manufacturer")
-            Model = objMgmt("SMBIOSBIOSVersion")
+            Vendor = RemoveSpaces(objMgmt("Manufacturer"))
+            Model = RemoveSpaces(objMgmt("SMBIOSBIOSVersion"))
             Identifier = Format(DateTimeConv(objMgmt("ReleaseDate").ToString), "yyyy-MM-dd")
         Next
 
         ' Értéktároló tömb frissítése -> BIOS
-        If RemoveSpaces(Vendor) = Nothing Then
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Then
             HWVendor(2) = Nothing
         Else
-            HWVendor(2) = RemoveSpaces(RemoveInvalidChars(Vendor))
+            HWVendor(2) = RemoveInvalidChars(Vendor)
         End If
 
-        If RemoveSpaces(Model) = Nothing Then
+        If Model = Nothing Then
             HWIdentifier(2) = Nothing
         Else
-            HWIdentifier(2) = RemoveSpaces(RemoveInvalidChars(Model)) + " (" + Str_Date + ": " + Identifier + ")"
+            HWIdentifier(2) = RemoveInvalidChars(Model) + " (" + Str_Date + ": " + Identifier + ")"
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> Akkumulátor információk ***
@@ -455,8 +455,8 @@ Public Class MainWindow
             HWIdentifier(3) = Nothing
         Else
             For Each Me.objMgmt In objBT.Get
-                Vendor = RemoveInvalidChars(objMgmt("DeviceID"))
-                Model = RemoveInvalidChars(objMgmt("Name"))
+                Vendor = RemoveSpaces(RemoveInvalidChars(objMgmt("DeviceID")))
+                Model = RemoveSpaces(RemoveInvalidChars(objMgmt("Name")))
                 BattVolt = objMgmt("DesignVoltage")
             Next
 
@@ -469,19 +469,19 @@ Public Class MainWindow
                 Identifier = Nothing
             End If
 
-            If RemoveSpaces(Vendor) = Nothing Then
+            If Vendor = Nothing Then
                 HWVendor(3) = Nothing
             Else
-                HWVendor(3) = RemoveSpaces(Vendor)
+                HWVendor(3) = Vendor
             End If
 
-            If RemoveSpaces(Model) = Nothing Then
+            If Model = Nothing Then
                 HWIdentifier(3) = Nothing
             Else
                 If Identifier = Nothing Then
-                    HWIdentifier(3) = RemoveSpaces(Model)
+                    HWIdentifier(3) = Model
                 Else
-                    HWIdentifier(3) = RemoveSpaces(Model) + " (" + Str_Volt + ": " + Identifier + ")"
+                    HWIdentifier(3) = Model + " (" + Str_Volt + ": " + Identifier + ")"
                 End If
             End If
         End If
@@ -542,7 +542,7 @@ Public Class MainWindow
 
         ' Értékek kinyerése a WMI-ből
         For Each Me.objMgmt In objOS.Get
-            OSName = objMgmt("Caption")
+            OSName = RemoveSpaces(objMgmt("Caption"))
             OSService = objMgmt("ServicePackMajorVersion")
             If OSMajorVersion > 5 Then
                 OSLanguage = objMgmt("MUILanguages")
@@ -551,9 +551,9 @@ Public Class MainWindow
 
         ' Kiírások értékének frissítése
         If OSService = 0 Then
-            Value_OSName.Text = RemoveSpaces(OSName)
+            Value_OSName.Text = OSName
         Else
-            Value_OSName.Text = RemoveSpaces(OSName) + ", " + Str_Serv + " " + OSService.ToString
+            Value_OSName.Text = OSName + ", " + Str_Serv + " " + OSService.ToString
         End If
 
         Value_OSRelease.Text = OSRelease.ToString + "-bit"
@@ -656,8 +656,8 @@ Public Class MainWindow
 
             ' Windows XP alatt nem támogatott néhány érték lekérdezése
             If OSMajorVersion >= 6 Then
-                SerialNumber = objMgmt("SerialNumber")
-                Firmware = objMgmt("FirmwareRevision")
+                SerialNumber = RemoveSpaces(objMgmt("SerialNumber"))
+                Firmware = RemoveSpaces(objMgmt("FirmwareRevision"))
             Else
                 SerialNumber = Nothing
                 Firmware = Nothing
@@ -698,7 +698,7 @@ Public Class MainWindow
             Value_DiskSerial.Text = Str_NotAvailable
         Else
             Value_DiskSerial.Enabled = True
-            Value_DiskSerial.Text = RemoveSpaces(SerialNumber)
+            Value_DiskSerial.Text = SerialNumber
         End If
 
         If Firmware = Nothing Then
@@ -706,7 +706,7 @@ Public Class MainWindow
             Value_DiskFirmware.Text = Str_NotAvailable
         Else
             Value_DiskFirmware.Enabled = True
-            Value_DiskFirmware.Text = RemoveSpaces(Firmware)
+            Value_DiskFirmware.Text = Firmware
         End If
 
         If Connector = "IDE" Then
@@ -1464,7 +1464,7 @@ Public Class MainWindow
 
         ' Értékek beállítása
         For Each Me.objMgmt In objPR.Get
-            CPUString(CPUCount) = objMgmt("Name")
+            CPUString(CPUCount) = RemoveSpaces(objMgmt("Name"))
             CPUDataWidth = objMgmt("DataWidth")
             CPUCount += 1
         Next
@@ -1477,7 +1477,7 @@ Public Class MainWindow
                 CPUString(i) = Replace(CPUString(i), "CPU", "")
             End While
 
-            CPUName(i) = ComboBox_CPUList.Items.Add("CPU #" + i.ToString + " - " + RemoveSpaces(CPUString(i)) + " (" + CPUDataWidth.ToString + "-bit)")
+            CPUName(i) = ComboBox_CPUList.Items.Add("CPU #" + i.ToString + " - " + CPUString(i) + " (" + CPUDataWidth.ToString + "-bit)")
         Next
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
@@ -1510,7 +1510,7 @@ Public Class MainWindow
 
         For Each Me.objMgmt In objDD.Get
             DiskList(DiskCount) = ToInt32(objMgmt("Index"))
-            DiskName(DiskList(DiskCount)) = objMgmt("Model")
+            DiskName(DiskList(DiskCount)) = RemoveSpaces(objMgmt("Model"))
             DiskCount += 1
         Next
 
@@ -1527,7 +1527,7 @@ Public Class MainWindow
         For ListCount = 0 To DiskCount - 1
 
             ' Felesleges szóközök eltávolítása (OEM lemezek esetén előfordul, hogy telenyomják szóközzel)
-            DiskName(DiskSort(ListCount)) = RemoveSpaces(DiskName(DiskSort(ListCount)))
+            DiskName(DiskSort(ListCount)) = DiskName(DiskSort(ListCount))
 
             ' USB megjelölés eltávolítása
             While (InStr(DiskName(DiskSort(ListCount)), " USB Device"))
@@ -1647,7 +1647,7 @@ Public Class MainWindow
                 ' Statisztikához átalakított eszköznevek keresése (Ha van egyezés, akkor az lesz a név, egyébként a gyári!)
                 For i As Int32 = 0 To (PnPNum - 1)
                     If (PnPName(i) = objMgmt("Name")) Then
-                        InterfaceName(InterfaceCount) = RemoveSpaces(PnPList(i))
+                        InterfaceName(InterfaceCount) = PnPList(i)
                     End If
                 Next
 
