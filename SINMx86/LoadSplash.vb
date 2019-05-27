@@ -35,7 +35,7 @@ Public NotInheritable Class LoadSplash
         ' Megjegyzés feltöltése
         Splash_Comment.Text = MainWindow.Str_Title + ChrW(13) + ChrW(10) + MainWindow.Str_Version + " " + MainWindow.VersionString
 
-        ' Állapotellenőrzés: Névjegy vagy betoltőképernyő?
+        ' Állapotellenőrzés: Névjegy vagy betöltőképernyő?
         If MainWindow.SplashDefineAsAbout Then
             Link_SplashClose.Text = MainWindow.Str_Close
             Splash_Status.Text = My.Application.Info.Copyright

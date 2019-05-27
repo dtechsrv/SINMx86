@@ -369,18 +369,18 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> Alaplap
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Then
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "Not Available" Then
             HWVendor(0) = Nothing
         Else
             HWVendor(0) = RemoveInvalidChars(Vendor)
         End If
 
-        If Model = Nothing Or Model = "To be filled by O.E.M." Then
+        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "Not Available" Then
             HWIdentifier(0) = Nothing
-        ElseIf Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "Base Board Serial Number" Then
+        ElseIf Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "Base Board Serial Number" Or Identifier = "Not Available" Then
             HWIdentifier(0) = RemoveInvalidChars(Model)
         Else
-            HWIdentifier(0) = RemoveInvalidChars(Model) + " (" + Str_Serial + ": " + RemoveInvalidChars(Identifier) + ")"
+            HWIdentifier(0) = RemoveInvalidChars(Model) + ", " + Str_Serial + ": " + RemoveInvalidChars(Identifier)
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
@@ -402,19 +402,19 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> Számítógép
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Then
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Or Vendor = "Not Available" Then
             HWVendor(1) = Nothing
         Else
             HWVendor(1) = RemoveInvalidChars(Vendor)
         End If
 
-        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Then
+        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Or Model = "Not Available" Then
             HWIdentifier(1) = Nothing
         Else
-            If Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "System Serial Number" Then
+            If Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "System Serial Number" Or Identifier = "Not Available" Then
                 HWIdentifier(1) = RemoveInvalidChars(Model)
             Else
-                HWIdentifier(1) = RemoveInvalidChars(Model) + " (" + Str_Serial + ": " + RemoveInvalidChars(Identifier) + ")"
+                HWIdentifier(1) = RemoveInvalidChars(Model) + ", " + Str_Serial + ": " + RemoveInvalidChars(Identifier)
             End If
         End If
 
@@ -426,7 +426,7 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> BIOS
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Then
+        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "Not Available" Then
             HWVendor(2) = Nothing
         Else
             HWVendor(2) = RemoveInvalidChars(Vendor)
@@ -435,7 +435,7 @@ Public Class MainWindow
         If Model = Nothing Then
             HWIdentifier(2) = Nothing
         Else
-            HWIdentifier(2) = RemoveInvalidChars(Model) + " (" + Str_Date + ": " + Identifier + ")"
+            HWIdentifier(2) = RemoveInvalidChars(Model) + ", " + Str_Date + ": " + Identifier
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> Akkumulátor információk ***
@@ -481,7 +481,7 @@ Public Class MainWindow
                 If Identifier = Nothing Then
                     HWIdentifier(3) = Model
                 Else
-                    HWIdentifier(3) = Model + " (" + Str_Volt + ": " + Identifier + ")"
+                    HWIdentifier(3) = Model + ", " + Str_Volt + ": " + Identifier
                 End If
             End If
         End If
@@ -668,7 +668,7 @@ Public Class MainWindow
         If OSMajorVersion < 6 Then
             SerialNumber = Nothing
         ElseIf OSMajorVersion = 6 And OSMinorVersion <= 1 And SerialNumber <> Nothing Then
-            SerialNumber = DiskSerialNumberConv(SerialNumber)
+            SerialNumber = RemoveSpaces(DiskSerialNumberConv(SerialNumber))
         End If
 
         ' Érvénytelen karakterek eltávolítása
@@ -1582,7 +1582,8 @@ Public Class MainWindow
 
         ' Értékek beállítása
         For Each Me.objMgmt In objVC.Get
-            VideoName(VideoCount) = ComboBox_VideoList.Items.Add(RemoveSpaces(objMgmt("Name")))
+            VideoName(VideoCount) = RemoveSpaces(objMgmt("Name"))
+            ComboBox_VideoList.Items.Add("VGA #" + VideoCount.ToString + " - " + RemoveSpaces(objMgmt("Name")))
             VideoCount += 1
         Next
 
@@ -1655,7 +1656,7 @@ Public Class MainWindow
                     InterfaceName(InterfaceCount) = RemoveSpaces(objMgmt("Name"))
                 End If
 
-                ComboBox_InterfaceList.Items.Add(InterfaceName(InterfaceCount))
+                ComboBox_InterfaceList.Items.Add("NIC #" + InterfaceCount.ToString + " - " + InterfaceName(InterfaceCount))
                 InterfaceCount += 1
             End If
         Next
