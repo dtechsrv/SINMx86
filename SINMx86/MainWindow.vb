@@ -49,8 +49,6 @@ Public Class MainWindow
     Public PrefixTable() As String = {"", "k", "M", "G", "T"}               ' Prefixumok tömbje (amíg szükséges lehet)
     Public TraffGenCounter As Int32                                         ' Diagram generálási időköz visszaszámlálója
     Public Hostname As String                                               ' Hosztnév
-    Public HWList(2) As String                                              ' Hardver komonensek listája
-    Public CPUName(32) As String                                            ' Processzorok nevei (kiírásokhoz)
     Public InterfaceList(32) As String                                      ' Interfészlista tömbje (lekérdezésekhez)
     Public InterfaceName(32) As String                                      ' Interfészek formázott neve (kiírásokhoz)
     Public InterfacePresent As Boolean                                      ' Interfészek ellenőrzése (Ha nincs egy sem, akkor hamis!)
@@ -240,6 +238,8 @@ Public Class MainWindow
         ' Checkbox és menüelemek állapotának beállítása
         MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
+        ChartMenuItem_DownloadVisible.Checked = CheckedDownChart
+        ChartMenuItem_UploadVisible.Checked = CheckedUpChart
         CheckBoxChart_DownloadVisible.Checked = CheckedDownChart
         CheckBoxChart_UploadVisible.Checked = CheckedUpChart
 
@@ -1472,12 +1472,13 @@ Public Class MainWindow
         ' CPU nevéből a felesleges karakterek eltávolítása
         For i As Int32 = 0 To CPUCount - 1
 
-            ' CPU megjelölés eltávolítása
-            While (InStr(CPUString(i), "CPU"))
-                CPUString(i) = Replace(CPUString(i), "CPU", "")
+            ' CPU megjelölés eltávolítása a névből
+            While (InStr(CPUString(i), " CPU"))
+                CPUString(i) = Replace(CPUString(i), " CPU", "")
             End While
 
-            CPUName(i) = ComboBox_CPUList.Items.Add("CPU #" + i.ToString + " - " + CPUString(i) + " (" + CPUDataWidth.ToString + "-bit)")
+            ' Listaelem hozzáadása
+            ComboBox_CPUList.Items.Add("# " + (i + 1).ToString + "/" + CPUCount.ToString + " - " + CPUString(i) + " (" + CPUDataWidth.ToString + "-bit)")
         Next
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
@@ -1583,8 +1584,12 @@ Public Class MainWindow
         ' Értékek beállítása
         For Each Me.objMgmt In objVC.Get
             VideoName(VideoCount) = RemoveSpaces(objMgmt("Name"))
-            ComboBox_VideoList.Items.Add("VGA #" + VideoCount.ToString + " - " + RemoveSpaces(objMgmt("Name")))
             VideoCount += 1
+        Next
+
+        ' Lista feltöltése
+        For i As Int32 = 1 To VideoCount
+            ComboBox_VideoList.Items.Add("# " + i.ToString + "/" + VideoCount.ToString + " - " + VideoName(i - 1))
         Next
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
@@ -1656,9 +1661,13 @@ Public Class MainWindow
                     InterfaceName(InterfaceCount) = RemoveSpaces(objMgmt("Name"))
                 End If
 
-                ComboBox_InterfaceList.Items.Add("NIC #" + InterfaceCount.ToString + " - " + InterfaceName(InterfaceCount))
                 InterfaceCount += 1
             End If
+        Next
+
+        ' Lista feltöltése
+        For i As Int32 = 1 To InterfaceCount
+            ComboBox_InterfaceList.Items.Add("# " + i.ToString + "/" + InterfaceCount.ToString + " - " + InterfaceName(i - 1))
         Next
 
         ' Interfész jelenlét ellenőrzése
@@ -2206,8 +2215,8 @@ Public Class MainWindow
             StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
             StatusLabel_ChartStatus.Text = Str_ChartDone + " " + (TraffGenCounter + 1).ToString + " " + Str_ChartCount + "..."
         Else
-            StatusLabel_ChartStatus.Text = Str_ChartRedraw + " " + TraffGenCounter.ToString + " " + Str_ChartCount + "..."
             StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
+            StatusLabel_ChartStatus.Text = Str_ChartRedraw + " " + TraffGenCounter.ToString + " " + Str_ChartCount + "..."
             TraffGenCounter = TraffGenCounter - 1
         End If
 
@@ -2298,7 +2307,7 @@ Public Class MainWindow
                 Tip_Refresh = "Refresh interval selection (seconds)"
                 Tip_Exit = "Exit (Alt + X)"
                 Tip_LinkBottom = "About..."
-                Tip_Hostname = "Host information"
+                Tip_Hostname = "Computer name"
                 Tip_Uptime = "System uptime"
                 Tip_Status = "Status of the chart creation process"
                 Tip_TopMost = "Always on top (Green = enabled, Red = disabled)"
@@ -2362,6 +2371,7 @@ Public Class MainWindow
                 MainMenu_ActionItem_Exit.Text = "E&xit"
                 MainMenu_ChartItem_DownloadVisible.Text = "Show &download chart"
                 MainMenu_ChartItem_UploadVisible.Text = "Show &upload chart"
+                MainMenu_ChartItem_SaveChart.Text = "&Save chart image to desktop"
                 MainMenu_ChartItem_ClearChart.Text = "&Clear chart"
 
                 ' Checkbox feliratok
@@ -2435,7 +2445,7 @@ Public Class MainWindow
                 Tip_CPU = "Processzor kiválasztása"
                 Tip_Disk = "Lemez kiválasztása"
                 Tip_Part = "Kötet kiválasztása"
-                Tip_Video = "Graphics card selection"
+                Tip_Video = "Videokártya kiválasztása"
                 Tip_Interface = "Hálózati adapter kiválasztása"
                 Tip_Reload = "Lista újratöltése"
                 Tip_Chart = "Adatforgalmi előzmények diagramja"
@@ -2445,7 +2455,7 @@ Public Class MainWindow
                 Tip_Refresh = "Frissítési időköz kiválasztása (másodperc)"
                 Tip_Exit = "Kilépés (Alt + K)"
                 Tip_LinkBottom = "Névjegy..."
-                Tip_Hostname = "Hoszt információk"
+                Tip_Hostname = "Számítógépnév"
                 Tip_Uptime = "Rendszer futási ideje"
                 Tip_Status = "A diagram jelenlegi állapota"
                 Tip_TopMost = "Mindig látható (zöld = engedélyezve, piros = tiltva)"
@@ -2498,7 +2508,7 @@ Public Class MainWindow
 
                 ' Menüelemek
                 MainMenuItem_Settings.Text = "&Beállítások"
-                MainMenuItem_Chart.Text = "&Diagramok"
+                MainMenuItem_Chart.Text = "&Diagram"
                 MainMenuItem_Information.Text = "&Műveletek"
                 MainMenu_SettingsItem_TopMost.Text = "Mi&ndig látható"
                 MainMenu_SettingsItem_TaskbarMinimize.Text = "Kicsinyítés a &rendszerikonok közé"
@@ -2509,6 +2519,7 @@ Public Class MainWindow
                 MainMenu_ActionItem_Exit.Text = "&Kilépés"
                 MainMenu_ChartItem_DownloadVisible.Text = "&Letöltési diagram mutatása"
                 MainMenu_ChartItem_UploadVisible.Text = "&Feltöltési diagram mutatása"
+                MainMenu_ChartItem_SaveChart.Text = "Diagram &mentése az asztalra"
                 MainMenu_ChartItem_ClearChart.Text = "Diagram &törlése"
 
                 ' Checkbox feliratok
@@ -2528,6 +2539,10 @@ Public Class MainWindow
         MainContextMenuItem_UpdateCheck.Text = MainMenu_ActionItem_UpdateCheck.Text
         MainContextMenuItem_About.Text = MainMenu_ActionItem_About.Text
         MainContextMenuItem_Exit.Text = MainMenu_ActionItem_Exit.Text
+        ChartMenuItem_DownloadVisible.Text = MainMenu_ChartItem_DownloadVisible.Text
+        ChartMenuItem_UploadVisible.Text = MainMenu_ChartItem_UploadVisible.Text
+        ChartMenuItem_SaveChart.Text = MainMenu_ChartItem_SaveChart.Text
+        ChartMenuItem_ClearChart.Text = MainMenu_ChartItem_ClearChart.Text
 
         ' Hosztnév beálítása az állapotsorban
         StatusLabel_Host.Text = Str_Hostname + ": " + Hostname
@@ -2753,7 +2768,7 @@ Public Class MainWindow
 
     ' *** ELJÁRÁS: Letöltési diagram generálásának ellenőrzése ***
     ' Eseményvezérelt: MainMenu_ChartItem_DownloadVisible.Click, ChartMenuItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click -> Klikk (Menüelem, Checkbox)
-    Private Sub DownloadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click
+    Private Sub DownloadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_DownloadVisible.Click, ChartMenuItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click
 
         ' Változás ellenőrzése és állapot invertálása
         If CheckedDownChart Then
@@ -2762,11 +2777,10 @@ Public Class MainWindow
             CheckedDownChart = True
         End If
 
-        ' Checkbox állapotának beállítása
-        CheckBoxChart_DownloadVisible.Checked = CheckedDownChart
-
-        ' Menüelem állapotának beállítása
+        ' Checkbox és menüelemek állapotának beállítása
         MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
+        ChartMenuItem_DownloadVisible.Checked = CheckedDownChart
+        CheckBoxChart_DownloadVisible.Checked = CheckedDownChart
 
         ' Diagram frissítése
         MakeChart(False)
@@ -2775,7 +2789,7 @@ Public Class MainWindow
 
     ' *** ELJÁRÁS: Feltöltési diagram generálásának ellenőrzése ***
     ' Eseményvezérelt: MainMenu_ChartItem_UploadVisible.Click, ChartMenuItem_UploadVisible.Click, CheckBoxChart_UploadVisible.Click -> Klikk (Menüelem, Checkbox)
-    Private Sub UploadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_UploadVisible.Click, CheckBoxChart_UploadVisible.Click
+    Private Sub UploadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_UploadVisible.Click, ChartMenuItem_UploadVisible.Click, CheckBoxChart_UploadVisible.Click
 
         ' Változás ellenőrzése és állapot invertálása
         If CheckedUpChart Then
@@ -2784,11 +2798,10 @@ Public Class MainWindow
             CheckedUpChart = True
         End If
 
-        ' Checkbox állapotának beállítása
-        CheckBoxChart_UploadVisible.Checked = CheckedUpChart
-
-        ' Menüelem állapotának beállítása
+        ' Checkbox és menüelemek állapotának beállítása
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
+        ChartMenuItem_UploadVisible.Checked = CheckedUpChart
+        CheckBoxChart_UploadVisible.Checked = CheckedUpChart
 
         ' Diagram frissítése
         MakeChart(False)
@@ -2928,7 +2941,7 @@ Public Class MainWindow
 
     ' *** ELJÁRÁS: Forgalmi diagram törlése ***
     ' Eseményvezérelt: MainMenu_ChartItem_ClearChart.Click, ChartMenuItem_ClearChart.Click -> Állapotváltozás (Menüelem)
-    Private Sub Chart_Clear(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_ClearChart.Click
+    Private Sub Chart_Clear(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_ClearChart.Click, ChartMenuItem_ClearChart.Click
 
         ' Diagram frissítése
         MakeChart(True)
@@ -2990,6 +3003,30 @@ Public Class MainWindow
 
     End Sub
 
+    ' *** ELJÁRÁS: Forgalmi diagram mentése az asztalra ***
+    ' Eseményvezérelt: MainMenu_ChartItem_SaveChart.Click, ChartMenuItem_SaveChart.Click, PictureBox_TrafficChart.MouseDoubleClick -> Klikk (Menüelem), Duplaklikk (Kép)
+    Private Sub Chart_Save(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_SaveChart.Click, ChartMenuItem_SaveChart.Click, PictureBox_TrafficChart.MouseDoubleClick
+
+        ' Mentési kép létrhozása és feltöltése
+        Dim SaveImage As New Bitmap(PictureBox_TrafficChart.Size.Width, PictureBox_TrafficChart.Size.Height, Imaging.PixelFormat.Format24bppRgb)
+        SaveImage = PictureBox_TrafficChart.Image
+
+        ' Fájnév generálása
+        Dim FileName As String = MyName + "_TrafficChart_" + Hostname + "_" + Format(ChartCreationTime, "yyyyMMdd-HHmmss") + ".png"
+
+        ' Elérési út beállítása (Desktop)
+        Dim DesktopPath As String = My.Computer.FileSystem.SpecialDirectories.Desktop
+        SavePath = DesktopPath + "\" + FileName
+
+        ' Kép mentése (PNG)
+        SaveImage.Save(SavePath, Imaging.ImageFormat.Png)
+
+        ' Buboréküzenet állapotának beállítása (fájl megnyitása) és üzenet megjelenítése
+        OpenFile = True
+        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + Str_Note, Str_ImageSaved + ": '" + SavePath + "'", ToolTipIcon.Info)
+
+    End Sub
+
     ' *** ELJÁRÁS: Képernyőkép mentése ***
     ' Eseményvezérelt: ScreenshotToolStripMenuItem.Click -> Klikk (Menüelem)
     Private Sub Screenshot_Save(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ScreenshotToolStripMenuItem.Click
@@ -2999,10 +3036,10 @@ Public Class MainWindow
         DrawToBitmap(SaveImage, New Rectangle(0, 0, Me.Width, Me.Height))
 
         ' Kép készítési idejének frissítése
-        Dim ImageCreationTime As DateTime = DateTime.Now
+        Dim ScreenCreationTime As DateTime = DateTime.Now
 
         ' Fájnév generálása
-        Dim FileName As String = MyName + "_" + Hostname + "_" + Format(ImageCreationTime, "yyyyMMdd-HHmmss") + ".png"
+        Dim FileName As String = MyName + "_Screenshot_" + Hostname + "_" + Format(ScreenCreationTime, "yyyyMMdd-HHmmss") + ".png"
 
         ' Elérési út beállítása (Desktop)
         Dim DesktopPath As String = My.Computer.FileSystem.SpecialDirectories.Desktop

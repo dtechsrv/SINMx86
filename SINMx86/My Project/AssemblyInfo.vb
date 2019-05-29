@@ -11,7 +11,7 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("SINMx86")> 
-<Assembly: AssemblyDescription("http://sinmx86.dtech.hu/")> 
+<Assembly: AssemblyDescription("https://github.com/dtechsrv/SINMx86/releases")> 
 <Assembly: AssemblyCompany("dtech(.hu)")> 
 <Assembly: AssemblyProduct("System Information and Network Monitor")> 
 <Assembly: AssemblyCopyright("Copyright (C) 2019 dtech(.hu)")> 
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("2.5.500.4983")> 
-<Assembly: AssemblyFileVersion("2.5.500.4983")> 
+<Assembly: AssemblyVersion("2.5.0.5000")> 
+<Assembly: AssemblyFileVersion("2.5.0.5000")> 
 
 <Assembly: NeutralResourcesLanguageAttribute("hu-HU")> 

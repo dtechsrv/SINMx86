@@ -21,7 +21,7 @@ __License:__ GNU General Public License v2.0.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-05-05 - Version 2.5.0 / Build 4980 Release Candidate__
+__2019-05-29 - Version 2.5.0 / Build 5000 (stable)__
 
 - Komponenslista az alaplap információi helyett (számítógép és BIOS is),
 - Szövegkiírások pozíciójának egységesítése, diagram méretének növelése,
@@ -39,7 +39,10 @@ __2019-05-05 - Version 2.5.0 / Build 4980 Release Candidate__
 - Akkumulátor információk hozzáadása a hardverlistához,
 - Érvénytelen karakterek szűrésének hozzáadása,
 - Windows XP UInt32 visszaállítása a forgalom lekérdezésénél (NT6 felett Uint64),
-- Hálózati kártya nélküli gépek lekezelése.
+- Processzorlista frissítési gomb eltávolítása,
+- Hálózati kártya nélküli gépek lekezelése,
+- Diagram menüjének és mentésének visszaállítása,
+- Listakezelés: sorszámok hozzáadása (processzor, videokártya, hálózati kártya).
 
 __2019-04-09 - Version 2.3.2 / Build 4725 (stable)__
 
