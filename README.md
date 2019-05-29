@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 2.3.2 Build 4725 (2018-04-09)
+## Current stable version: 2.5.0 Build 5000 (2018-05-29)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
