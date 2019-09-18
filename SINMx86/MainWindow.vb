@@ -10,10 +10,10 @@ Imports Microsoft.Win32
 Public Class MainWindow
 
     ' Alkalmazás adatai
-    Public MyVersion As String = Application.ProductVersion                 ' Saját verziószám
-    Public MyName As String = My.Application.Info.Title                     ' Program neve
-    Public MyLink As String = My.Application.Info.Description               ' Támogatási link
-    Public SplashDefineAsAbout As Boolean = False                           ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
+    Public MyVersion As String = Application.ProductVersion                         ' Saját verziószám
+    Public MyName As String = My.Application.Info.Title                             ' Program neve
+    Public MyLink As String = My.Application.Info.Description + "/releases/latest"  ' Támogatási link
+    Public SplashDefineAsAbout As Boolean = False                                   ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
 
     ' WMI feldolgozási objektumok
     Public objOS, objBB, objCS, objBS, objBT, objPR, objPE, objNI, objVC, objDD, objDP, objLP, objLD As ManagementObjectSearcher
@@ -30,8 +30,8 @@ Public Class MainWindow
            Str_Note, Str_NoDisk, Str_NoName, Str_NotAvailable, Str_Unknown, Str_None, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
 
     ' ToolTip sztringek
-    Public Tip_Language, Tip_HW, Tip_CPU, Tip_Disk, Tip_Part, Tip_Video, Tip_Interface, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown,
-           Tip_ChartUp, Tip_Refresh, Tip_Exit, Tip_LinkBottom, Tip_Hostname, Tip_Uptime, Tip_Status, Tip_TopMost, Tip_Screenshot As String
+    Public Tip_Language, Tip_HW, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown, Tip_ChartUp, Tip_Refresh, Tip_Exit, Tip_LinkBottom, Tip_Hostname,
+           Tip_Uptime, Tip_Status, Tip_TopMost, Tip_Screenshot As String
 
     ' Checkboxok és menüelemek változói
     Public CheckedSplashDisable, CheckedDownChart, CheckedUpChart, CheckedTopMost, CheckedNoQuitAsk, CheckedMinToTray As Boolean
@@ -40,35 +40,35 @@ Public Class MainWindow
     Public SelectedLanguage, SelectedRefresh, SelectedHardware, SelectedCPU, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
 
     ' További változók
-    Public ReleaseStatus As String = Nothing                                ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
-    Public VersionString As String                                          ' Formázott verziószám
-    Public HWVendor(3), HWIdentifier(3) As String                           ' Komponensinformációs tömbök
-    Public OSMajorVersion, OSMinorVersion, OSBuildVersion As Int32          ' OS fő-, al- és build verziószáma (hibakereséshez)
-    Public OSRelease As Int32                                               ' Kiadás típusa (32/64 bit)
-    Public RefreshInterval() As Int32 = {1, 2, 3, 4, 5, 10, 15, 30, 60}     ' Frissítési intervallumok
-    Public PrefixTable() As String = {"", "k", "M", "G", "T"}               ' Prefixumok tömbje (amíg szükséges lehet)
-    Public TraffGenCounter As Int32                                         ' Diagram generálási időköz visszaszámlálója
-    Public Hostname As String                                               ' Hosztnév
-    Public InterfaceList(32) As String                                      ' Interfészlista tömbje (lekérdezésekhez)
-    Public InterfaceName(32) As String                                      ' Interfészek formázott neve (kiírásokhoz)
-    Public InterfacePresent As Boolean                                      ' Interfészek ellenőrzése (Ha nincs egy sem, akkor hamis!)
-    Public DiskList(32) As String                                           ' Meghajtóindexek tömbje (lekérdezésekhez)
-    Public DiskName(32) As String                                           ' Meghajtók neve (kiírásokhoz)
-    Public PartLabel(32) As String                                          ' Partíció betűjele (kiírásokhoz)
-    Public PartInfo(32) As String                                           ' Partíció információk (kiírásokhoz)
-    Public VideoName(32) As String                                          ' Videókártyák nevei (kiírásokhoz)
-    Public TraffResolution As Int32 = 60                                    ' Diagramon jelzett értékek száma (ennyi időegységre van felosztva a diagram)
-    Public VerticalGrids As Int32 = 1                                       ' Fuggőleges osztóvonalak száma (másodpercre vetítve)
-    Public GridSlip As Int32                                                ' Függőleges rács eltolás
-    Public GridUpdate As Boolean = False                                    ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
-    Public TimerSeconds, UptimeSeconds As Int32                             ' Időértékek: időzítő, futásidő
-    Public LatestDownload, LatestUpload As Double                           ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
-    Public ChartCreationTime As DateTime                                    ' Az utolsó diagram elkészülésének ideje
-    Public DisableBalloon As Boolean = False                                ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
-    Public OpenFile As Boolean = False                                      ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
-    Public SavePath As String = Nothing                                     ' Az utolsó mentett fájl elérési útja
-    Public Languages() As String = {"English (EN)", "Magyar (HU)"}          ' Nyelvek (egyelőre statikus, 2 elemű)
-    Public MainWindowDone As Boolean = False                                ' A főablak betöltődésének indikátora, néhány szükséges lekérdezés csak ezután történhet meg!
+    Public ReleaseStatus As String = Nothing                                        ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
+    Public VersionString As String                                                  ' Formázott verziószám
+    Public HWVendor(3), HWIdentifier(3) As String                                   ' Komponensinformációs tömbök
+    Public OSMajorVersion, OSMinorVersion, OSBuildVersion As Int32                  ' OS fő-, al- és build verziószáma (hibakereséshez)
+    Public OSRelease As Int32                                                       ' Kiadás típusa (32/64 bit)
+    Public RefreshInterval() As Int32 = {1, 2, 3, 4, 5, 10, 15, 30, 60}             ' Frissítési intervallumok
+    Public PrefixTable() As String = {"", "k", "M", "G", "T"}                       ' Prefixumok tömbje (amíg szükséges lehet)
+    Public TraffGenCounter As Int32                                                 ' Diagram generálási időköz visszaszámlálója
+    Public Hostname As String                                                       ' Hosztnév
+    Public InterfaceList(32) As String                                              ' Interfészlista tömbje (lekérdezésekhez)
+    Public InterfaceName(32) As String                                              ' Interfészek formázott neve (kiírásokhoz)
+    Public InterfacePresent As Boolean                                              ' Interfészek ellenőrzése (Ha nincs egy sem, akkor hamis!)
+    Public DiskList(32) As String                                                   ' Meghajtóindexek tömbje (lekérdezésekhez)
+    Public DiskName(32) As String                                                   ' Meghajtók neve (kiírásokhoz)
+    Public PartLabel(32) As String                                                  ' Partíció betűjele (kiírásokhoz)
+    Public PartInfo(32) As String                                                   ' Partíció információk (kiírásokhoz)
+    Public VideoName(32) As String                                                  ' Videókártyák nevei (kiírásokhoz)
+    Public TraffResolution As Int32 = 60                                            ' Diagramon jelzett értékek száma (ennyi időegységre van felosztva a diagram)
+    Public VerticalGrids As Int32 = 1                                               ' Fuggőleges osztóvonalak száma (másodpercre vetítve)
+    Public GridSlip As Int32                                                        ' Függőleges rács eltolás
+    Public GridUpdate As Boolean = False                                            ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
+    Public TimerSeconds, UptimeSeconds As Int32                                     ' Időértékek: időzítő, futásidő
+    Public LatestDownload, LatestUpload As Double                                   ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
+    Public ChartCreationTime As DateTime                                            ' Az utolsó diagram elkészülésének ideje
+    Public DisableBalloon As Boolean = False                                        ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
+    Public OpenFile As Boolean = False                                              ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
+    Public SavePath As String = Nothing                                             ' Az utolsó mentett fájl elérési útja
+    Public Languages() As String = {"English (EN)", "Magyar (HU)"}                  ' Nyelvek (egyelőre statikus, 2 elemű)
+    Public MainWindowDone As Boolean = False                                        ' A főablak betöltődésének indikátora, néhány szükséges lekérdezés csak ezután történhet meg!
 
     ' Forgalmi diagramok (2-vel több eleműnek kell lennie, mint a kijelzett érték!)
     Public TraffDownArray(TraffResolution + 2), TraffUpArray(TraffResolution + 2) As Double
@@ -85,11 +85,11 @@ Public Class MainWindow
         Value_Debug.Text = "LOAD_FAIL"
 
         ' Veriószám felbontása (Build-del)
-        Dim VersionArray() As String = Split(MyVersion, ".")                ' Verziószámok elemeinek tömbje (Major, Minor, Sub, Build)
+        Dim VersionArray() As String = Split(MyVersion, ".")                        ' Verziószámok elemeinek tömbje (Major, Minor, Sub, Build)
         ReDim Preserve VersionArray(0 To 3)
 
         ' Alverzió ellenőrzés: BETA (900+) és RC (500+) tagek ellenőrzése
-        Dim SubVersion As Int32 = ToInt32(VersionArray(2))                  ' Alverzió
+        Dim SubVersion As Int32 = ToInt32(VersionArray(2))                          ' Alverzió
 
         ' Alverzió és kiadási állapot módosítása (Pl. 901 = 'vx.y.1 BETA', 502 = 'vx.y.1 RC')
         If SubVersion >= 900 And SubVersion < 1000 Then
@@ -108,7 +108,7 @@ Public Class MainWindow
         objOS = New ManagementObjectSearcher("SELECT Version FROM Win32_OperatingSystem")
 
         ' Értékek definiálása
-        Dim OSVersionArray() As String = Nothing                            ' OS tagolt verziószám tömbje
+        Dim OSVersionArray() As String = Nothing                                    ' OS tagolt verziószám tömbje
 
         ' Értékek beállítása
         For Each Me.objMgmt In objOS.Get
@@ -127,7 +127,7 @@ Public Class MainWindow
         ' XP-nél nincs alapból az OS kiadásnál ilyen WMI érték, de a CPU címbuszból ott is származtatható.
         objPR = New ManagementObjectSearcher("SELECT AddressWidth FROM Win32_Processor")
 
-        Dim CPUAddressWidth As Int32 = 0                                    ' Processzor címbusz szélessége
+        Dim CPUAddressWidth As Int32 = 0                                            ' Processzor címbusz szélessége
 
         ' Értékek beállítása
         For Each Me.objMgmt In objPR.Get
@@ -146,12 +146,12 @@ Public Class MainWindow
 
         ' *** REGISTRY LEKÉRDEZÉS: Utolsó beállított értékek lekérdezése ***
         ' Megjegyzés: a beállított számérték sztringként tér vissza, ha nem létezik, akkor üres lesz!
-        Dim ReadLanguage As String = RegPath.GetValue("SelectedLanguage")               ' Nyelv beállítása
-        Dim ReadSplash As String = RegPath.GetValue("DisableLoadSplash")                ' Splash Screen megjelenítése
-        Dim ReadRefresh As String = RegPath.GetValue("SelectedRefreshIndex")            ' Frissítési időköz
-        Dim ReadTopMost As String = RegPath.GetValue("EnableTopMost")                   ' Láthatóság
-        Dim ReadMinToTray As String = RegPath.GetValue("MinimizeToTaskbar")             ' Kicsinyítés állapota
-        Dim ReadNoQuitAsk As String = RegPath.GetValue("DisableExitConfirmation")       ' Kilépési megerősítés
+        Dim ReadLanguage As String = RegPath.GetValue("SelectedLanguage")           ' Nyelv beállítása
+        Dim ReadSplash As String = RegPath.GetValue("DisableLoadSplash")            ' Splash Screen megjelenítése
+        Dim ReadRefresh As String = RegPath.GetValue("SelectedRefreshIndex")        ' Frissítési időköz
+        Dim ReadTopMost As String = RegPath.GetValue("EnableTopMost")               ' Láthatóság
+        Dim ReadMinToTray As String = RegPath.GetValue("MinimizeToTaskbar")         ' Kicsinyítés állapota
+        Dim ReadNoQuitAsk As String = RegPath.GetValue("DisableExitConfirmation")   ' Kilépési megerősítés
 
         ' *** REGISTRY ELEMZÉS: Nyelv kiválasztása (SelectedLanguage) ***
         If ReadLanguage Is Nothing Or ReadLanguage > UBound(Languages) Then
@@ -161,8 +161,8 @@ Public Class MainWindow
         End If
 
         ' *** LISTAFELTÖLTÉS: Nyelv kiválasztása ***
-        Dim LanguageList(UBound(Languages)) As String           ' Nyelvlista
-        Dim LanguageCount As Int32                              ' Nyelv sorszáma
+        Dim LanguageList(UBound(Languages)) As String                               ' Nyelvlista
+        Dim LanguageCount As Int32                                                  ' Nyelv sorszáma
 
         ' Nyelvi lista feltöltése
         For LanguageCount = 0 To UBound(Languages)
@@ -204,8 +204,8 @@ Public Class MainWindow
         End If
 
         ' *** LISTAFELTÖLTÉS: Frissítési időköz ***
-        Dim RefreshList(UBound(RefreshInterval)) As String      ' Frissítési lista tömbje
-        Dim RefreshItems As Int32                               ' Tömbelemek sorszáma
+        Dim RefreshList(UBound(RefreshInterval)) As String                          ' Frissítési lista tömbje
+        Dim RefreshItems As Int32                                                   ' Tömbelemek sorszáma
 
         ' Frissítési értékeket tartalmazó lista feltöltése
         For RefreshItems = 0 To UBound(RefreshInterval)
@@ -303,8 +303,8 @@ Public Class MainWindow
         objOS = New ManagementObjectSearcher("SELECT LocalDateTime, LastBootUptime FROM Win32_OperatingSystem")
 
         ' Értékek definiálása
-        Dim CurrentTime As String = Nothing                     ' Jelenlegi idő
-        Dim SysUpTime As String = Nothing                       ' Indítás ideje
+        Dim CurrentTime As String = Nothing                                         ' Jelenlegi idő
+        Dim SysUpTime As String = Nothing                                           ' Indítás ideje
 
         ' Értékek beállítása
         For Each Me.objMgmt In objOS.Get
@@ -349,14 +349,17 @@ Public Class MainWindow
     ' ----- FÜGGVÉNYEK -----
 
     ' *** FÜGGVEÉNY: Hardver komponensek értékeinek beállítása ***
-    ' Bemenet: Void
-    ' Kimenet: Boolean (False)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetHWInformation()
 
         ' Értékek definiálása
         Dim Vendor As String = Nothing                      ' Gyártó
         Dim Model As String = Nothing                       ' Modell
         Dim Identifier As String = Nothing                  ' Azonosító
+
+        ' OEM feketelistás sztringek (Dummy szövegek, amelyeket a gyártó "elfelejtett" kitölteni.)
+        Dim Blacklist() As String = {"To be filled by O.E.M.", "Not Available", "Default string", "System manufacturer", "System Product Name", "System Serial Number", "Base Board Serial Number"}
 
         ' *** WMI LEKÉRDEZÉS: Win32_Baseboard -> Alaplap információ ***
         objBB = New ManagementObjectSearcher("SELECT Manufacturer, Product, SerialNumber FROM Win32_Baseboard")
@@ -369,15 +372,15 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> Alaplap
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "Not Available" Then
+        If Vendor = Nothing Or CheckStrMatch(Vendor, Blacklist, False) Then
             HWVendor(0) = Nothing
         Else
             HWVendor(0) = RemoveInvalidChars(Vendor)
         End If
 
-        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "Not Available" Then
+        If Model = Nothing Or CheckStrMatch(Model, Blacklist, False) Then
             HWIdentifier(0) = Nothing
-        ElseIf Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "Base Board Serial Number" Or Identifier = "Not Available" Then
+        ElseIf Identifier = Nothing Or CheckStrMatch(Identifier, Blacklist, False) Then
             HWIdentifier(0) = RemoveInvalidChars(Model)
         Else
             HWIdentifier(0) = RemoveInvalidChars(Model) + ", " + Str_Serial + ": " + RemoveInvalidChars(Identifier)
@@ -402,16 +405,16 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> Számítógép
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "System manufacturer" Or Vendor = "Not Available" Then
+        If Vendor = Nothing Or CheckStrMatch(Vendor, Blacklist, False) Then
             HWVendor(1) = Nothing
         Else
             HWVendor(1) = RemoveInvalidChars(Vendor)
         End If
 
-        If Model = Nothing Or Model = "To be filled by O.E.M." Or Model = "System Product Name" Or Model = "Not Available" Then
+        If Model = Nothing Or CheckStrMatch(Model, Blacklist, False) Then
             HWIdentifier(1) = Nothing
         Else
-            If Identifier = Nothing Or Identifier = "To be filled by O.E.M." Or Identifier = "System Serial Number" Or Identifier = "Not Available" Then
+            If Identifier = Nothing Or CheckStrMatch(Identifier, Blacklist, False) Then
                 HWIdentifier(1) = RemoveInvalidChars(Model)
             Else
                 HWIdentifier(1) = RemoveInvalidChars(Model) + ", " + Str_Serial + ": " + RemoveInvalidChars(Identifier)
@@ -426,7 +429,7 @@ Public Class MainWindow
         Next
 
         ' Értéktároló tömb frissítése -> BIOS
-        If Vendor = Nothing Or Vendor = "To be filled by O.E.M." Or Vendor = "Not Available" Then
+        If Vendor = Nothing Or CheckStrMatch(Vendor, Blacklist, False) Then
             HWVendor(2) = Nothing
         Else
             HWVendor(2) = RemoveInvalidChars(Vendor)
@@ -492,8 +495,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVEÉNY: Processzor aktuális órajelének beállítása ***
-    ' Bemenet: Void
-    ' Kimenet: Boolean (False)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetCPUInformation()
 
         ' Értékek definiálása
@@ -528,8 +531,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Operációs rendszer információk beállítása ***
-    ' Bemenet: Void
-    ' Kimenet: Boolean (False)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetOSInformation()
 
         ' Értékek definiálása
@@ -574,8 +577,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Memória információk beállítása ***
-    ' Bemenet: Void
-    ' Kimenet: Boolean (False)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetMemoryInformation()
 
         ' Értékek definiálása
@@ -630,8 +633,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Lemezmeghajtó információk beállítása ***
-    ' Bemenet: Void
-    ' Kimenet: Boolean (False)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetDiskInformation()
 
         ' Értékek definiálása
@@ -799,8 +802,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Videokártya információk beállítása ***
-    ' Bemenet: Void
-    ' Kimenet: Boolean (False)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetVideoInformation()
 
         ' WMI LEKÉRDEZÉS: Win32_VideoController -> Elsődleges videóvezérlő
@@ -850,10 +853,10 @@ Public Class MainWindow
 
     End Function
 
-    ' *** FÜGGVÉNY: Rendszer Futási idő beállítása ***
-    ' Bemenet: UptimeSeconds -> Indítás óta eltelt másodpercek (Int32)
-    '          TimerCount    -> Számláló állása (Int32)
-    ' Kimenet: Boolean (False)
+    ' *** FÜGGVÉNY: Rendszer futási idő beállítása ***
+    ' Bemenet: UptimeSeconds -> indítás óta eltelt másodpercek (Int32)
+    '          TimerCount    -> számláló állása (Int32)
+    ' Kimenet: *             -> boolean (False)
     Private Function SetUptime(ByVal UptimeSeconds As Int32, ByVal TimerCount As Int32)
 
         ' Értékek definiálása
@@ -885,8 +888,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Felesleges szóközök eltávolítása ***
-    ' Bemenet: RawString -> Formázandó sztring (String)
-    ' Kimenet: RawString -> Formázott sztring (String)
+    ' Bemenet: RawString -> formázandó sztring (String)
+    ' Kimenet: RawString -> formázott sztring (String)
     Private Function RemoveSpaces(ByVal RawString As String)
 
         ' Értékek definiálása
@@ -934,9 +937,39 @@ Public Class MainWindow
 
     End Function
 
+    ' *** FÜGGVÉNY: Sztring egyezés keresése tömbből ***
+    ' Bemenet: RawString -> keresési forrás sztring (String)
+    '          ChkArr()  -> keresett elemek tömbje (String)
+    '          CSense    -> case sensitive összehasonlítás (Boolean)
+    ' Kimenet: *         -> egyezés állapota (Boolean)
+    Private Function CheckStrMatch(ByVal RawString As String, ByVal ChkArr() As String, ByVal CSense As Boolean)
+
+        ' Értékek definiálása
+        Dim Match As Boolean = False   ' Egyezés állapota
+
+        ' Egyezés keresés a tömb elemei között
+        For i As Int32 = 0 To UBound(ChkArr)
+
+            ' Case insensitive átalakítás
+            If CSense = False Then
+                If LCase(RawString) = LCase(ChkArr(i)) And Match = False Then
+                    Match = True
+                End If
+            Else
+                If RawString = ChkArr(i) And Match = False Then
+                    Match = True
+                End If
+            End If
+        Next
+
+        ' Visszatérési érték beállítása
+        Return Match
+
+    End Function
+
     ' *** FÜGGVÉNY: Statisztikai név konverzió (Nem visszafordítható névátalakítás!) ***
-    ' Bemenet: RawString -> Formázandó sztring (String)
-    ' Kimenet: RawString -> Formázott sztring (String)
+    ' Bemenet: RawString -> formázandó sztring (String)
+    ' Kimenet: RawString -> formázott sztring (String)
     Private Function StatNameConv(ByVal RawString As String)
 
         ' Zárójelek átalakítása
@@ -964,7 +997,7 @@ Public Class MainWindow
 
     ' *** FÜGGVÉNY: WMI alapú DateTime változó konverzió ***
     ' Bemenet: WMIDateTime -> WMI datetime formátumú változó (String)
-    ' Kimenet: Converted   -> Hagyományos DateTime változó (DateTime)
+    ' Kimenet: Converted   -> hagyományos DateTime változó (DateTime)
     Private Function DateTimeConv(ByVal WMIDateTime As String)
 
         ' Értékek definiálása
@@ -988,8 +1021,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Nyelvi dátum és időformátum konverzió ***
-    ' Bemenet: InputDate -> Dátum és idő (DateTime)
-    ' Kimenet: Converted -> Formázott sztring (String)
+    ' Bemenet: InputDate -> dátum és idő (DateTime)
+    ' Kimenet: Converted -> formázott sztring (String)
     Private Function GetLocalizedDate(ByVal InputDate As DateTime)
 
         ' Értékek definiálása
@@ -1028,8 +1061,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Nem elfogadhatóü karakterek eltávolítása ***
-    ' Bemenet: RawString -> Formázandó sztring (String)
-    ' Kimenet: RawString -> Formázott érték (String)
+    ' Bemenet: RawString -> formázandó sztring (String)
+    ' Kimenet: RawString -> formázott érték (String)
     Private Function RemoveInvalidChars(ByVal RawString As String)
 
         ' Értékek definiálása
@@ -1057,7 +1090,7 @@ Public Class MainWindow
 
     ' *** FÜGGVÉNY: Statikus bájtkonverzió ***
     ' Bemenet: Value -> bájt (Double)
-    ' Kimenet: Formázott érték (String)
+    ' Kimenet: *     -> formázott érték (String)
     Private Function StatByteConv(ByVal Value As Double, ByVal Prefix As Int32)
 
         ' Bemeneti érték formázása
@@ -1069,9 +1102,9 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Dinamikus bájtkonverzió ***
-    ' Bemenet: Value -> bájt (Double)
-    '          Digit -> Elválasztó utáni helyiértékek száma (Int32)
-    ' Kimenet: ConvValue -> Formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
+    ' Bemenet: Value       -> bájt (Double)
+    '          Digit       -> elválasztó utáni helyiértékek száma (Int32)
+    ' Kimenet: ConvValue() -> formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
     Private Function DynByteConv(ByVal Value As Double, ByVal Digit As Int32)
 
         ' Értékek definiálása
@@ -1094,9 +1127,9 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Dinamikus bitkonverzió ***
-    ' Bemenet: Value -> bit (Double)
-    '          Digit -> Elválasztó utáni helyiértékek száma (Int32)
-    ' Kimenet: ConvValue -> Formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
+    ' Bemenet: Value       -> bit (Double)
+    '          Digit       -> elválasztó utáni helyiértékek száma (Int32)
+    ' Kimenet: ConvValue() -> formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
     Private Function DynBitConv(ByVal Value As Double, ByVal Digit As Int32)
 
         ' Értékek definiálása
@@ -1119,10 +1152,10 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Tizedes elválaszó javítása (területi beállítás felülbírálása) ***
-    ' Bemenet: Value      -> Módosítatlan tizedestört érték (Double)
-    '          Digit      -> Elválasztó utáni helyiértékek száma (Int32)
-    '          FloatFract -> Lebegő (True) vagy statikus (False) törtformátum (Boolean)
-    ' Kimenet: ConvString -> Formázott tizedestört (String)
+    ' Bemenet: Value      -> módosítatlan tizedestört érték (Double)
+    '          Digit      -> elválasztó utáni helyiértékek száma (Int32)
+    '          FloatFract -> lebegő (True) vagy statikus (False) törtformátum (Boolean)
+    ' Kimenet: ConvString -> formázott tizedestört (String)
     Private Function FixDigitSeparator(ByVal Value As Double, ByVal Digit As Int32, ByVal FloatFract As Boolean)
 
         ' Értékek definiálása
@@ -1170,8 +1203,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Lemez sorozatszám korrekció (Windows 7) ***
-    ' Bemenet: Value -> Sorozatszám (String)
-    ' Kimenet: ConvValue -> Formázott érték (String)
+    ' Bemenet: Value     -> sorozatszám (String)
+    ' Kimenet: ConvValue -> formázott érték (String)
     Private Function DiskSerialNumberConv(ByVal Value As String)
 
         ' Értékek definiálása
@@ -1212,8 +1245,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Sebesség értékek frissítése a statisztikához (folyamatos) ***
-    ' Bemenet: TraffReset -> Forgalom nullázása (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Bemenet: TraffReset -> forgalom nullázása (Boolean)
+    ' Kimenet: *          -> hamis érték (Boolean)
     Private Function UpdateSpeedStatistics(ByVal TraffReset As Boolean)
 
         ' Értékek definiálása
@@ -1356,8 +1389,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Forgalomszámláló tömb feltöltése és értékek frissítése ***
-    ' Bemenet: TraffReset -> Forgalom nullázása (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Bemenet: TraffReset -> forgalom nullázása (Boolean)
+    ' Kimenet: *          -> hamis érték (Boolean)
     Private Function UpdateTraffArray(ByVal TraffReset As Boolean)
 
         ' Értékek definiálása
@@ -1424,7 +1457,7 @@ Public Class MainWindow
 
     ' *** FÜGGVÉNY: Hardver lista újratöltése ***
     ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateHWList(ByVal ResetFlag As Boolean)
 
         ' Lista kiürítése
@@ -1448,7 +1481,7 @@ Public Class MainWindow
 
     ' *** FÜGGVÉNY: Processzor lista újratöltése ***
     ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateCPUList(ByVal ResetFlag As Boolean)
 
         ' Lista kiürítése
@@ -1496,7 +1529,7 @@ Public Class MainWindow
 
     ' *** FÜGGVÉNY: Lemezlista újratöltése ***
     ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateDiskList(ByVal ResetFlag As Boolean)
 
         ' Lista kiürítése
@@ -1569,7 +1602,7 @@ Public Class MainWindow
 
     ' *** FÜGGVÉNY: Videokártya lista újratöltése ***
     ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateVideoList(ByVal ResetFlag As Boolean)
 
         ' Lista kiürítése
@@ -1607,7 +1640,7 @@ Public Class MainWindow
 
     ' *** FÜGGVÉNY: Interfész lista újratöltése ***
     ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateInterfaceList(ByVal ResetFlag As Boolean)
 
         ' Értékek definiálása
@@ -1697,8 +1730,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Forgalmi diagram készítése ***
-    ' Bemenet: TraffReset -> Forgalom nullázása (Boolean)
-    ' Kimenet: Boolean (False)
+    ' Bemenet: TraffReset -> forgalom nullázása (Boolean)
+    ' Kimenet: *          -> hamis érték (Boolean)
     Private Function MakeChart(ByVal TraffReset As Boolean)
 
         ' Értékek definiálása
@@ -2166,8 +2199,8 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Közvetett időzítő ***
-    ' Bemenet: Void
-    ' Kimenet: Boolean (False)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function TraffRefresh()
 
         ' Diagram ToolTip beállítása (másodpercek kiírásával)
@@ -2294,11 +2327,6 @@ Public Class MainWindow
                 ' ToolTip sztringek
                 Tip_Language = "Language selection"
                 Tip_HW = "Component selection"
-                Tip_CPU = "Processor selection"
-                Tip_Disk = "Disk selection"
-                Tip_Part = "Volume selection"
-                Tip_Video = "Graphics card selection"
-                Tip_Interface = "Network adapter selection"
                 Tip_Reload = "Reload list"
                 Tip_Chart = "Traffic history chart"
                 Tip_Average = "seconds averages"
@@ -2442,11 +2470,6 @@ Public Class MainWindow
                 ' ToolTip sztringek
                 Tip_Language = "Nyelv kiválasztása"
                 Tip_HW = "Komponens kiválasztása"
-                Tip_CPU = "Processzor kiválasztása"
-                Tip_Disk = "Lemez kiválasztása"
-                Tip_Part = "Kötet kiválasztása"
-                Tip_Video = "Videokártya kiválasztása"
-                Tip_Interface = "Hálózati adapter kiválasztása"
                 Tip_Reload = "Lista újratöltése"
                 Tip_Chart = "Adatforgalmi előzmények diagramja"
                 Tip_Average = "másodperces átlagok"
@@ -2562,11 +2585,6 @@ Public Class MainWindow
         ' Checkbox és Combobox ToolTip értékek beállítása
         EventToolTip.SetToolTip(ComboBox_LanguageList, Tip_Language)
         EventToolTip.SetToolTip(ComboBox_HWList, Tip_HW)
-        EventToolTip.SetToolTip(ComboBox_CPUList, Tip_CPU)
-        EventToolTip.SetToolTip(ComboBox_DiskList, Tip_Disk)
-        EventToolTip.SetToolTip(ComboBox_PartList, Tip_Part)
-        EventToolTip.SetToolTip(ComboBox_VideoList, Tip_Video)
-        EventToolTip.SetToolTip(ComboBox_InterfaceList, Tip_Interface)
         EventToolTip.SetToolTip(Button_DiskListReload, Tip_Reload)
         EventToolTip.SetToolTip(Button_VideoListReload, Tip_Reload)
         EventToolTip.SetToolTip(Button_InterfaceListReload, Tip_Reload)
@@ -2664,6 +2682,9 @@ Public Class MainWindow
         ' Videokártya információk lekérdezése
         SetCPUInformation()
 
+        ' ToolTip érték beállítása
+        EventToolTip.SetToolTip(ComboBox_CPUList, ComboBox_CPUList.Items(SelectedCPU))
+
     End Sub
 
     ' *** ELJÁRÁS: Meghajtó kiválasztása ***
@@ -2682,6 +2703,9 @@ Public Class MainWindow
 
         ' Értékek lekérdezése
         SetDiskInformation()
+
+        ' ToolTip érték beállítása
+        EventToolTip.SetToolTip(ComboBox_DiskList, ComboBox_DiskList.Items(SelectedDisk))
 
     End Sub
 
@@ -2710,6 +2734,9 @@ Public Class MainWindow
             Value_PartInfo.Text = PartInfo(SelectedPartition)
         End If
 
+        ' ToolTip érték beállítása
+        EventToolTip.SetToolTip(ComboBox_PartList, ComboBox_PartList.Items(SelectedPartition))
+
     End Sub
 
     ' *** ELJÁRÁS: Videokártya kiválasztása ***
@@ -2721,6 +2748,9 @@ Public Class MainWindow
 
         ' Videokártya információk lekérdezése
         SetVideoInformation()
+
+        ' ToolTip érték beállítása
+        EventToolTip.SetToolTip(ComboBox_VideoList, ComboBox_VideoList.Items(SelectedVideo))
 
     End Sub
 
@@ -2736,6 +2766,9 @@ Public Class MainWindow
 
         ' Diagram frissítése
         MakeChart(True)
+
+        ' ToolTip érték beállítása
+        EventToolTip.SetToolTip(ComboBox_InterfaceList, ComboBox_InterfaceList.Items(SelectedInterface))
 
     End Sub
 
@@ -2860,6 +2893,7 @@ Public Class MainWindow
 
             ' Buboréküzenet megjelenítése, majd későbbi kikapcsolása (Csak az első tálcára tételkor jelenik meg!)
             If Not DisableBalloon Then
+                OpenFile = False
                 MainNotifyIcon.ShowBalloonTip(3000, MyName + " - " + Str_Note, Str_Taskbar, ToolTipIcon.Info)
                 DisableBalloon = True
             End If
@@ -3061,9 +3095,6 @@ Public Class MainWindow
         ' Kép megnyitása, a buboréközenet fájl mentésére vonatkozik (egyébként a főablak előtérbe hozása)
         If OpenFile Then
             Process.Start(SavePath)
-
-            ' Buboréküzenet állapot visszaállítása
-            OpenFile = False
         Else
             ' Főablak előtérbe hozása
             Me.Visible = True

@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 2.5.0 Build 5000 (2019-05-29)
+## Current stable version: 2.5.1 Build 5010 (2019-09-18)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -20,6 +20,13 @@ __License:__ GNU General Public License v2.0.
 ![](Screenshots/SINMx86_MainWindow_Win7.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__2019-09-18 - Version 2.5.1 / Build 5010 (stable)__
+
+- Feketelistás OEM sztringek tömbösített keresése a komponens információkban,
+- Buboréküzenet hiba javítása kis méretre alakítás esetén,
+- Lista ToolTip-ek cseréje: magyarázat helyett a teljes kiválasztás nevének kiírása,
+- Frissítési link javítása, már a legfrisebb stabil kiadásra mutat.
 
 __2019-05-29 - Version 2.5.0 / Build 5000 (stable)__
 
