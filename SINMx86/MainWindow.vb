@@ -61,7 +61,7 @@ Public Class MainWindow
     Public VerticalGrids As Int32 = 1                                               ' Fuggőleges osztóvonalak száma (másodpercre vetítve)
     Public GridSlip As Int32                                                        ' Függőleges rács eltolás
     Public GridUpdate As Boolean = False                                            ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
-    Public TimerSeconds, UptimeSeconds As Int32                                     ' Időértékek: időzítő, futásidő
+    Public SysStartTime As DateTime                                                 ' Rendszer indításának ideje
     Public LatestDownload, LatestUpload As Double                                   ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
     Public ChartCreationTime As DateTime                                            ' Az utolsó diagram elkészülésének ideje
     Public DisableBalloon As Boolean = False                                        ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
@@ -299,22 +299,16 @@ Public Class MainWindow
         ' Hosztnév beálítása az állapotsorban
         StatusLabel_Host.Text = Str_Hostname + ": " + Hostname
 
-        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Futási idő ***
-        objOS = New ManagementObjectSearcher("SELECT LocalDateTime, LastBootUptime FROM Win32_OperatingSystem")
-
-        ' Értékek definiálása
-        Dim CurrentTime As String = Nothing                                         ' Jelenlegi idő
-        Dim SysUpTime As String = Nothing                                           ' Indítás ideje
+        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Rendszerindítás ideje ***
+        objOS = New ManagementObjectSearcher("SELECT LastBootUptime FROM Win32_OperatingSystem")
 
         ' Értékek beállítása
         For Each Me.objMgmt In objOS.Get
-            CurrentTime = objMgmt("LocalDateTime").ToString
-            SysUpTime = objMgmt("LastBootUptime").ToString
+            SysStartTime = DateTimeConv(objMgmt("LastBootUptime"))
         Next
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Futásidő ***
-        UptimeSeconds = DateDiff("s", DateTimeConv(SysUpTime), DateTimeConv(CurrentTime))
-        SetUptime(UptimeSeconds, TimerSeconds)
+        SetUptime()
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Memória információk ***
         SetMemoryInformation()
@@ -854,17 +848,17 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Rendszer futási idő beállítása ***
-    ' Bemenet: UptimeSeconds -> indítás óta eltelt másodpercek (Int32)
-    '          TimerCount    -> számláló állása (Int32)
-    ' Kimenet: *             -> boolean (False)
-    Private Function SetUptime(ByVal UptimeSeconds As Int32, ByVal TimerCount As Int32)
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
+    Private Function SetUptime()
 
         ' Értékek definiálása
+        Dim UptimeSeconds As Int32                 ' Indítás óta eltelt másodpercek száma
         Dim Days, Hours, Minutes, Seconds As Int32 ' Időváltozók (nap, óra, perc, másodperc)
         Dim UptimeString As String = Nothing       ' Futásidő sztring
 
-        ' Futásidő érték növelése (másodperc)
-        UptimeSeconds += TimerCount
+        ' Futásidő érték számítása (másodperc)
+        UptimeSeconds = DateDiff("s", SysStartTime, DateTime.Now)
 
         ' Egységekre bontás
         Days = Int(UptimeSeconds / (24 * 3600))
@@ -875,12 +869,9 @@ Public Class MainWindow
         UptimeSeconds = UptimeSeconds - (Minutes * 60)
         Seconds = Int(UptimeSeconds)
 
-        ' Kiírási sztring beállítása
-        UptimeString = Str_Uptime + ": " + Days.ToString + " " + Str_Days + ", " + Hours.ToString + " " + Str_Hours + ", " +
-                       Minutes.ToString + " " + Str_Mins + " " + Str_And + " " + Seconds.ToString + " " + Str_Secs + "."
-
         ' Kiírás frissítése
-        StatusLabel_Uptime.Text = UptimeString
+        StatusLabel_Uptime.Text = Str_Uptime + ": " + Days.ToString + " " + Str_Days + ", " + Hours.ToString + " " + Str_Hours + ", " +
+                                  Minutes.ToString + " " + Str_Mins + " " + Str_And + " " + Seconds.ToString + " " + Str_Secs + "."
 
         ' Visszatérési érték beállítása
         Return False
@@ -2226,9 +2217,6 @@ Public Class MainWindow
     ' Eseményvezérelt: EventTimer.Tick -> Óra ugrása
     Private Sub EventTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles EventTimer.Tick
 
-        ' Eseményszámláló növelése
-        TimerSeconds += 1
-
         ' Processzorórajel frissítése
         SetCPUInformation()
 
@@ -2236,7 +2224,7 @@ Public Class MainWindow
         SetMemoryInformation()
 
         ' Uptime frissítése
-        SetUptime(UptimeSeconds, TimerSeconds)
+        SetUptime()
 
         ' Interfész statisztika frissítése
         UpdateSpeedStatistics(False)
