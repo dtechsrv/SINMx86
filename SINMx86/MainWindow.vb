@@ -62,6 +62,7 @@ Public Class MainWindow
     Public GridSlip As Int32                                                        ' Függőleges rács eltolás
     Public GridUpdate As Boolean = False                                            ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
     Public SysStartTime As DateTime                                                 ' Rendszer indításának ideje
+    Public TimerLastTick As DateTime                                                ' Közvetlen időzítő időbélyegzője
     Public LatestDownload, LatestUpload As Double                                   ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
     Public ChartCreationTime As DateTime                                            ' Az utolsó diagram elkészülésének ideje
     Public DisableBalloon As Boolean = False                                        ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
@@ -315,9 +316,12 @@ Public Class MainWindow
 
         ' ----- ZÁRÓ MŰVELETEK -----
 
+        ' Kezdeti időbélyegző beállítása az időzítőhöz
+        TimerLastTick = DateTime.Now
+
         ' Időzítő indítása: EventTimer (1 másodperc)
-        EventTimer.Enabled = True
         EventTimer.Interval = 1000
+        EventTimer.Enabled = True
 
         ' Diagram frissítése (gyakorlatilag ez a kezdő reset, mert az óra már ketyeg, de betöltés előtt nem mér!)
         MakeChart(True)
@@ -1265,12 +1269,8 @@ Public Class MainWindow
             ' Lekérdezett értékek feldolgozása
             For Each Me.objMgmt In objNI.Get
 
-                ' Maximálisan felvehető sebességérték (Sávszélesség / 8)
-                If objMgmt("CurrentBandwidth") <> 0 Then
-                    MaxRelativeSpeed = objMgmt("CurrentBandwidth") / 8
-                Else
-                    MaxRelativeSpeed = 1 ' Nullával való osztás elkerülésére
-                End If
+                ' Maximálisan felvehető sebességérték (A sávszélesség nyolcadrésze)
+                MaxRelativeSpeed = objMgmt("CurrentBandwidth") / 8
 
                 ' Aktuális érték az első helyre
                 If objMgmt("BytesReceivedPersec") > (UIntCorrection - 1) Then
@@ -1310,8 +1310,8 @@ Public Class MainWindow
         Value_Bandwidth.Text = FixDigitSeparator(MaxBandwidth(0), 2, True)
         Value_BandwidthUnit.Text = PrefixTable(MaxBandwidth(1)) + "bps"
 
-        ' Forgalomtörlés ellenőrzése
-        If TraffReset Then
+        ' Forgalomtörlés ellenőrzése és 0-val való osztás elkerülése
+        If TraffReset Or MaxRelativeSpeed = 0 Then
 
             ' Forgalomtörlés esetére hibakorrekció
             LatestDownload = CurrentDownload
@@ -1341,7 +1341,8 @@ Public Class MainWindow
 
             ' Kihasználtsági érték kiszámítása (Mivel duplexitást nem lehet lekérdezni, ezért a kettő összege adja a kihasználtság mértékét -> Ez csak half-duplex kapcsolatnál igaz ebben a formában!)
             UsageValue = (CurrentDownload - LatestDownload) + (CurrentUpload - LatestUpload)
-            CurrentUsage = Round(Abs(UsageValue / (MaxRelativeSpeed) * 100))
+
+            CurrentUsage = Round(Abs(UsageValue / MaxRelativeSpeed) * 100)
 
             ' Kiírási értékek láthatóságának beállítása
             Value_InterfaceUsage.Enabled = True
@@ -2211,6 +2212,30 @@ Public Class MainWindow
 
     End Function
 
+    ' *** FÜGGVÉNY: Időzítő időbélyeg ellenőrzése ***
+    ' Bemenet: Tolerance  -> etűrhető késés mértéke másodpercben (Int32)
+    ' Kimenet: StampValid -> időbélyeg érvényesség (Boolean)
+    Private Function CheckTimerStamp(ByVal Tolerance As Int32)
+
+        ' Értékek definiálása
+        Dim TimeDiff As Int32                   ' Az utolsó és a jelenlegi ciklus közti eltérés
+        Dim StampValid As Boolean = False       ' Bélyeg ellenőrzés -> Ha a tartományon kívül van, akkor hamis!
+
+        ' Az utolsó ciklus és a jelenlegi idő összehasonlítása
+        TimeDiff = DateDiff("s", TimerLastTick, DateTime.Now)
+
+        ' Kiesett idő ellenőrzése (pl. készenléti állapot, óraállítás, időszinkron, stb.)
+        If Abs(TimeDiff) >= (EventTimer.Interval / 1000) + Tolerance Then
+            StampValid = False
+        Else
+            StampValid = True
+        End If
+
+        ' Visszatérési érték beállítása
+        Return StampValid
+
+    End Function
+
     ' ----- ELJÁRÁSOK -----
 
     ' *** ELJÁRÁS: Közvetlen időzítő ***
@@ -2226,20 +2251,36 @@ Public Class MainWindow
         ' Uptime frissítése
         SetUptime()
 
-        ' Interfész statisztika frissítése
-        UpdateSpeedStatistics(False)
+        ' Időbélyeg ellenőrzés (tolerancia: 1 másodperc)
+        If CheckTimerStamp(1) Then
 
-        ' Diagramgenerálás időközének beálltása és kiírása az állapotsorban
-        If TraffGenCounter = 0 Then
-            TraffRefresh()
-            TraffGenCounter = RefreshInterval(SelectedRefresh) - 1
-            StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
-            StatusLabel_ChartStatus.Text = Str_ChartDone + " " + (TraffGenCounter + 1).ToString + " " + Str_ChartCount + "..."
+            ' Interfész statisztika frissítése 
+            UpdateSpeedStatistics(False)
+
+            ' Diagramgenerálás időközének beálltása és kiírása az állapotsorban
+            If TraffGenCounter = 0 Then
+                TraffRefresh()
+                TraffGenCounter = RefreshInterval(SelectedRefresh) - 1
+                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+                StatusLabel_ChartStatus.Text = Str_ChartDone + " " + (TraffGenCounter + 1).ToString + " " + Str_ChartCount + "..."
+            Else
+                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
+                StatusLabel_ChartStatus.Text = Str_ChartRedraw + " " + TraffGenCounter.ToString + " " + Str_ChartCount + "..."
+                TraffGenCounter = TraffGenCounter - 1
+            End If
+
         Else
-            StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
-            StatusLabel_ChartStatus.Text = Str_ChartRedraw + " " + TraffGenCounter.ToString + " " + Str_ChartCount + "..."
-            TraffGenCounter = TraffGenCounter - 1
+
+            ' Statisztika nullázása
+            UpdateSpeedStatistics(True)
+
+            ' Diagram frissítése
+            MakeChart(True)
+
         End If
+
+        ' Időbélyegző frissítése
+        TimerLastTick = DateTime.Now
 
     End Sub
 
