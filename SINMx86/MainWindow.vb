@@ -16,7 +16,7 @@ Public Class MainWindow
     Public SplashDefineAsAbout As Boolean = False                                   ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objBT, objPR, objPE, objNI, objVC, objDD, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objBT, objPR, objPE, objNI, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
     ' Beállításjegyzék változói
@@ -54,6 +54,7 @@ Public Class MainWindow
     Public InterfacePresent As Boolean                                              ' Interfészek ellenőrzése (Ha nincs egy sem, akkor hamis!)
     Public DiskList(32) As String                                                   ' Meghajtóindexek tömbje (lekérdezésekhez)
     Public DiskName(32) As String                                                   ' Meghajtók neve (kiírásokhoz)
+    Public DiskSmart(32) As String                                                  ' Meghajtó S.M.A.R.T azonosítója (ha van, egyékbént üres)
     Public PartLabel(32) As String                                                  ' Partíció betűjele (kiírásokhoz)
     Public PartInfo(32) As String                                                   ' Partíció információk (kiírásokhoz)
     Public VideoName(32) As String                                                  ' Videókártyák nevei (kiírásokhoz)
@@ -112,7 +113,7 @@ Public Class MainWindow
         Dim OSVersionArray() As String = Nothing                                    ' OS tagolt verziószám tömbje
 
         ' Értékek beállítása
-        For Each Me.objMgmt In objOS.Get
+        For Each Me.objMgmt In objOS.Get()
             OSVersionArray = Split(objMgmt("Version"), ".")
         Next
 
@@ -131,7 +132,7 @@ Public Class MainWindow
         Dim CPUAddressWidth As Int32 = 0                                            ' Processzor címbusz szélessége
 
         ' Értékek beállítása
-        For Each Me.objMgmt In objPR.Get
+        For Each Me.objMgmt In objPR.Get()
             CPUAddressWidth = ToInt32(objMgmt("AddressWidth"))
         Next
 
@@ -293,7 +294,7 @@ Public Class MainWindow
         objCS = New ManagementObjectSearcher("SELECT Name FROM Win32_ComputerSystem")
 
         ' Értékek beállítása
-        For Each Me.objMgmt In objCS.Get
+        For Each Me.objMgmt In objCS.Get()
             Hostname = objMgmt("Name")
         Next
 
@@ -304,7 +305,7 @@ Public Class MainWindow
         objOS = New ManagementObjectSearcher("SELECT LastBootUptime FROM Win32_OperatingSystem")
 
         ' Értékek beállítása
-        For Each Me.objMgmt In objOS.Get
+        For Each Me.objMgmt In objOS.Get()
             SysStartTime = DateTimeConv(objMgmt("LastBootUptime"))
         Next
 
@@ -363,7 +364,7 @@ Public Class MainWindow
         objBB = New ManagementObjectSearcher("SELECT Manufacturer, Product, SerialNumber FROM Win32_Baseboard")
 
         ' Értékek beállítása -> Alaplap: gyártó, modell, sorozatszám
-        For Each Me.objMgmt In objBB.Get
+        For Each Me.objMgmt In objBB.Get()
             Vendor = RemoveSpaces(objMgmt("Manufacturer"))
             Model = RemoveSpaces(objMgmt("Product"))
             Identifier = RemoveSpaces(objMgmt("SerialNumber"))
@@ -388,7 +389,7 @@ Public Class MainWindow
         objCS = New ManagementObjectSearcher("SELECT Manufacturer, Model FROM Win32_ComputerSystem")
 
         ' Értékek beállítása -> Számítógép: gyártó, modell
-        For Each Me.objMgmt In objCS.Get
+        For Each Me.objMgmt In objCS.Get()
             Vendor = RemoveSpaces(objMgmt("Manufacturer"))
             Model = RemoveSpaces(objMgmt("Model"))
         Next
@@ -398,7 +399,7 @@ Public Class MainWindow
         objBS = New ManagementObjectSearcher("SELECT SerialNumber, Manufacturer, SMBIOSBIOSVersion, ReleaseDate FROM Win32_BIOS")
 
         ' Értékek beállítása -> Számítógép: sorozatszám
-        For Each Me.objMgmt In objBS.Get
+        For Each Me.objMgmt In objBS.Get()
             Identifier = RemoveSpaces(objMgmt("SerialNumber"))
         Next
 
@@ -420,7 +421,7 @@ Public Class MainWindow
         End If
 
         ' Értékek beállítása -> BIOS: gyártó, verziószám, dátum
-        For Each Me.objMgmt In objBS.Get
+        For Each Me.objMgmt In objBS.Get()
             Vendor = RemoveSpaces(objMgmt("Manufacturer"))
             Model = RemoveSpaces(objMgmt("SMBIOSBIOSVersion"))
             Identifier = Format(DateTimeConv(objMgmt("ReleaseDate").ToString), "yyyy-MM-dd")
@@ -446,16 +447,14 @@ Public Class MainWindow
         Dim BattVolt As Int32 = 0                           ' Akkumulátor névleges feszültsége
 
         ' Akkumulátorok számának meghatározása
-        For Each Me.objMgmt In objBT.Get
-            BattCount += 1
-        Next
+        BattCount = objBT.Get().Count
 
         ' Értékek beállítása -> Akkumulátor: név, azonosító, feszültség
         If BattCount = 0 Then
             HWVendor(3) = Nothing
             HWIdentifier(3) = Nothing
         Else
-            For Each Me.objMgmt In objBT.Get
+            For Each Me.objMgmt In objBT.Get()
                 Vendor = RemoveSpaces(RemoveInvalidChars(objMgmt("DeviceID")))
                 Model = RemoveSpaces(RemoveInvalidChars(objMgmt("Name")))
                 BattVolt = objMgmt("DesignVoltage")
@@ -508,7 +507,7 @@ Public Class MainWindow
         objPR = New ManagementObjectSearcher("SELECT NumberOfCores, NumberOfLogicalProcessors, CurrentClockSpeed, MaxClockSpeed FROM Win32_Processor")
 
         ' Értékek kinyerése a WMI-ből
-        For Each Me.objMgmt In objPR.Get
+        For Each Me.objMgmt In objPR.Get()
             If CPUCount = SelectedCPU Then
                 CPUCoreNumber = objMgmt("NumberOfCores")
                 CPUThreadNumber = objMgmt("NumberOfLogicalProcessors")
@@ -542,7 +541,7 @@ Public Class MainWindow
         objOS = New ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem")
 
         ' Értékek kinyerése a WMI-ből
-        For Each Me.objMgmt In objOS.Get
+        For Each Me.objMgmt In objOS.Get()
             OSName = RemoveSpaces(objMgmt("Caption"))
             OSService = objMgmt("ServicePackMajorVersion")
             If OSMajorVersion > 5 Then
@@ -591,7 +590,7 @@ Public Class MainWindow
         objOS = New ManagementObjectSearcher("SELECT TotalVisibleMemorySize, FreePhysicalMemory, TotalVirtualMemorySize, FreeVirtualMemory FROM Win32_OperatingSystem")
 
         ' Értékek kinyerése a WMI-ből
-        For Each Me.objMgmt In objOS.Get
+        For Each Me.objMgmt In objOS.Get()
             PMemSize = objMgmt("TotalVisibleMemorySize")
             PMemFree = objMgmt("FreePhysicalMemory")
             PMemPerc = Round(((PMemSize - PMemFree) / PMemSize) * 100).ToString
@@ -649,7 +648,7 @@ Public Class MainWindow
         objDD = New ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive WHERE Index = '" + DiskList(SelectedDisk) + "'")
 
         ' Lemezinformáció kinyerése a WMI-ből
-        For Each Me.objMgmt In objDD.Get
+        For Each Me.objMgmt In objDD.Get()
             Capacity = objMgmt("Size")
             Connector = objMgmt("InterfaceType")
             DiskIndex = objMgmt("Index")
@@ -713,7 +712,7 @@ Public Class MainWindow
         If Connector = "IDE" Then
             Value_DiskInterface.Text = "IDE / SATA"
         ElseIf Connector = "SCSI" Then
-            Value_DiskInterface.Text = "SCSI / SAS (RAID)"
+            Value_DiskInterface.Text = "SCSI / SAS"
         Else
             Value_DiskInterface.Text = Connector
         End If
@@ -731,12 +730,12 @@ Public Class MainWindow
         objDP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskID + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
 
         ' Partíciók kinyerése a WMI-ből
-        For Each Me.objMgmt In objDP.Get
+        For Each Me.objMgmt In objDP.Get()
             PartID = objMgmt("DeviceID")
 
             ' Meghajtóbetűjelek kinyerése a WMI-ből
             objLP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + PartID + "'} WHERE AssocClass = Win32_LogicalDiskToPartition")
-            For Each Me.objRes In objLP.Get
+            For Each Me.objRes In objLP.Get()
                 PartList(PartNum) = objRes("DeviceID")
                 PartNum += 1
             Next
@@ -755,7 +754,7 @@ Public Class MainWindow
             ComboBox_PartList.Enabled = True
             For PartCount = 0 To PartNum - 1
                 objLD = New ManagementObjectSearcher("SELECT DeviceID, FileSystem, Size, VolumeName FROM Win32_LogicalDisk WHERE DeviceID = '" + PartList(PartCount) + "'")
-                For Each Me.objMgmt In objLD.Get
+                For Each Me.objMgmt In objLD.Get()
 
                     ' Meghajtóbetűjel
                     PartList(PartCount) = objMgmt("DeviceID")
@@ -813,7 +812,7 @@ Public Class MainWindow
         Dim VideoCount As Int32 = 0                             ' Videokártya sorszáma
 
         ' Értékek beállítása
-        For Each Me.objMgmt In objVC.Get
+        For Each Me.objMgmt In objVC.Get()
             If VideoCount = SelectedVideo Then
                 VideoMemory = objMgmt("AdapterRAM")
                 VideoResolution(0) = objMgmt("CurrentHorizontalResolution")
@@ -1267,7 +1266,7 @@ Public Class MainWindow
             objNI = New ManagementObjectSearcher("SELECT CurrentBandwidth, BytesReceivedPersec, BytesSentPersec FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
 
             ' Lekérdezett értékek feldolgozása
-            For Each Me.objMgmt In objNI.Get
+            For Each Me.objMgmt In objNI.Get()
 
                 ' Maximálisan felvehető sebességérték (A sávszélesség nyolcadrésze)
                 MaxRelativeSpeed = objMgmt("CurrentBandwidth") / 8
@@ -1401,7 +1400,7 @@ Public Class MainWindow
         objNI = New ManagementObjectSearcher("SELECT * FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
 
         ' Lekérdezett értékek feldolgozása
-        For Each Me.objMgmt In objNI.Get
+        For Each Me.objMgmt In objNI.Get()
 
             ' Aktuális letöltési érték az első helyre
             If objMgmt("BytesReceivedPersec") >= UIntCorrection Then
@@ -1488,7 +1487,7 @@ Public Class MainWindow
         Dim CPUDataWidth As Int32 = 0                           ' Processzor adatbusz szélessége
 
         ' Értékek beállítása
-        For Each Me.objMgmt In objPR.Get
+        For Each Me.objMgmt In objPR.Get()
             CPUString(CPUCount) = RemoveSpaces(objMgmt("Name"))
             CPUDataWidth = objMgmt("DataWidth")
             CPUCount += 1
@@ -1528,15 +1527,22 @@ Public Class MainWindow
         ComboBox_DiskList.Items.Clear()
 
         ' WMI lekérdezés: Win32_DiskDrive -> Lemezmeghajtók
-        objDD = New ManagementObjectSearcher("SELECT Index, Model FROM Win32_DiskDrive")
+        objDD = New ManagementObjectSearcher("SELECT Index, Model, InterfaceType, PNPDeviceID FROM Win32_DiskDrive")
 
         ' Számláló beállítása
         Dim DiskCount As Int32 = 0                              ' Lemezek sorszáma
-        Dim SortCount, ListCount As Int32                       ' Sorbarendezési sorszámok
+        Dim ListCount As Int32 = 0                              ' Lista szerinti sorszámok
+        Dim SortCount As Int32 = 0                              ' Sorbarendezési sorszámok
+        Dim DiskPnPID(32) As String                             ' Lemez PnP azonosítója
+        Dim DiskInterface(32) As String                         ' Lemez csatlakozófelülette
+        Dim Listlabel As String = Nothing                       ' Lemez megjelenítendő neve
 
-        For Each Me.objMgmt In objDD.Get
-            DiskList(DiskCount) = ToInt32(objMgmt("Index"))
-            DiskName(DiskList(DiskCount)) = RemoveSpaces(objMgmt("Model"))
+        For Each Me.objMgmt In objDD.Get()
+            ListCount = ToInt32(objMgmt("Index"))
+            DiskName(ListCount) = RemoveSpaces(objMgmt("Model"))
+            DiskInterface(ListCount) = objMgmt("InterfaceType")
+            DiskPnPID(ListCount) = objMgmt("PNPDeviceID")
+            DiskList(DiskCount) = ListCount
             DiskCount += 1
         Next
 
@@ -1572,9 +1578,94 @@ Public Class MainWindow
 
         Next
 
-        ' Lemezlista feltöltése
+        ' Lemez típusának meghatározása (S.M.A.R.T értékből -> Ez nem a "ROOT\CIMV2"-ből való bejegyzés!)
+        objSM = New ManagementObjectSearcher("ROOT\WMI", "SELECT InstanceName, VendorSpecific FROM MSStorageDriver_ATAPISmartData")
+
+        Dim SmartPnPID As String = Nothing                      ' PnP azonosító a S.M.A.R.T-hoz
+        Dim ConvertID As String = Nothing                       ' Konvertált PnP azonosító (összehasonlításhoz)
+        Dim SmartData() As Byte                                 ' S.M.A.R.T adatok tömbje
+        Dim SmartStart As Int32 = 2                             ' S.M.A.R.T rekord kezdő bájtja (az első 2-es)
+        Dim SmartStep As Int32 = 12                             ' S.M.A.R.T bájtok ugrásköze (12-esével)
+        Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
+        Dim DiskHaveSmart(32) As Boolean                        ' S.M.A.R.T tábla elérhetősége
+        Dim DiskIsHDD(32) As Boolean                            ' HDD paramétereket vannak jelen (HDD vagy SSHD)
+        Dim DiskIsSSD(32) As Boolean                            ' SSD paramétereket vannak jelen (SSD vagy SSHD)
+
+        ' S.M.A.R.T értékek kiértékelése
+        For Each Me.objMgmt In objSM.Get()
+            SmartPnPID = objMgmt("InstanceName")
+            SmartData = objMgmt("VendorSpecific")
+
+            ' S.M.A.R.T PnP átalakítása az összehasonlításhoz (Csupa nagybetű, az utolsó két karakter levágva!)
+            ConvertID = UCase(SmartPnPID.Substring(0, SmartPnPID.Length - 2))
+
+            ' S.M.A.R.T azonosíók keresése
+            For ListCount = 0 To DiskCount - 1
+
+                ' Lemez PnP ID és a konvertált azonosító összehasonlítása
+                If ConvertID = DiskPnPID(ListCount) Then
+
+                    ' Létezik S.M.A.R.T tábla a lemezhez
+                    DiskHaveSmart(ListCount) = True
+
+                    ' Lemez S.M.A.R.T azonosítójának mentése
+                    DiskSmart(DiskSort(ListCount)) = Replace(SmartPnPID, "\", "\\")
+
+                    ' Ugrási kezdőérték beállíása
+                    SmartCount = SmartStart
+
+                    ' Léptetés a rekordok között, amíg el nem fogynak
+                    While SmartData(SmartCount) <> 0
+
+                        ' HDD-re jellemző rekord keresése -> Spin Up Time (3) vagy Seek Error Rate (7)
+                        If SmartData(SmartCount) = 3 Or SmartData(SmartCount) = 7 Then
+                            DiskIsHDD(ListCount) = True
+                        End If
+
+                        ' SSD-re jellemző rekord keresése -> Wear Leveling Count (173) vagy Wear Range Delta (177)
+                        If SmartData(SmartCount) = 173 Or SmartData(SmartCount) = 177 Then
+                            DiskIsSSD(ListCount) = True
+                        End If
+
+                        ' Lépésköz beállítása
+                        SmartCount += SmartStep
+                    End While
+                End If
+            Next
+        Next
+
+        ' Lemezlista neveinek legenerálása
         For ListCount = 0 To DiskCount - 1
-            DiskName(ListCount) = ComboBox_DiskList.Items.Add(Str_Disk + " #" + ListCount.ToString + " - " + DiskName(DiskSort(ListCount)))
+
+            ' Címke beállítása
+            Listlabel = Str_Disk + " #" + DiskSort(ListCount).ToString + " - " + DiskName(DiskSort(ListCount))
+            SortCount = DiskSort(ListCount)
+
+            ' S.M.A.R.T tábla meglétének ellenőrzése
+            If DiskHaveSmart(SortCount) Then
+
+                ' SSD, SSHD vagy HDD ellenőrzés
+                If DiskIsSSD(SortCount) Then
+                    If DiskIsHDD(SortCount) Then
+                        Listlabel += " (SSHD)"
+                    Else
+                        Listlabel += " (SSD)"
+                    End If
+                Else
+                    Listlabel += " (HDD)"
+                End If
+            Else
+
+                ' Csatoló típusa alapján történő ellenőrzés
+                If DiskInterface(SortCount) = "USB" Then
+                    Listlabel += " (USB)"
+                ElseIf DiskInterface(SortCount) = "SCSI" Then
+                    Listlabel += " (RAID)"
+                End If
+            End If
+
+            ' Lista feltöltése
+            DiskName(ListCount) = ComboBox_DiskList.Items.Add(Listlabel)
             DiskList(ListCount) = DiskSort(ListCount)
         Next
 
@@ -1607,7 +1698,7 @@ Public Class MainWindow
         Dim VideoCount As Int32 = 0                             ' Kártya sorszáma
 
         ' Értékek beállítása
-        For Each Me.objMgmt In objVC.Get
+        For Each Me.objMgmt In objVC.Get()
             VideoName(VideoCount) = RemoveSpaces(objMgmt("Name"))
             VideoCount += 1
         Next
@@ -1642,9 +1733,7 @@ Public Class MainWindow
         objPE = New ManagementObjectSearcher("SELECT Name FROM Win32_PnPEntity")
 
         ' Eszközszám meghatározása
-        For Each Me.objMgmt In objPE.Get
-            PnPNum += 1
-        Next
+        PnPNum = objPE.Get().Count
 
         ' Értékek definiálása
         Dim PnPList(PnPNum - 1) As String                       ' PnP eszhöznevek tömbje
@@ -1652,7 +1741,7 @@ Public Class MainWindow
         Dim PnPCount As Int32 = 0                               ' Eszköz sorszáma
 
         ' PnP hálózati kártya nevek lekérdezése 
-        For Each Me.objMgmt In objPE.Get
+        For Each Me.objMgmt In objPE.Get()
             PnPList(PnPCount) = RemoveSpaces(objMgmt("Name"))
             If InStr(PnPList(PnPCount), " - Packet Scheduler Miniport") Then
                 PnPList(PnPCount) = Replace(PnPList(PnPCount), " - Packet Scheduler Miniport", "")
@@ -1671,7 +1760,7 @@ Public Class MainWindow
         Dim InterfaceCount As Int32 = 0                         ' Interfészek sorszáma
 
         ' Interfészlista feltöltése (isatap adapterek kihagyása a listából)
-        For Each Me.objMgmt In objNI.Get
+        For Each Me.objMgmt In objNI.Get()
             If InStr(objMgmt("Name"), "isatap") = False Then
                 InterfaceList(InterfaceCount) = objMgmt("Name")
 
