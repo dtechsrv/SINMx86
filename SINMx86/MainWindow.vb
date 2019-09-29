@@ -1588,8 +1588,7 @@ Public Class MainWindow
         Dim SmartStep As Int32 = 12                             ' S.M.A.R.T bájtok ugrásköze (12-esével)
         Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
         Dim DiskHaveSmart(32) As Boolean                        ' S.M.A.R.T tábla elérhetősége
-        Dim DiskIsHDD(32) As Boolean                            ' HDD paramétereket vannak jelen (HDD vagy SSHD)
-        Dim DiskIsSSD(32) As Boolean                            ' SSD paramétereket vannak jelen (SSD vagy SSHD)
+        Dim DiskIsSSD(32) As Boolean                            ' SSD érzékelés
 
         ' S.M.A.R.T értékek kiértékelése
         For Each Me.objMgmt In objSM.Get()
@@ -1617,11 +1616,6 @@ Public Class MainWindow
                     ' Léptetés a rekordok között, amíg el nem fogynak
                     While SmartData(SmartCount) <> 0
 
-                        ' HDD-re jellemző rekord keresése -> Spin Up Time (3) vagy Seek Error Rate (7)
-                        If SmartData(SmartCount) = 3 Or SmartData(SmartCount) = 7 Then
-                            DiskIsHDD(ListCount) = True
-                        End If
-
                         ' SSD-re jellemző rekord keresése -> Wear Leveling Count (173) vagy Wear Range Delta (177)
                         If SmartData(SmartCount) = 173 Or SmartData(SmartCount) = 177 Then
                             DiskIsSSD(ListCount) = True
@@ -1646,11 +1640,7 @@ Public Class MainWindow
 
                 ' SSD, SSHD vagy HDD ellenőrzés
                 If DiskIsSSD(SortCount) Then
-                    If DiskIsHDD(SortCount) Then
-                        Listlabel += " (SSHD)"
-                    Else
-                        Listlabel += " (SSD)"
-                    End If
+                    Listlabel += " (SSD)"
                 Else
                     Listlabel += " (HDD)"
                 End If
