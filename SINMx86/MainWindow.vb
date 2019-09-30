@@ -23,14 +23,18 @@ Public Class MainWindow
     Public RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\\" + MyName, True)
 
     ' Nyelvi sztringek
-    Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Serv, Str_Loading, Str_LoadReg, Str_LoadWMI, Str_MemUse, Str_MemFree, Str_Uptime, Str_Date,
-           Str_DayName(7), Str_MonthName(12), Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator, Str_Disk, Str_Motherboard,
-           Str_System, Str_BIOS, Str_Battery, Str_Serial, Str_Volt, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak,
-           Str_ChartTime, Str_ChartDown, Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname, Str_ChartCount,
-           Str_Note, Str_NoDisk, Str_NoName, Str_NotAvailable, Str_Unknown, Str_None, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved, Str_Close As String
+    Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Serv, Str_MemUse, Str_MemFree, Str_Uptime, Str_Date, Str_DayName(7), Str_MonthName(12),
+           Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator, Str_Disk, Str_Motherboard, Str_System, Str_BIOS,
+           Str_Battery, Str_Serial, Str_Volt, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak, Str_ChartTime,
+           Str_ChartDown, Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname, Str_ChartCount, Str_Note,
+           Str_NoDisk, Str_NoName, Str_NotAvailable, Str_Unknown, Str_None, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved As String
+
+    ' Külső nyelvi sztingek (Ablakok: Splash, S.M.A.R.T)
+    Public Str_SplashLoad, Str_SplashReg, Str_SplashWMI, Str_SplashClose As String
+    Public Str_SmartTitle, Str_SmartRecord, Str_SmartTreshold, Str_SmartValue, Str_SmartWorst, Str_SmartData, Str_SmartClose As String
 
     ' ToolTip sztringek
-    Public Tip_Language, Tip_HW, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown, Tip_ChartUp, Tip_Refresh, Tip_Exit, Tip_LinkBottom, Tip_Hostname,
+    Public Tip_Language, Tip_HW, Tip_Smart, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown, Tip_ChartUp, Tip_Refresh, Tip_Exit, Tip_LinkBottom, Tip_Hostname,
            Tip_Uptime, Tip_Status, Tip_TopMost, Tip_Screenshot As String
 
     ' Checkboxok és menüelemek változói
@@ -55,6 +59,7 @@ Public Class MainWindow
     Public DiskList(32) As String                                                   ' Meghajtóindexek tömbje (lekérdezésekhez)
     Public DiskName(32) As String                                                   ' Meghajtók neve (kiírásokhoz)
     Public DiskSmart(32) As String                                                  ' Meghajtó S.M.A.R.T azonosítója (ha van, egyékbént üres)
+    Public DiskType(32) As String                                                   ' Meghajtó típusa: SSD/HDD (Ha nincs S.M.A.R.T, akkor üres)
     Public PartLabel(32) As String                                                  ' Partíció betűjele (kiírásokhoz)
     Public PartInfo(32) As String                                                   ' Partíció információk (kiírásokhoz)
     Public VideoName(32) As String                                                  ' Videókártyák nevei (kiírásokhoz)
@@ -195,7 +200,7 @@ Public Class MainWindow
         ' Splash Screen betöltése és státusz frissítése
         If Not CheckedSplashDisable Then
             LoadSplash.Visible = True
-            LoadSplash.Splash_Status.Text = Str_Loading + ": " + Str_LoadReg + "..."
+            LoadSplash.Splash_Status.Text = Str_SplashLoad + ": " + Str_SplashReg + "..."
         End If
 
         ' *** REGISTRY LEKÉRDEZÉS: Frissítési időköz ***
@@ -287,7 +292,7 @@ Public Class MainWindow
 
         ' Splash Screen státusz frissítése
         If Not CheckedSplashDisable Then
-            LoadSplash.Splash_Status.Text = Str_Loading + ": " + Str_LoadWMI + "..."
+            LoadSplash.Splash_Status.Text = Str_SplashLoad + ": " + Str_SplashWMI + "..."
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem" -> Hosztnév ***
@@ -636,10 +641,7 @@ Public Class MainWindow
 
         ' Értékek definiálása
         Dim DiskIndex As Int32 = 0                          ' Lemez sorszáma
-        Dim Capacity As Double = 0                          ' Lemez kapacitása
-        Dim FormattedCapacity(2) As Double                  ' Formázott kapacitás
         Dim Connector As String = Nothing                   ' Csatolófelület
-        Dim SectorSize As Int32 = 0                         ' Szektorméret
         Dim Firmware As String = Nothing                    ' Firmware revízió
         Dim SerialNumber As String = Nothing                ' Sorozatszám
         Dim DiskID As String = Nothing                      ' Lemez azonosító
@@ -649,7 +651,6 @@ Public Class MainWindow
 
         ' Lemezinformáció kinyerése a WMI-ből
         For Each Me.objMgmt In objDD.Get()
-            Capacity = objMgmt("Size")
             Connector = objMgmt("InterfaceType")
             DiskIndex = objMgmt("Index")
             DiskID = objMgmt("DeviceID")
@@ -680,19 +681,7 @@ Public Class MainWindow
             Firmware = RemoveInvalidChars(Firmware)
         End If
 
-        ' Kapacitás konvertálása 
-        FormattedCapacity = DynByteConv(Capacity, 2)
-
-        ' Nulla bájtos lemezméret korrekció -> Nincs lemez!
-        If Capacity = 0 Then
-            Value_DiskCapacity.Enabled = False
-            Value_DiskCapacity.Text = Str_NoDisk
-        Else
-            Value_DiskCapacity.Enabled = True
-            Value_DiskCapacity.Text = FixDigitSeparator(FormattedCapacity(0), 2, True) + " " + PrefixTable(FormattedCapacity(1)) + "B"
-        End If
-
-        ' Kiírások formázása
+        ' Sorozatszám beállítása
         If SerialNumber = Nothing Then
             Value_DiskSerial.Enabled = False
             Value_DiskSerial.Text = Str_NotAvailable
@@ -701,6 +690,7 @@ Public Class MainWindow
             Value_DiskSerial.Text = SerialNumber
         End If
 
+        ' Firmware revízió beállítása
         If Firmware = Nothing Then
             Value_DiskFirmware.Enabled = False
             Value_DiskFirmware.Text = Str_NotAvailable
@@ -709,12 +699,22 @@ Public Class MainWindow
             Value_DiskFirmware.Text = Firmware
         End If
 
+        ' Csatolófelület beállítása
         If Connector = "IDE" Then
             Value_DiskInterface.Text = "IDE / SATA"
         ElseIf Connector = "SCSI" Then
-            Value_DiskInterface.Text = "SCSI / SAS"
+            Value_DiskInterface.Text = "SCSI / SAS (RAID)"
         Else
             Value_DiskInterface.Text = Connector
+        End If
+
+        ' Lemez típus beállítása
+        If DiskType(SelectedDisk) <> Nothing Then
+            Value_MediaType.Enabled = True
+            Value_MediaType.Text = DiskType(SelectedDisk)
+        Else
+            Value_MediaType.Enabled = False
+            Value_MediaType.Text = Str_Unknown
         End If
 
         ' Partícióelemzéshez használt változók
@@ -1099,7 +1099,7 @@ Public Class MainWindow
     ' Bemenet: Value       -> bájt (Double)
     '          Digit       -> elválasztó utáni helyiértékek száma (Int32)
     ' Kimenet: ConvValue() -> formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
-    Private Function DynByteConv(ByVal Value As Double, ByVal Digit As Int32)
+    Public Function DynByteConv(ByVal Value As Double, ByVal Digit As Int32)
 
         ' Értékek definiálása
         Dim Prefix, ConvValue(2) As Double
@@ -1124,7 +1124,7 @@ Public Class MainWindow
     ' Bemenet: Value       -> bit (Double)
     '          Digit       -> elválasztó utáni helyiértékek száma (Int32)
     ' Kimenet: ConvValue() -> formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
-    Private Function DynBitConv(ByVal Value As Double, ByVal Digit As Int32)
+    Public Function DynBitConv(ByVal Value As Double, ByVal Digit As Int32)
 
         ' Értékek definiálása
         Dim Prefix, ConvValue(2) As Double
@@ -1150,7 +1150,7 @@ Public Class MainWindow
     '          Digit      -> elválasztó utáni helyiértékek száma (Int32)
     '          FloatFract -> lebegő (True) vagy statikus (False) törtformátum (Boolean)
     ' Kimenet: ConvString -> formázott tizedestört (String)
-    Private Function FixDigitSeparator(ByVal Value As Double, ByVal Digit As Int32, ByVal FloatFract As Boolean)
+    Public Function FixDigitSeparator(ByVal Value As Double, ByVal Digit As Int32, ByVal FloatFract As Boolean)
 
         ' Értékek definiálása
         Dim IntString, ConvString As String
@@ -1527,21 +1527,22 @@ Public Class MainWindow
         ComboBox_DiskList.Items.Clear()
 
         ' WMI lekérdezés: Win32_DiskDrive -> Lemezmeghajtók
-        objDD = New ManagementObjectSearcher("SELECT Index, Model, InterfaceType, PNPDeviceID FROM Win32_DiskDrive")
+        objDD = New ManagementObjectSearcher("SELECT Index, Model, Size, PNPDeviceID FROM Win32_DiskDrive")
 
         ' Számláló beállítása
         Dim DiskCount As Int32 = 0                              ' Lemezek sorszáma
         Dim ListCount As Int32 = 0                              ' Lista szerinti sorszámok
         Dim SortCount As Int32 = 0                              ' Sorbarendezési sorszámok
         Dim DiskPnPID(32) As String                             ' Lemez PnP azonosítója
-        Dim DiskInterface(32) As String                         ' Lemez csatlakozófelülette
+        Dim Capacity(32) As Double                              ' Lemez kapacitása
+        Dim FormattedCapacity(2) As Double                      ' Formázott kapacitás érték
         Dim Listlabel As String = Nothing                       ' Lemez megjelenítendő neve
 
         For Each Me.objMgmt In objDD.Get()
             ListCount = ToInt32(objMgmt("Index"))
             DiskName(ListCount) = RemoveSpaces(objMgmt("Model"))
-            DiskInterface(ListCount) = objMgmt("InterfaceType")
             DiskPnPID(ListCount) = objMgmt("PNPDeviceID")
+            Capacity(ListCount) = objMgmt("Size")
             DiskList(DiskCount) = ListCount
             DiskCount += 1
         Next
@@ -1587,8 +1588,6 @@ Public Class MainWindow
         Dim SmartStart As Int32 = 2                             ' S.M.A.R.T rekord kezdő bájtja (az első 2-es)
         Dim SmartStep As Int32 = 12                             ' S.M.A.R.T bájtok ugrásköze (12-esével)
         Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
-        Dim DiskHaveSmart(32) As Boolean                        ' S.M.A.R.T tábla elérhetősége
-        Dim DiskIsSSD(32) As Boolean                            ' SSD érzékelés
 
         ' S.M.A.R.T értékek kiértékelése
         For Each Me.objMgmt In objSM.Get()
@@ -1604,9 +1603,6 @@ Public Class MainWindow
                 ' Lemez PnP ID és a konvertált azonosító összehasonlítása
                 If ConvertID = DiskPnPID(ListCount) Then
 
-                    ' Létezik S.M.A.R.T tábla a lemezhez
-                    DiskHaveSmart(ListCount) = True
-
                     ' Lemez S.M.A.R.T azonosítójának mentése
                     DiskSmart(DiskSort(ListCount)) = Replace(SmartPnPID, "\", "\\")
 
@@ -1618,12 +1614,18 @@ Public Class MainWindow
 
                         ' SSD-re jellemző rekord keresése -> Wear Leveling Count (173) vagy Wear Range Delta (177)
                         If SmartData(SmartCount) = 173 Or SmartData(SmartCount) = 177 Then
-                            DiskIsSSD(ListCount) = True
+                            DiskType(DiskSort(ListCount)) = "SSD"
                         End If
 
                         ' Lépésköz beállítása
                         SmartCount += SmartStep
                     End While
+
+                    ' HDD beállítása, ha lemez nem SSD
+                    If DiskType(DiskSort(ListCount)) = Nothing Then
+                        DiskType(DiskSort(ListCount)) = "HDD"
+                    End If
+
                 End If
             Next
         Next
@@ -1632,26 +1634,15 @@ Public Class MainWindow
         For ListCount = 0 To DiskCount - 1
 
             ' Címke beállítása
-            Listlabel = Str_Disk + " #" + DiskSort(ListCount).ToString + " - " + DiskName(DiskSort(ListCount))
+            Listlabel = "# " + DiskSort(ListCount).ToString + " - " + DiskName(DiskSort(ListCount))
             SortCount = DiskSort(ListCount)
 
-            ' S.M.A.R.T tábla meglétének ellenőrzése
-            If DiskHaveSmart(SortCount) Then
+            ' Lemezméret beállítása
+            If Capacity(DiskSort(ListCount)) <> 0 Then
 
-                ' SSD, SSHD vagy HDD ellenőrzés
-                If DiskIsSSD(SortCount) Then
-                    Listlabel += " (SSD)"
-                Else
-                    Listlabel += " (HDD)"
-                End If
-            Else
-
-                ' Csatoló típusa alapján történő ellenőrzés
-                If DiskInterface(SortCount) = "USB" Then
-                    Listlabel += " (USB)"
-                ElseIf DiskInterface(SortCount) = "SCSI" Then
-                    Listlabel += " (RAID)"
-                End If
+                ' Kapacitás konvertálása
+                FormattedCapacity = DynByteConv(Capacity(DiskSort(ListCount)), 2)
+                Listlabel += " (" + FixDigitSeparator(FormattedCapacity(0), 2, True) + " " + PrefixTable(FormattedCapacity(1)) + "B)"
             End If
 
             ' Lista feltöltése
@@ -2380,9 +2371,6 @@ Public Class MainWindow
                 Str_Title = "System Information and Network Monitor"
                 Str_Comment = "This software is open source and portable."
                 Str_Version = "Version"
-                Str_Loading = "Loading"
-                Str_LoadReg = "Registry settings"
-                Str_LoadWMI = "WMI database"
                 Str_DigitSeparator = "."
                 Str_Interval = "Intervals"
                 Str_Traffic = "Traffic"
@@ -2430,11 +2418,26 @@ Public Class MainWindow
                 Str_None = "None"
                 Str_Invalid = "Invalid"
                 Str_Inactive = "Inactive"
-                Str_Close = "Close"
+
+                ' Külső nyelvi sztingek (Splash ablak)
+                Str_SplashLoad = "Loading"
+                Str_SplashReg = "Registry settings"
+                Str_SplashWMI = "WMI database"
+                Str_SplashClose = "Close"
+
+                ' Külső nyelvi sztingek (S.M.A.R.T ablak)
+                Str_SmartTitle = "S.M.A.R.T information"
+                Str_SmartRecord = "Record"
+                Str_SmartTreshold = "Treshold"
+                Str_SmartValue = "Value"
+                Str_SmartWorst = "Worst"
+                Str_SmartData = "Data"
+                Str_SmartClose = "&Close"
 
                 ' ToolTip sztringek
                 Tip_Language = "Language selection"
                 Tip_HW = "Component selection"
+                Tip_Smart = "Open S.M.A.R.T table"
                 Tip_Reload = "Reload list"
                 Tip_Chart = "Traffic history chart"
                 Tip_Average = "seconds averages"
@@ -2468,7 +2471,7 @@ Public Class MainWindow
                 Name_OSLang.Text = "Language:"
                 Name_OSRelease.Text = "Release:"
                 Name_DiskList.Text = "Disk drive:"
-                Name_DiskCapacity.Text = "Capacity:"
+                Name_MediaType.Text = "Media type:"
                 Name_DiskInterface.Text = "Interface:"
                 Name_DiskFirmware.Text = "Firmware:"
                 Name_PartList.Text = "Volume:"
@@ -2523,9 +2526,6 @@ Public Class MainWindow
                 Str_Title = "Rendszerinformációk és hálózatfigyelés"
                 Str_Comment = "Ez a szoftver nyílt forrású és hordozható."
                 Str_Version = "Verziószám"
-                Str_Loading = "Betöltés"
-                Str_LoadReg = "Registry beállítások"
-                Str_LoadWMI = "WMI adatbázis"
                 Str_DigitSeparator = ","
                 Str_Interval = "Intervallumok"
                 Str_Traffic = "Forgalom"
@@ -2573,11 +2573,26 @@ Public Class MainWindow
                 Str_None = "Nincs"
                 Str_Invalid = "Érvénytelen"
                 Str_Inactive = "Inaktív"
-                Str_Close = "Bezárás"
+
+                ' Külső nyelvi sztingek (Splash ablak)
+                Str_SplashLoad = "Betöltés"
+                Str_SplashReg = "Registry beállítások"
+                Str_SplashWMI = "WMI adatbázis"
+                Str_SplashClose = "Bezárás"
+
+                ' Külső nyelvi sztingek (S.M.A.R.T ablak)
+                Str_SmartTitle = "S.M.A.R.T információk"
+                Str_SmartRecord = "Rekord"
+                Str_SmartTreshold = "Küszöb"
+                Str_SmartValue = "Érték"
+                Str_SmartWorst = "Legrosszabb"
+                Str_SmartData = "Adat"
+                Str_SmartClose = "&Bezárás"
 
                 ' ToolTip sztringek
                 Tip_Language = "Nyelv kiválasztása"
                 Tip_HW = "Komponens kiválasztása"
+                Tip_Smart = "S.M.A.R.T tábla megnyitása"
                 Tip_Reload = "Lista újratöltése"
                 Tip_Chart = "Adatforgalmi előzmények diagramja"
                 Tip_Average = "másodperces átlagok"
@@ -2611,7 +2626,7 @@ Public Class MainWindow
                 Name_OSLang.Text = "Nyelv:"
                 Name_OSRelease.Text = "Kiadás:"
                 Name_DiskList.Text = "Meghajtó:"
-                Name_DiskCapacity.Text = "Tárterület:"
+                Name_MediaType.Text = "Lemez típus:"
                 Name_DiskInterface.Text = "Interfész:"
                 Name_DiskFirmware.Text = "Firmware:"
                 Name_PartList.Text = "Kötet:"
@@ -2693,6 +2708,7 @@ Public Class MainWindow
         ' Checkbox és Combobox ToolTip értékek beállítása
         EventToolTip.SetToolTip(ComboBox_LanguageList, Tip_Language)
         EventToolTip.SetToolTip(ComboBox_HWList, Tip_HW)
+        EventToolTip.SetToolTip(Button_DiskSmartOpen, Tip_Smart)
         EventToolTip.SetToolTip(Button_DiskListReload, Tip_Reload)
         EventToolTip.SetToolTip(Button_VideoListReload, Tip_Reload)
         EventToolTip.SetToolTip(Button_InterfaceListReload, Tip_Reload)
@@ -2812,6 +2828,13 @@ Public Class MainWindow
         ' Értékek lekérdezése
         SetDiskInformation()
 
+        ' S.M.A.R.T tábla ellenőrzése
+        If DiskSmart(SelectedDisk) <> Nothing Then
+            Button_DiskSmartOpen.Enabled = True
+        Else
+            Button_DiskSmartOpen.Enabled = False
+        End If
+
         ' ToolTip érték beállítása
         EventToolTip.SetToolTip(ComboBox_DiskList, ComboBox_DiskList.Items(SelectedDisk))
 
@@ -2907,6 +2930,19 @@ Public Class MainWindow
 
     End Sub
 
+    ' *** ELJÁRÁS: S.M.A.R.T ablak megnyitása ***
+    ' Eseményvezérelt: Button_DiskSmartOpen.Click -> Klikk (Lemez S.M.A.R.T gomb)
+    Private Sub SmartWindow_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_DiskSmartOpen.Click
+
+        ' Külső ablakok bezárása
+        LoadSplash.Close()
+        SmartWindow.Close()
+
+        ' S.M.A.R.T ablak megnyitása
+        SmartWindow.Visible = True
+
+    End Sub
+
     ' *** ELJÁRÁS: Letöltési diagram generálásának ellenőrzése ***
     ' Eseményvezérelt: MainMenu_ChartItem_DownloadVisible.Click, ChartMenuItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click -> Klikk (Menüelem, Checkbox)
     Private Sub DownloadChartVisible_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ChartItem_DownloadVisible.Click, ChartMenuItem_DownloadVisible.Click, CheckBoxChart_DownloadVisible.Click
@@ -2994,6 +3030,7 @@ Public Class MainWindow
 
         ' Splash ablak bezárása
         LoadSplash.Close()
+        SmartWindow.Close()
 
         ' Kis méret állapotának beállítása
         If Me.WindowState = FormWindowState.Minimized And CheckedMinToTray Then
@@ -3013,8 +3050,9 @@ Public Class MainWindow
     ' Eseményvezérelt: MainNotifyIcon.MouseDoubleClick -> Dupla klikk (Taskbar ikon)
     Private Sub MainNotifyIcon_DoubleClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles MainNotifyIcon.MouseDoubleClick
 
-        ' Splash ablak bezárása
+        ' Külső ablakok bezárása
         LoadSplash.Close()
+        SmartWindow.Close()
 
         ' Változás ellenőrzése és állapot invertálása
         If Me.WindowState = FormWindowState.Normal Then
@@ -3060,8 +3098,9 @@ Public Class MainWindow
     ' Eseményvezérelt: MainMenu_SettingsItem_TopMost.Click, StatusLabel_TopMost.Click, MainContextMenuItem_TopMost.Click -> Állapotváltozás (StatusLabel, Menüelem)
     Private Sub TopMost_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_SettingsItem_TopMost.Click, StatusLabel_TopMost.Click, MainContextMenuItem_TopMost.Click
 
-        ' Splash ablak bezárása
+        ' Külső ablakok bezárása
         LoadSplash.Close()
+        SmartWindow.Close()
 
         ' Változás ellenőrzése és állapot invertálása
         If Me.TopMost Then
@@ -3136,8 +3175,9 @@ Public Class MainWindow
     ' Eseményvezérelt: MainMenu_ActionItem_About.Click, MainContextMenuItem_About.Click, Link_Bottom.LinkClicked -> Klikk (Menüelem, Link)
     Private Sub LoadSplash_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ActionItem_About.Click, MainContextMenuItem_About.Click, Link_Bottom.LinkClicked
 
-        ' Splash ablak bezárása
+        ' Külső ablakok bezárása
         LoadSplash.Close()
+        SmartWindow.Close()
 
         ' Splash időzítő újbóli elindítása és ablak megjelenítése
         LoadSplash.SplashTimer.Enabled = False

@@ -37,7 +37,7 @@ Public NotInheritable Class LoadSplash
 
         ' Állapotellenőrzés: Névjegy vagy betöltőképernyő?
         If MainWindow.SplashDefineAsAbout Then
-            Link_SplashClose.Text = MainWindow.Str_Close
+            Link_SplashClose.Text = MainWindow.Str_SplashClose
             Splash_Status.Text = My.Application.Info.Copyright
 
             If MainWindow.TopMost Then
@@ -47,7 +47,7 @@ Public NotInheritable Class LoadSplash
             End If
         Else
             Link_SplashClose.Text = Nothing
-            Splash_Status.Text = MainWindow.Str_Loading + "..." ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
+            Splash_Status.Text = MainWindow.Str_SplashLoad + "..." ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
 
             Me.TopMost = True
         End If

@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("2.5.902.5026")> 
-<Assembly: AssemblyFileVersion("2.5.902.5026")> 
+<Assembly: AssemblyVersion("3.0.900.5070")> 
+<Assembly: AssemblyFileVersion("3.0.900.5070")> 
 
 <Assembly: NeutralResourcesLanguageAttribute("hu-HU")> 

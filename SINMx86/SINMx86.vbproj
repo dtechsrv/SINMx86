@@ -156,6 +156,12 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Settings.vb" />
+    <Compile Include="SmartWindow.Designer.vb">
+      <DependentUpon>SmartWindow.vb</DependentUpon>
+    </Compile>
+    <Compile Include="SmartWindow.vb">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainWindow.resx">
@@ -169,6 +175,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LoadSplash.resx">
       <DependentUpon>LoadSplash.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SmartWindow.resx">
+      <DependentUpon>SmartWindow.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -211,17 +220,18 @@
     <None Include="Resources\Splash\hikari.png" />
     <None Include="Resources\Splash\midori.png" />
     <None Include="Resources\Controls\refresh.gif" />
-    <None Include="Resources\Controls\computer.gif" />
+    <None Include="Resources\Controls\info.gif" />
     <None Include="Resources\Controls\uptime.gif" />
     <None Include="Resources\Controls\load.gif" />
     <None Include="Resources\Controls\pin_green.gif" />
     <None Include="Resources\Controls\pin_red.gif" />
     <None Include="Resources\Controls\check.gif" />
-    <None Include="Resources\Controls\screenshot.gif" />
+    <None Include="Resources\Controls\camera.gif" />
+    <None Include="Resources\Controls\hdd.gif" />
     <Content Include="Resources\Icon\main.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
