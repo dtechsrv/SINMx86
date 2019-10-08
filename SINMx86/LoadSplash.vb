@@ -1,11 +1,10 @@
 ﻿Imports System.Convert
 Imports Microsoft.Win32
 
-Public NotInheritable Class LoadSplash
+Imports SINMx86.Localization
 
-    ' Külső változók
-    Public LoadLanguage As Int32 = 0 ' Betöltési nyelv alapértelmezése
-    Public CurrentImage As Int32 = 0 ' Véletlen kép kezdő sorszáma
+' Betöltőképernyő osztálya
+Public NotInheritable Class LoadSplash
 
     ' *** FŐ ELJÁRÁS: Splash ablak betöltése (Me.Load -> LoadSplash) ***
     ' Eseményvezérelt: Betöltőképernyó vagy névjegy meghívása
@@ -19,8 +18,8 @@ Public NotInheritable Class LoadSplash
         SplashTimer.Interval = 10000 ' Betöltés: 10 másodperc (Érték: 10000)
 
         ' Alkalmazás adatai
-        Dim MyVersion As String = Application.ProductVersion   ' Saját verziószám
-        Dim MyName As String = My.Application.Info.Title       ' Program neve
+        Dim MyVersion As String = Application.ProductVersion        ' Saját verziószám
+        Dim MyName As String = My.Application.Info.Title            ' Program neve
 
         ' Háttérkép generálása
         RandomImage()
@@ -33,11 +32,11 @@ Public NotInheritable Class LoadSplash
         End If
 
         ' Megjegyzés feltöltése
-        Splash_Comment.Text = MainWindow.Str_Title + ChrW(13) + ChrW(10) + MainWindow.Str_Version + " " + MainWindow.VersionString
+        Splash_Comment.Text = GetLoc("Title") + ChrW(13) + ChrW(10) + GetLoc("Version") + " " + MainWindow.VersionString
 
         ' Állapotellenőrzés: Névjegy vagy betöltőképernyő?
         If MainWindow.SplashDefineAsAbout Then
-            Link_SplashClose.Text = MainWindow.Str_SplashClose
+            Link_SplashClose.Text = GetLoc("SplashClose")
             Splash_Status.Text = My.Application.Info.Copyright
 
             If MainWindow.TopMost Then
@@ -47,7 +46,7 @@ Public NotInheritable Class LoadSplash
             End If
         Else
             Link_SplashClose.Text = Nothing
-            Splash_Status.Text = MainWindow.Str_SplashLoad + "..." ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
+            Splash_Status.Text = GetLoc("SplashLoad") + "..."  ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
 
             Me.TopMost = True
         End If
@@ -62,14 +61,15 @@ Public NotInheritable Class LoadSplash
     Private Function RandomImage()
 
         ' Értékek definiálása
-        Dim ImageNum As Int32 = 0 ' Kezdőérték
+        Dim ImageNum As Int32 = 0                                   ' Kezdőérték (legeslő)
+        Dim CurrentImage As Int32 = ImageNum                        ' Jelenlegi beállítása (alapból a kezdőértékre)
 
         ' Véletlenszámgenerátor inicializálása (enélkül is megy, de hivatalosan kell!)
         Randomize()
 
         ' Kezdő érték ellenőrzése (Ha 0, akkor egyszerűen generál, ha eltér, akkor ellenőrzi a korábbival való egyezést!)
         If CurrentImage = 0 Then
-            ImageNum = CInt(Int((5 * Rnd()) + 1))
+            ImageNum = ToInt32(Int((5 * Rnd()) + 1))
         Else
             ImageNum = CurrentImage
 
@@ -85,6 +85,7 @@ Public NotInheritable Class LoadSplash
         ' Külső változó beállítása (utolső kép)
         CurrentImage = ImageNum
 
+        ' Visszatérési érték beállítása
         Return False
 
     End Function

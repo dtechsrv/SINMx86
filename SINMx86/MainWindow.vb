@@ -7,6 +7,9 @@ Imports System.Convert
 Imports System.Text.RegularExpressions
 Imports Microsoft.Win32
 
+Imports SINMx86.Localization
+
+' Főablak osztálya
 Public Class MainWindow
 
     ' Alkalmazás adatai
@@ -22,26 +25,11 @@ Public Class MainWindow
     ' Beállításjegyzék változói
     Public RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\\" + MyName, True)
 
-    ' Nyelvi sztringek
-    Public Str_Title, Str_Comment, Str_Version, Str_Build, Str_Serv, Str_MemUse, Str_MemFree, Str_Uptime, Str_Date, Str_DayName(7), Str_MonthName(12),
-           Str_DateFormat, Str_Days, Str_Hours, Str_Mins, Str_Secs, Str_And, Str_DigitSeparator, Str_Disk, Str_Motherboard, Str_System, Str_BIOS,
-           Str_Battery, Str_Serial, Str_Volt, Str_Interface, Str_Interval, Str_Traffic, Str_Time, Str_Update, Str_Current, Str_Peak, Str_ChartTime,
-           Str_ChartDown, Str_ChartUp, Str_ChartHide, Str_ChartRedraw, Str_ChartDone, Str_QuitAsk, Str_QuitTitle, Str_Hostname, Str_ChartCount, Str_Note,
-           Str_NoDisk, Str_NoName, Str_NotAvailable, Str_Unknown, Str_None, Str_Invalid, Str_Inactive, Str_Taskbar, Str_ImageSaved As String
-
-    ' Külső nyelvi sztingek (Ablakok: Splash, S.M.A.R.T)
-    Public Str_SplashLoad, Str_SplashReg, Str_SplashWMI, Str_SplashClose As String
-    Public Str_SmartTitle, Str_SmartRecord, Str_SmartTreshold, Str_SmartValue, Str_SmartWorst, Str_SmartData, Str_SmartClose As String
-
-    ' ToolTip sztringek
-    Public Tip_Language, Tip_HW, Tip_Smart, Tip_Chart, Tip_Average, Tip_Reload, Tip_ChartDown, Tip_ChartUp, Tip_Refresh, Tip_Exit, Tip_LinkBottom, Tip_Hostname,
-           Tip_Uptime, Tip_Status, Tip_TopMost, Tip_Screenshot As String
-
     ' Checkboxok és menüelemek változói
     Public CheckedSplashDisable, CheckedDownChart, CheckedUpChart, CheckedTopMost, CheckedNoQuitAsk, CheckedMinToTray As Boolean
 
     ' Listák kiválasztott elemeinek sorszáma
-    Public SelectedLanguage, SelectedRefresh, SelectedHardware, SelectedCPU, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
+    Public SelectedRefresh, SelectedHardware, SelectedCPU, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
 
     ' További változók
     Public ReleaseStatus As String = Nothing                                        ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
@@ -74,7 +62,6 @@ Public Class MainWindow
     Public DisableBalloon As Boolean = False                                        ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
     Public OpenFile As Boolean = False                                              ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
     Public SavePath As String = Nothing                                             ' Az utolsó mentett fájl elérési útja
-    Public Languages() As String = {"English (EN)", "Magyar (HU)"}                  ' Nyelvek (egyelőre statikus, 2 elemű)
     Public MainWindowDone As Boolean = False                                        ' A főablak betöltődésének indikátora, néhány szükséges lekérdezés csak ezután történhet meg!
 
     ' Forgalmi diagramok (2-vel több eleműnek kell lennie, mint a kijelzett érték!)
@@ -85,7 +72,6 @@ Public Class MainWindow
     Private Sub MainWindow_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
         ' Alapértelmezett értékek beállítása (Ismeretlen érték vagy üres registryváltozó esetén)
-        Dim DefaultLaguage As Int32 = 0         ' Nyelv: angol
         Dim DefaultRefresh As Int32 = 2         ' Frissítési időköz: 3 másodperc
 
         ' Debug sztring beállítása (ha a főablak betöltődik, akkor előtte ki kell üríteni!)
@@ -161,10 +147,10 @@ Public Class MainWindow
         Dim ReadNoQuitAsk As String = RegPath.GetValue("DisableExitConfirmation")   ' Kilépési megerősítés
 
         ' *** REGISTRY ELEMZÉS: Nyelv kiválasztása (SelectedLanguage) ***
-        If ReadLanguage Is Nothing Or ReadLanguage > UBound(Languages) Then
-            SelectedLanguage = DefaultLaguage
-        Else
+        If ReadLanguage <> Nothing And ReadLanguage <= UBound(Languages) Then
             SelectedLanguage = ToInt32(ReadLanguage)
+        Else
+            SelectedLanguage = 0
         End If
 
         ' *** LISTAFELTÖLTÉS: Nyelv kiválasztása ***
@@ -200,7 +186,7 @@ Public Class MainWindow
         ' Splash Screen betöltése és státusz frissítése
         If Not CheckedSplashDisable Then
             LoadSplash.Visible = True
-            LoadSplash.Splash_Status.Text = Str_SplashLoad + ": " + Str_SplashReg + "..."
+            LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + GetLoc("SplashReg") + "..."
         End If
 
         ' *** REGISTRY LEKÉRDEZÉS: Frissítési időköz ***
@@ -292,7 +278,7 @@ Public Class MainWindow
 
         ' Splash Screen státusz frissítése
         If Not CheckedSplashDisable Then
-            LoadSplash.Splash_Status.Text = Str_SplashLoad + ": " + Str_SplashWMI + "..."
+            LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + GetLoc("SplashWMI") + "..."
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem" -> Hosztnév ***
@@ -304,7 +290,7 @@ Public Class MainWindow
         Next
 
         ' Hosztnév beálítása az állapotsorban
-        StatusLabel_Host.Text = Str_Hostname + ": " + Hostname
+        StatusLabel_Host.Text = GetLoc("Hostname") + ": " + Hostname
 
         ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Rendszerindítás ideje ***
         objOS = New ManagementObjectSearcher("SELECT LastBootUptime FROM Win32_OperatingSystem")
@@ -352,7 +338,7 @@ Public Class MainWindow
 
     ' ----- FÜGGVÉNYEK -----
 
-    ' *** FÜGGVEÉNY: Hardver komponensek értékeinek beállítása ***
+    ' *** FÜGGVÉNY: Hardver komponensek értékeinek beállítása ***
     ' Bemenet: * -> üres (Void)
     ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetHWInformation()
@@ -387,7 +373,7 @@ Public Class MainWindow
         ElseIf Identifier = Nothing Or CheckStrMatch(Identifier, Blacklist, False) Then
             HWIdentifier(0) = RemoveInvalidChars(Model)
         Else
-            HWIdentifier(0) = RemoveInvalidChars(Model) + ", " + Str_Serial + ": " + RemoveInvalidChars(Identifier)
+            HWIdentifier(0) = RemoveInvalidChars(Model) + ", " + GetLoc("Serial") + ": " + RemoveInvalidChars(Identifier)
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
@@ -421,7 +407,7 @@ Public Class MainWindow
             If Identifier = Nothing Or CheckStrMatch(Identifier, Blacklist, False) Then
                 HWIdentifier(1) = RemoveInvalidChars(Model)
             Else
-                HWIdentifier(1) = RemoveInvalidChars(Model) + ", " + Str_Serial + ": " + RemoveInvalidChars(Identifier)
+                HWIdentifier(1) = RemoveInvalidChars(Model) + ", " + GetLoc("Serial") + ": " + RemoveInvalidChars(Identifier)
             End If
         End If
 
@@ -442,7 +428,7 @@ Public Class MainWindow
         If Model = Nothing Then
             HWIdentifier(2) = Nothing
         Else
-            HWIdentifier(2) = RemoveInvalidChars(Model) + ", " + Str_Date + ": " + Identifier
+            HWIdentifier(2) = RemoveInvalidChars(Model) + ", " + GetLoc("Date") + ": " + Identifier
         End If
 
         ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> Akkumulátor információk ***
@@ -486,7 +472,7 @@ Public Class MainWindow
                 If Identifier = Nothing Then
                     HWIdentifier(3) = Model
                 Else
-                    HWIdentifier(3) = Model + ", " + Str_Volt + ": " + Identifier
+                    HWIdentifier(3) = Model + ", " + GetLoc("Volt") + ": " + Identifier
                 End If
             End If
         End If
@@ -496,7 +482,7 @@ Public Class MainWindow
 
     End Function
 
-    ' *** FÜGGVEÉNY: Processzor aktuális órajelének beállítása ***
+    ' *** FÜGGVÉNY: Processzor aktuális órajelének beállítása ***
     ' Bemenet: * -> üres (Void)
     ' Kimenet: * -> hamis érték (Boolean)
     Private Function SetCPUInformation()
@@ -525,7 +511,7 @@ Public Class MainWindow
         ' Kiírások frissítése
         Value_CPUCore.Text = CPUCoreNumber.ToString + " / " + CPUThreadNumber.ToString
         Value_CPUClock.Text = CPUCurrentClock.ToString + " MHz"
-        Value_CPUMaxClock.Text = CPUMaximumClock.ToString + " MHz"
+        Value_CPUMaximum.Text = CPUMaximumClock.ToString + " MHz"
 
         ' Visszatérési érték beállítása
         Return False
@@ -558,7 +544,7 @@ Public Class MainWindow
         If OSService = 0 Then
             Value_OSName.Text = OSName
         Else
-            Value_OSName.Text = OSName + ", " + Str_Serv + " " + OSService.ToString
+            Value_OSName.Text = OSName + ", " + GetLoc("SvcPack") + " " + OSService.ToString
         End If
 
         Value_OSRelease.Text = OSRelease.ToString + "-bit"
@@ -569,7 +555,7 @@ Public Class MainWindow
             Value_OSLang.Text = OSLanguage(0)
         Else
             Value_OSLang.Enabled = False
-            Value_OSLang.Text = Str_Unknown
+            Value_OSLang.Text = GetLoc("Unknown")
         End If
 
 
@@ -622,12 +608,12 @@ Public Class MainWindow
         VMemFreeConv = DynByteConv(VMemFree * 1024, 2)
 
         ' Kiírások formázása
-        Value_PhysicalMemorySize.Text = FixDigitSeparator(PMemSizeConv(0), 2, True) + " " + PrefixTable(PMemSizeConv(1)) + "B"
-        Value_PhysicalMemoryFree.Text = FixDigitSeparator(PMemFreeConv(0), 2, True) + " " + PrefixTable(PMemFreeConv(1)) + "B"
-        Value_PhysicalMemoryUsage.Text = PMemPerc + " %"
-        Value_VirtualMemorySize.Text = FixDigitSeparator(VMemSizeConv(0), 2, True) + " " + PrefixTable(VMemSizeConv(1)) + "B"
-        Value_VirtualMemoryFree.Text = FixDigitSeparator(VMemFreeConv(0), 2, True) + " " + PrefixTable(VMemFreeConv(1)) + "B"
-        Value_VirtualMemoryUsage.Text = VMemPerc + " %"
+        Value_PhyMemSize.Text = FixDigitSeparator(PMemSizeConv(0), 2, True) + " " + PrefixTable(PMemSizeConv(1)) + "B"
+        Value_PhyMemFree.Text = FixDigitSeparator(PMemFreeConv(0), 2, True) + " " + PrefixTable(PMemFreeConv(1)) + "B"
+        Value_PhyMemUsed.Text = PMemPerc + " %"
+        Value_VirtMemSize.Text = FixDigitSeparator(VMemSizeConv(0), 2, True) + " " + PrefixTable(VMemSizeConv(1)) + "B"
+        Value_VirtMemFree.Text = FixDigitSeparator(VMemFreeConv(0), 2, True) + " " + PrefixTable(VMemFreeConv(1)) + "B"
+        Value_VirtMemUsed.Text = VMemPerc + " %"
 
         ' Visszatérési érték beállítása
         Return False
@@ -684,7 +670,7 @@ Public Class MainWindow
         ' Sorozatszám beállítása
         If SerialNumber = Nothing Then
             Value_DiskSerial.Enabled = False
-            Value_DiskSerial.Text = Str_NotAvailable
+            Value_DiskSerial.Text = GetLoc("NotAvailable")
         Else
             Value_DiskSerial.Enabled = True
             Value_DiskSerial.Text = SerialNumber
@@ -693,7 +679,7 @@ Public Class MainWindow
         ' Firmware revízió beállítása
         If Firmware = Nothing Then
             Value_DiskFirmware.Enabled = False
-            Value_DiskFirmware.Text = Str_NotAvailable
+            Value_DiskFirmware.Text = GetLoc("NotAvailable")
         Else
             Value_DiskFirmware.Enabled = True
             Value_DiskFirmware.Text = Firmware
@@ -714,7 +700,7 @@ Public Class MainWindow
             Value_MediaType.Text = DiskType(SelectedDisk)
         Else
             Value_MediaType.Enabled = False
-            Value_MediaType.Text = Str_Unknown
+            Value_MediaType.Text = GetLoc("Unknown")
         End If
 
         ' Partícióelemzéshez használt változók
@@ -749,7 +735,7 @@ Public Class MainWindow
         ' Partíció információk lekérdezése
         If PartNum = 0 Then
             ComboBox_PartList.Enabled = False
-            ComboBox_PartList.Items.Add(Str_NotAvailable)
+            ComboBox_PartList.Items.Add(GetLoc("NotAvailable"))
         Else
             ComboBox_PartList.Enabled = True
             For PartCount = 0 To PartNum - 1
@@ -766,7 +752,7 @@ Public Class MainWindow
                     End If
 
                     If objMgmt("VolumeName") = Nothing Then
-                        PartName = Str_NoName
+                        PartName = GetLoc("NoName")
                     Else
                         PartName = objMgmt("VolumeName")
                     End If
@@ -825,7 +811,7 @@ Public Class MainWindow
         ' Nulla bájtos memória korrekció -> Ismeretlen!
         If VideoMemory = 0 Then
             Value_VideoMemory.Enabled = False
-            Value_VideoMemory.Text = Str_NotAvailable
+            Value_VideoMemory.Text = GetLoc("NotAvailable")
         Else
             ' Memóriaérték formázása
             Dim VideoMemoryConv(2) As Double
@@ -839,7 +825,7 @@ Public Class MainWindow
         ' Ismeretlen felbontás (Pl.: 0 x 0, 0 bit)
         If VideoResolution(0) = 0 Or VideoResolution(1) = 0 Or VideoResolution(2) = 0 Then
             Value_VideoResolution.Enabled = False
-            Value_VideoResolution.Text = Str_Inactive
+            Value_VideoResolution.Text = GetLoc("Inactive")
         Else
             Value_VideoResolution.Enabled = True
             Value_VideoResolution.Text = VideoResolution(0).ToString + " x " + VideoResolution(1).ToString + " (" + VideoResolution(2).ToString + " bit)"
@@ -873,8 +859,8 @@ Public Class MainWindow
         Seconds = Int(UptimeSeconds)
 
         ' Kiírás frissítése
-        StatusLabel_Uptime.Text = Str_Uptime + ": " + Days.ToString + " " + Str_Days + ", " + Hours.ToString + " " + Str_Hours + ", " +
-                                  Minutes.ToString + " " + Str_Mins + " " + Str_And + " " + Seconds.ToString + " " + Str_Secs + "."
+        StatusLabel_Uptime.Text = GetLoc("Uptime") + ": " + Days.ToString + " " + GetLoc("Days") + ", " + Hours.ToString + " " + GetLoc("Hours") + ", " +
+                                  Minutes.ToString + " " + GetLoc("Mins") + " " + GetLoc("And") + " " + Seconds.ToString + " " + GetLoc("Secs") + "."
 
         ' Visszatérési érték beállítása
         Return False
@@ -1014,46 +1000,6 @@ Public Class MainWindow
 
     End Function
 
-    ' *** FÜGGVÉNY: Nyelvi dátum és időformátum konverzió ***
-    ' Bemenet: InputDate -> dátum és idő (DateTime)
-    ' Kimenet: Converted -> formázott sztring (String)
-    Private Function GetLocalizedDate(ByVal InputDate As DateTime)
-
-        ' Értékek definiálása
-        Dim Converted As String = Str_DateFormat
-        Dim ConvCount As Int32 = 0
-        Dim SourceFormat() = {"yyyy", "MMMM", "dddd", "dd", "d", "H:mm:ss", "h:mm:ss", "tt"}
-        Dim TargetFormat() = {Format(InputDate, "yyyy"), "###", "##", Format(InputDate, "dd"), Format(InputDate, "d"),
-                              Format(InputDate, "H:mm:ss"), Format(InputDate, "h:mm:ss"), "#"}
-
-        ' Ismert formátumok lecserélése valódi értékekre
-        For i As Int32 = 0 To UBound(SourceFormat)
-            While (InStr(Converted, SourceFormat(ConvCount)))
-                Converted = Replace(Converted, SourceFormat(ConvCount), TargetFormat(ConvCount))
-            End While
-            ConvCount += 1
-        Next
-
-        ' Védett szöveges formátum cseréje: Hónap neve
-        While (InStr(Converted, "###"))
-            Converted = Replace(Converted, "###", Str_MonthName(InputDate.Month - 1))
-        End While
-
-        ' Védett szöveges formátum cseréje: Nap neve
-        While (InStr(Converted, "##"))
-            Converted = Replace(Converted, "##", Str_DayName(InputDate.DayOfWeek))
-        End While
-
-        ' Védett szöveges formátum cseréje: Napszak (AM/PM)
-        While (InStr(Converted, "#"))
-            Converted = Replace(Converted, "#", InputDate.ToString("tt", System.Globalization.CultureInfo.InvariantCulture))
-        End While
-
-        ' Visszatérési érték beállítása
-        Return Converted
-
-    End Function
-
     ' *** FÜGGVÉNY: Nem elfogadhatóü karakterek eltávolítása ***
     ' Bemenet: RawString -> formázandó sztring (String)
     ' Kimenet: RawString -> formázott érték (String)
@@ -1142,57 +1088,6 @@ Public Class MainWindow
 
         ' Visszatérési érték beállítása
         Return ConvValue
-
-    End Function
-
-    ' *** FÜGGVÉNY: Tizedes elválaszó javítása (területi beállítás felülbírálása) ***
-    ' Bemenet: Value      -> módosítatlan tizedestört érték (Double)
-    '          Digit      -> elválasztó utáni helyiértékek száma (Int32)
-    '          FloatFract -> lebegő (True) vagy statikus (False) törtformátum (Boolean)
-    ' Kimenet: ConvString -> formázott tizedestört (String)
-    Public Function FixDigitSeparator(ByVal Value As Double, ByVal Digit As Int32, ByVal FloatFract As Boolean)
-
-        ' Értékek definiálása
-        Dim IntString, ConvString As String
-        Dim ConvFract As Double
-        Dim FractString As String = Nothing
-
-        ' Értékek számítása
-        IntString = Fix(Value).ToString
-
-        ' Tizedes elválasztó ellenőrzése -> Ha nincs helyiérték, akkor nem kell!
-        If Digit <> 0 Then
-            FractString = Str_DigitSeparator
-        End If
-
-        ' Törtrész generálása -> Lebegő (pl.: 0,1 -> 0,1) vagy statikus tört (pl. 0,1 -> 0,10)
-        If FloatFract Then
-
-            ' Tört kerekítése és meghagyása törtnek
-            ConvFract = Round(Value - Fix(Value), Digit)
-
-            ' Tizedesrész generálása - Lebegő, végződő 0-k nélkül (Ha a string 3-nál rövidebb, akkor egész szám, ilyenkor a törtrész üres, és nincs tizedes elválasztó sem!)
-            If ConvFract.ToString.Length < 3 Then
-                FractString = Nothing
-            Else
-                FractString = FractString + ConvFract.ToString.Substring(2, ConvFract.ToString.Length - 2)
-            End If
-
-        Else
-
-            ' Törtrész konvetálása egésszé, valamint az elejére egy 1-es számjegy
-            ConvFract = (Round(Value - Fix(Value), Digit) * 10 ^ Digit) + 10 ^ Digit
-
-            ' Tizedesrész generálása - Statikus, a végződő 0-k is kiírva maradnak (Az elejéről csak az egyest kell eltüntetni!)
-            FractString = FractString + ConvFract.ToString.Substring(1, ConvFract.ToString.Length - 1)
-
-        End If
-
-        ' Kimenet formázása
-        ConvString = IntString + FractString
-
-        ' Visszatérési érték beállítása
-        Return ConvString
 
     End Function
 
@@ -1455,7 +1350,7 @@ Public Class MainWindow
         ComboBox_HWList.Items.Clear()
 
         ' Lista feltöltése
-        ComboBox_HWList.Items.AddRange(New Object() {Str_Motherboard, Str_System, Str_BIOS, Str_Battery})
+        ComboBox_HWList.Items.AddRange(New Object() {GetLoc("Motherboard"), GetLoc("System"), GetLoc("BIOS"), GetLoc("Battery")})
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
         If ResetFlag Then
@@ -1771,8 +1666,8 @@ Public Class MainWindow
             ComboBox_InterfaceList.Enabled = False
 
             ' Hamis listaelem hozzáadása
-            ComboBox_InterfaceList.Items.Add(Str_NotAvailable)
-            InterfaceName(0) = Str_NotAvailable
+            ComboBox_InterfaceList.Items.Add(GetLoc("NotAvailable"))
+            InterfaceName(0) = GetLoc("NotAvailable")
         Else
             InterfacePresent = True
             ComboBox_InterfaceList.Enabled = True
@@ -1836,7 +1731,7 @@ Public Class MainWindow
 
             ' Diagram rajzolásának kezdő állapotba hozása az állapotsorban
             StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
-            StatusLabel_ChartStatus.Text = Str_ChartDone + " " + (RefreshInterval(SelectedRefresh).ToString) + " " + Str_ChartCount + "..."
+            StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (RefreshInterval(SelectedRefresh).ToString) + " " + GetLoc("ChartCount") + "..."
 
         End If
 
@@ -2164,7 +2059,7 @@ Public Class MainWindow
         TextOffset = {12, 12}
 
         ' Interfész nevének kiírása 
-        Chart.DrawString(Str_Interface + ": " + InterfaceName(SelectedInterface), SignFont, Brushes.DeepSkyBlue, TextOffset(0), TextOffset(1))
+        Chart.DrawString(GetLoc("Interface") + ": " + InterfaceName(SelectedInterface), SignFont, Brushes.DeepSkyBlue, TextOffset(0), TextOffset(1))
 
         ' *** SZÖVEGES KIÍRÁSOK: Intervallumok (2.sor) ***
 
@@ -2175,18 +2070,18 @@ Public Class MainWindow
         IntervalValue = TraffResolution * RefreshInterval(SelectedRefresh)
         If IntervalValue >= 3600 And (IntervalValue Mod 3600) = 0 Then
             ' Másodperc -> Óra
-            IntervalTag = (IntervalValue / 3600).ToString + " " + Str_Hours
+            IntervalTag = (IntervalValue / 3600).ToString + " " + GetLoc("Hours")
         ElseIf IntervalValue >= 60 And (IntervalValue Mod 60) = 0 Then
             ' Másodperc -> Perc
-            IntervalTag = (IntervalValue / 60).ToString + " " + Str_Mins
+            IntervalTag = (IntervalValue / 60).ToString + " " + GetLoc("Mins")
         Else
             ' Másodperc
-            IntervalTag = IntervalValue.ToString + " " + Str_Secs
+            IntervalTag = IntervalValue.ToString + " " + GetLoc("Secs")
         End If
 
         ' Intervallum sor kiírása
-        Chart.DrawString(Str_Interval + " - " + Str_Traffic + ": " + PeakDiv.ToString + " " + PrefixTable(PeakExp) + "B / " +
-                         Str_Time + ": " + IntervalTag + " (" + Str_Update + ": " + RefreshInterval(SelectedRefresh).ToString + " " + Str_Secs + ")",
+        Chart.DrawString(GetLoc("Interval") + " - " + GetLoc("Traffic") + ": " + PeakDiv.ToString + " " + PrefixTable(PeakExp) + "B / " +
+                         GetLoc("Time") + ": " + IntervalTag + " (" + GetLoc("Update") + ": " + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Secs") + ")",
                          SignFont, Brushes.DeepSkyBlue, TextOffset(0), TextOffset(1))
 
         ' *** SZÖVEGES KIÍRÁSOK: Diagram készítési ideje (3.sor) ***
@@ -2195,7 +2090,7 @@ Public Class MainWindow
         TextOffset(1) += 15
 
         ' Készítési idő kiírása
-        Chart.DrawString(Str_ChartTime + " " + GetLocalizedDate(ChartCreationTime) + ".", SignFont, Brushes.DeepSkyBlue, TextOffset(0), TextOffset(1))
+        Chart.DrawString(GetLoc("ChartTime") + " " + GetLocalizedDate(ChartCreationTime) + ".", SignFont, Brushes.DeepSkyBlue, TextOffset(0), TextOffset(1))
 
         ' *** SZÖVEGES KIÍRÁSOK: Letöltési jelmagyarázat, értékek (4.sor) ***
 
@@ -2210,18 +2105,18 @@ Public Class MainWindow
 
         ' Jelszakasz megrajzolása és jelmagyarázat kiírása
         Chart.DrawLines(Pens.Lime, SignLine)
-        Chart.DrawString(Str_ChartDown, SignFont, Brushes.Lime, TextOffset(0) + 25, TextOffset(1))
+        Chart.DrawString(GetLoc("ChartDown"), SignFont, Brushes.Lime, TextOffset(0) + 25, TextOffset(1))
 
         ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
         DownCurrentConv = DynByteConv(ChartDownNumbers(0), TraffDigit)
 
         If CheckedDownChart And InterfacePresent Then
-            Chart.DrawString(Str_Current + ": " + FixDigitSeparator(DownCurrentConv(0), TraffDigit, True) + " " +
+            Chart.DrawString(GetLoc("Current") + ": " + FixDigitSeparator(DownCurrentConv(0), TraffDigit, True) + " " +
                              PrefixTable(DownCurrentConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
-            Chart.DrawString(Str_Peak + ": " + FixDigitSeparator(DownPeakConv(0), TraffDigit, True) + " " +
+            Chart.DrawString(GetLoc("Peak") + ": " + FixDigitSeparator(DownPeakConv(0), TraffDigit, True) + " " +
                              PrefixTable(DownPeakConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(1), TextOffset(1))
         Else
-            Chart.DrawString(Str_ChartHide, SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
+            Chart.DrawString(GetLoc("ChartHide"), SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
         End If
 
         ' *** SZÖVEGES KIÍRÁSOK: Letöltési jelmagyarázat, értékek (5.sor) ***
@@ -2237,18 +2132,18 @@ Public Class MainWindow
 
         ' Jelszakasz megrajzolása és jelmagyarázat kiírása
         Chart.DrawLines(Pens.Red, SignLine)
-        Chart.DrawString(Str_ChartUp, SignFont, Brushes.Red, TextOffset(0) + 25, TextOffset(1))
+        Chart.DrawString(GetLoc("ChartUp"), SignFont, Brushes.Red, TextOffset(0) + 25, TextOffset(1))
 
         ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
         UpCurrentConv = DynByteConv(ChartUpNumbers(0), TraffDigit)
 
         If CheckedUpChart And InterfacePresent Then
-            Chart.DrawString(Str_Current + ": " + FixDigitSeparator(UpCurrentConv(0), TraffDigit, True) + " " +
+            Chart.DrawString(GetLoc("Current") + ": " + FixDigitSeparator(UpCurrentConv(0), TraffDigit, True) + " " +
                              PrefixTable(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(0), TextOffset(1))
-            Chart.DrawString(Str_Peak + ": " + FixDigitSeparator(UpPeakConv(0), TraffDigit, True) + " " +
+            Chart.DrawString(GetLoc("Peak") + ": " + FixDigitSeparator(UpPeakConv(0), TraffDigit, True) + " " +
                              PrefixTable(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(1), TextOffset(1))
         Else
-            Chart.DrawString(Str_ChartHide, SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
+            Chart.DrawString(GetLoc("ChartHide"), SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
         End If
 
         ' ----- KÉPMŰVELETEK -----
@@ -2266,7 +2161,7 @@ Public Class MainWindow
     Private Function TraffRefresh()
 
         ' Diagram ToolTip beállítása (másodpercek kiírásával)
-        EventToolTip.SetToolTip(PictureBox_TrafficChart, Tip_Chart + " (" + RefreshInterval(SelectedRefresh).ToString + " " + Tip_Average + ")")
+        EventToolTip.SetToolTip(PictureBox_TrafficChart, GetLoc("Tip_Chart") + " (" + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Tip_Average") + ")")
 
         ' Forgalmi adatok frissítése
         UpdateTraffArray(False)
@@ -2332,10 +2227,10 @@ Public Class MainWindow
                 TraffRefresh()
                 TraffGenCounter = RefreshInterval(SelectedRefresh) - 1
                 StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
-                StatusLabel_ChartStatus.Text = Str_ChartDone + " " + (TraffGenCounter + 1).ToString + " " + Str_ChartCount + "..."
+                StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (TraffGenCounter + 1).ToString + " " + GetLoc("ChartCount") + "..."
             Else
                 StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
-                StatusLabel_ChartStatus.Text = Str_ChartRedraw + " " + TraffGenCounter.ToString + " " + Str_ChartCount + "..."
+                StatusLabel_ChartStatus.Text = GetLoc("ChartRedraw") + " " + TraffGenCounter.ToString + " " + GetLoc("ChartCount") + "..."
                 TraffGenCounter = TraffGenCounter - 1
             End If
 
@@ -2361,321 +2256,102 @@ Public Class MainWindow
         ' Változás beállítása
         SelectedLanguage = ComboBox_LanguageList.SelectedIndex
 
-        ' ----- NYELVEK BETÖLTÉSE -----
-        ' Megjegyzés: 0 = angol (alapértelmezett), 1 = magyar (Jelenleg statikus!)
-        Select Case ComboBox_LanguageList.SelectedIndex
+        ' Nyelvi sztringek betöltése
+        LoadLocalization(SelectedLanguage)
 
-            Case 0 ' *** NYELV: Angol kiírások -> Alapértelmezett (0) ***
+        ' Hosztnév beálítása az állapotsorban
+        StatusLabel_Host.Text = GetLoc("Hostname") + ": " + Hostname
 
-                ' Sztringek
-                Str_Title = "System Information and Network Monitor"
-                Str_Comment = "This software is open source and portable."
-                Str_Version = "Version"
-                Str_DigitSeparator = "."
-                Str_Interval = "Intervals"
-                Str_Traffic = "Traffic"
-                Str_Motherboard = "Motherboard"
-                Str_System = "Computer"
-                Str_BIOS = "BIOS"
-                Str_Battery = "Battery"
-                Str_Serial = "Serial number"
-                Str_Volt = "Nominal voltage"
-                Str_Serv = "Service Pack"
-                Str_Interface = "Interface"
-                Str_ChartTime = "Chart created on"
-                Str_Time = "Time"
-                Str_Update = "Update"
-                Str_Current = "Current"
-                Str_Peak = "Peak"
-                Str_DayName = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
-                Str_MonthName = {"January", "February", "March", "April", "May", "June", "July",
-                                 "August", "September", "October", "November", "December"}
-                Str_DateFormat = "dddd, dd MMMM yyyy, h:mm:ss tt"
-                Str_ChartDown = "Download speed"
-                Str_ChartUp = "Upload speed"
-                Str_ChartHide = "Chart rendering disabled."
-                Str_ChartDone = "Status: Chart done, next is in"
-                Str_ChartRedraw = "Status: Chart redraw in"
-                Str_ChartCount = "seconds"
-                Str_Hostname = "Hostname"
-                Str_Uptime = "Uptime"
-                Str_Date = "Date"
-                Str_Days = "days"
-                Str_Hours = "hours"
-                Str_Mins = "minutes"
-                Str_Secs = "seconds"
-                Str_And = "and"
-                Str_QuitAsk = "Do you really want to quit?"
-                Str_QuitTitle = "Exit confirmation"
-                Str_Note = "Notification"
-                Str_Taskbar = "The process is still running in the background."
-                Str_ImageSaved = "Image saved"
-                Str_Disk = "Disk"
-                Str_NoDisk = "No disk"
-                Str_NoName = "No name"
-                Str_NotAvailable = "Not available"
-                Str_Unknown = "Unknown"
-                Str_None = "None"
-                Str_Invalid = "Invalid"
-                Str_Inactive = "Inactive"
+        ' Az ablak címének beállítása
+        Me.Text = MyName + " - " + GetLoc("Title") + ", " + GetLoc("Version") + " " + VersionString
 
-                ' Külső nyelvi sztingek (Splash ablak)
-                Str_SplashLoad = "Loading"
-                Str_SplashReg = "Registry settings"
-                Str_SplashWMI = "WMI database"
-                Str_SplashClose = "Close"
+        ' Taskbar ikon nevének beállítása
+        MainNotifyIcon.Text = MyName + " - " + GetLoc("Title")
 
-                ' Külső nyelvi sztingek (S.M.A.R.T ablak)
-                Str_SmartTitle = "S.M.A.R.T information"
-                Str_SmartRecord = "Record"
-                Str_SmartTreshold = "Treshold"
-                Str_SmartValue = "Value"
-                Str_SmartWorst = "Worst"
-                Str_SmartData = "Data"
-                Str_SmartClose = "&Close"
+        ' Alsó link szövegének beállítása
+        Link_Bottom.Text = GetLoc("Title") + " - " + GetLoc("Comment")
 
-                ' ToolTip sztringek
-                Tip_Language = "Language selection"
-                Tip_HW = "Component selection"
-                Tip_Smart = "Open S.M.A.R.T table"
-                Tip_Reload = "Reload list"
-                Tip_Chart = "Traffic history chart"
-                Tip_Average = "seconds averages"
-                Tip_ChartDown = "Enable/disable download chart rendering (Alt + D)"
-                Tip_ChartUp = "Enable/disable upload chart rendering (Alt + U)"
-                Tip_Refresh = "Refresh interval selection (seconds)"
-                Tip_Exit = "Exit (Alt + X)"
-                Tip_LinkBottom = "About..."
-                Tip_Hostname = "Computer name"
-                Tip_Uptime = "System uptime"
-                Tip_Status = "Status of the chart creation process"
-                Tip_TopMost = "Always on top (Green = enabled, Red = disabled)"
-                Tip_Screenshot = "Take screenshot"
+        ' Feliratok kitöltése
+        Name_HWList.Text = GetLoc("HWList")
+        Name_HWVendor.Text = GetLoc("HWVendor")
+        Name_HWIdent.Text = GetLoc("HWIdent")
+        Name_CPUList.Text = GetLoc("CPUList")
+        Name_CPUCore.Text = GetLoc("CPUCore")
+        Name_CPUClock.Text = GetLoc("CPUClock")
+        Name_CPUMaximum.Text = GetLoc("CPUMaximum")
+        Name_PhyMemSize.Text = GetLoc("PhyMemSize")
+        Name_PhyMemUsed.Text = GetLoc("PhyMemUsed")
+        Name_PhyMemFree.Text = GetLoc("PhyMemFree")
+        Name_VirtMemSize.Text = GetLoc("VirtMemSize")
+        Name_VirtMemUsed.Text = GetLoc("VirtMemUsed")
+        Name_VirtMemFree.Text = GetLoc("VirtMemFree")
+        Name_OSName.Text = GetLoc("OSName")
+        Name_OSVersion.Text = GetLoc("OSVersion")
+        Name_OSLang.Text = GetLoc("OSLang")
+        Name_OSRelease.Text = GetLoc("OSRelease")
+        Name_DiskList.Text = GetLoc("DiskList")
+        Name_MediaType.Text = GetLoc("MediaType")
+        Name_DiskInterface.Text = GetLoc("DiskInterface")
+        Name_DiskFirmware.Text = GetLoc("DiskFirmware")
+        Name_PartList.Text = GetLoc("PartList")
+        Name_DiskSerial.Text = GetLoc("DiskSerial")
+        Name_VideoList.Text = GetLoc("VideoList")
+        Name_VideoMemory.Text = GetLoc("VideoMemory")
+        Name_VideoResolution.Text = GetLoc("VideoResolution")
+        Name_InterfaceList.Text = GetLoc("InterfaceList")
+        Name_Bandwidth.Text = GetLoc("Bandwidth")
+        Name_InterfaceUsage.Text = GetLoc("InterfaceUsage")
+        Name_DownloadSpeed.Text = GetLoc("DownloadSpeed")
+        Name_UploadSpeed.Text = GetLoc("UploadSpeed")
+        Name_ChartVisible.Text = GetLoc("ChartVisible")
+        Name_UpdateList.Text = GetLoc("UpdateList")
+        Name_UpdateUnit.Text = GetLoc("UpdateUnit")
 
-                ' Feliratok
-                Name_HWList.Text = "Component:"
-                Name_HWVendor.Text = "Vendor:"
-                Name_HWIdentifier.Text = "Identifier:"
-                Name_CPUList.Text = "Processor:"
-                Name_CPUCore.Text = "Cores / Threads:"
-                Name_CPUClock.Text = "Clock:"
-                Name_CPUMaxClock.Text = "Native:"
-                Name_PhysicalMemory.Text = "Physical memory:"
-                Name_PhysicalMemoryUsage.Text = "Usage:"
-                Name_PhysicalMemoryFree.Text = "Free:"
-                Name_VirtualMemory.Text = "Virtual memory:"
-                Name_VirtualMemoryUsage.Text = "Usage:"
-                Name_VirtualMemoryFree.Text = "Free:"
-                Name_OSName.Text = "Product:"
-                Name_OSVersion.Text = "Version:"
-                Name_OSLang.Text = "Language:"
-                Name_OSRelease.Text = "Release:"
-                Name_DiskList.Text = "Disk drive:"
-                Name_MediaType.Text = "Media type:"
-                Name_DiskInterface.Text = "Interface:"
-                Name_DiskFirmware.Text = "Firmware:"
-                Name_PartList.Text = "Volume:"
-                Name_DiskSerial.Text = "Serial number:"
-                Name_VideoList.Text = "Graphics card:"
-                Name_VideoMemory.Text = "Video memory:"
-                Name_VideoResolution.Text = "Resolution:"
-                Name_InterfaceList.Text = "Interface:"
-                Name_Bandwidth.Text = "Bandwidth:"
-                Name_InterfaceUsage.Text = "Interface usage:"
-                Name_DownloadSpeed.Text = "Download speed:"
-                Name_UploadSpeed.Text = "Upload speed:"
-                Name_ChartVisible.Text = "Chart visibility:"
-                Name_UpdateList.Text = "Update interval:"
-                Name_UpdateUnit.Text = "s"
+        ' Checkbox és Combobox ToolTip értékek beállítása
+        EventToolTip.SetToolTip(ComboBox_LanguageList, GetLoc("Tip_Language"))
+        EventToolTip.SetToolTip(ComboBox_HWList, GetLoc("Tip_HW"))
+        EventToolTip.SetToolTip(Button_DiskSmartOpen, GetLoc("Tip_Smart"))
+        EventToolTip.SetToolTip(Button_DiskListReload, GetLoc("Tip_Reload"))
+        EventToolTip.SetToolTip(Button_VideoListReload, GetLoc("Tip_Reload"))
+        EventToolTip.SetToolTip(Button_InterfaceListReload, GetLoc("Tip_Reload"))
+        EventToolTip.SetToolTip(PictureBox_TrafficChart, GetLoc("Tip_Chart") + " (" + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Tip_Average") + ")") ' Az átlagértékek is hozzáadva!
+        EventToolTip.SetToolTip(CheckBoxChart_DownloadVisible, GetLoc("Tip_ChartDown"))
+        EventToolTip.SetToolTip(CheckBoxChart_UploadVisible, GetLoc("Tip_ChartUp"))
+        EventToolTip.SetToolTip(ComboBox_UpdateList, GetLoc("Tip_Refresh"))
+        EventToolTip.SetToolTip(Button_Exit, GetLoc("Tip_Exit"))
+        EventToolTip.SetToolTip(Link_Bottom, GetLoc("Tip_LinkBottom"))
 
-                ' Csoportfeliratok
-                GroupBox_HWInfo.Text = "Computer system information"
-                GroupBox_CPUInfo.Text = "Processor information"
-                GroupBox_MemoryInfo.Text = "Memory information"
-                GroupBox_OSInfo.Text = "Operating system information"
-                GroupBox_DiskInfo.Text = "Disk information"
-                GroupBox_VideoInfo.Text = "Display controller information"
-                GroupBox_Network.Text = "Network interface statistics"
+        ' Állapot- és menüsori ToolTip kiírások beállítása
+        StatusLabel_Host.ToolTipText = GetLoc("Tip_Hostname")
+        StatusLabel_Uptime.ToolTipText = GetLoc("Tip_Uptime")
+        StatusLabel_ChartStatus.ToolTipText = GetLoc("Tip_Status")
+        StatusLabel_TopMost.ToolTipText = GetLoc("Tip_TopMost")
+        ScreenshotToolStripMenuItem.ToolTipText = GetLoc("Tip_Screenshot")
 
-                ' Menüelemek
-                MainMenuItem_Settings.Text = "&Settings"
-                MainMenuItem_Chart.Text = "&Chart"
-                MainMenuItem_Information.Text = "&Action"
-                MainMenu_SettingsItem_TopMost.Text = "Always on &top"
-                MainMenu_SettingsItem_TaskbarMinimize.Text = "&Minimize to taskbar"
-                MainMenu_SettingsItem_DisableConfirm.Text = "Disable exit &confirmation"
-                MainMenu_SettingsItem_DisableSplash.Text = "Disable loading &screen"
-                MainMenu_ActionItem_UpdateCheck.Text = "Check for u&pdates..."
-                MainMenu_ActionItem_About.Text = "A&bout..."
-                MainMenu_ActionItem_Exit.Text = "E&xit"
-                MainMenu_ChartItem_DownloadVisible.Text = "Show &download chart"
-                MainMenu_ChartItem_UploadVisible.Text = "Show &upload chart"
-                MainMenu_ChartItem_SaveChart.Text = "&Save chart image to desktop"
-                MainMenu_ChartItem_ClearChart.Text = "&Clear chart"
+        ' Csoportfeliratok
+        GroupBox_HWInfo.Text = GetLoc("GB_HWInfo")
+        GroupBox_CPUInfo.Text = GetLoc("GB_CPUInfo")
+        GroupBox_MemoryInfo.Text = GetLoc("GB_MemoryInfo")
+        GroupBox_OSInfo.Text = GetLoc("GB_OSInfo")
+        GroupBox_DiskInfo.Text = GetLoc("GB_DiskInfo")
+        GroupBox_VideoInfo.Text = GetLoc("GB_VideoInfo")
+        GroupBox_Network.Text = GetLoc("GB_Network")
 
-                ' Checkbox feliratok
-                CheckBoxChart_DownloadVisible.Text = "&Download"
-                CheckBoxChart_UploadVisible.Text = "&Upload"
-
-                ' Gombfeliratok
-                Button_Exit.Text = "E&xit"
-
-            Case 1 ' *** NYELV: Magyar kiírások (1) ***
-
-                ' Sztringek
-                Str_Title = "Rendszerinformációk és hálózatfigyelés"
-                Str_Comment = "Ez a szoftver nyílt forrású és hordozható."
-                Str_Version = "Verziószám"
-                Str_DigitSeparator = ","
-                Str_Interval = "Intervallumok"
-                Str_Traffic = "Forgalom"
-                Str_Motherboard = "Alaplap"
-                Str_System = "Számítógép"
-                Str_BIOS = "BIOS"
-                Str_Battery = "Akkumulátor"
-                Str_Serial = "Sorozatszám"
-                Str_Volt = "Névleges feszültség"
-                Str_Serv = "Szervizcsomag"
-                Str_Interface = "Interfész"
-                Str_ChartTime = "Diagram elkészítve:"
-                Str_Time = "Idő"
-                Str_Update = "Frissítés"
-                Str_Current = "Jelenlegi"
-                Str_Peak = "Csúcs"
-                Str_DayName = {"vasárnap", "hétfő", "kedd", "szerda", "csütörtök", "péntek", "szombat"}
-                Str_MonthName = {"január", "február", "március", "április", "május", "június", "július",
-                                 "augusztus", "szeptember", "október", "november", "december"}
-                Str_DateFormat = "yyyy. MMMM dd. dddd, H:mm:ss"
-                Str_ChartDown = "Letöltési sebesség"
-                Str_ChartUp = "Feltöltési sebesség"
-                Str_ChartHide = "A diagram leképezés ki van kapcsolva."
-                Str_ChartDone = "Állapot: Diagram kész, következő"
-                Str_ChartRedraw = "Állapot: Diagram újrarajzolása"
-                Str_ChartCount = "másodperc múlva"
-                Str_Hostname = "Hosztnév"
-                Str_Uptime = "Futási idő"
-                Str_Date = "Dátum"
-                Str_Days = "nap"
-                Str_Hours = "óra"
-                Str_Mins = "perc"
-                Str_Secs = "másodperc"
-                Str_And = "és"
-                Str_QuitAsk = "Valóban ki szeretne lépni?"
-                Str_QuitTitle = "Kilépés megerősítése"
-                Str_Note = "Értesítés"
-                Str_Taskbar = "A folyamat továbbra is fut a háttérben."
-                Str_ImageSaved = "Kép elmentve"
-                Str_Disk = "Lemez"
-                Str_NoDisk = "Nincs lemez"
-                Str_NoName = "Névtelen"
-                Str_NotAvailable = "Nem elérhető"
-                Str_Unknown = "Ismeretlen"
-                Str_None = "Nincs"
-                Str_Invalid = "Érvénytelen"
-                Str_Inactive = "Inaktív"
-
-                ' Külső nyelvi sztingek (Splash ablak)
-                Str_SplashLoad = "Betöltés"
-                Str_SplashReg = "Registry beállítások"
-                Str_SplashWMI = "WMI adatbázis"
-                Str_SplashClose = "Bezárás"
-
-                ' Külső nyelvi sztingek (S.M.A.R.T ablak)
-                Str_SmartTitle = "S.M.A.R.T információk"
-                Str_SmartRecord = "Rekord"
-                Str_SmartTreshold = "Küszöb"
-                Str_SmartValue = "Érték"
-                Str_SmartWorst = "Legrosszabb"
-                Str_SmartData = "Adat"
-                Str_SmartClose = "&Bezárás"
-
-                ' ToolTip sztringek
-                Tip_Language = "Nyelv kiválasztása"
-                Tip_HW = "Komponens kiválasztása"
-                Tip_Smart = "S.M.A.R.T tábla megnyitása"
-                Tip_Reload = "Lista újratöltése"
-                Tip_Chart = "Adatforgalmi előzmények diagramja"
-                Tip_Average = "másodperces átlagok"
-                Tip_ChartDown = "Letöltési diagram leképezésének engedélyezése/tiltása (Alt + L)"
-                Tip_ChartUp = "Feltöltési diagram leképezésének engedélyezése/tiltása (Alt + F)"
-                Tip_Refresh = "Frissítési időköz kiválasztása (másodperc)"
-                Tip_Exit = "Kilépés (Alt + K)"
-                Tip_LinkBottom = "Névjegy..."
-                Tip_Hostname = "Számítógépnév"
-                Tip_Uptime = "Rendszer futási ideje"
-                Tip_Status = "A diagram jelenlegi állapota"
-                Tip_TopMost = "Mindig látható (zöld = engedélyezve, piros = tiltva)"
-                Tip_Screenshot = "Képernyőkép készítése"
-
-                ' Feliratok
-                Name_HWList.Text = "Komponens:"
-                Name_HWVendor.Text = "Gyártó:"
-                Name_HWIdentifier.Text = "Azonosító:"
-                Name_CPUList.Text = "Processzor:"
-                Name_CPUCore.Text = "Magok / Szálak:"
-                Name_CPUClock.Text = "Órajel:"
-                Name_CPUMaxClock.Text = "Eredeti:"
-                Name_PhysicalMemory.Text = "Fizikai memória:"
-                Name_PhysicalMemoryUsage.Text = "Foglaltság:"
-                Name_PhysicalMemoryFree.Text = "Szabad:"
-                Name_VirtualMemory.Text = "Virtuális memória:"
-                Name_VirtualMemoryUsage.Text = "Foglaltság:"
-                Name_VirtualMemoryFree.Text = "Szabad:"
-                Name_OSName.Text = "Termék:"
-                Name_OSVersion.Text = "Verzió:"
-                Name_OSLang.Text = "Nyelv:"
-                Name_OSRelease.Text = "Kiadás:"
-                Name_DiskList.Text = "Meghajtó:"
-                Name_MediaType.Text = "Lemez típus:"
-                Name_DiskInterface.Text = "Interfész:"
-                Name_DiskFirmware.Text = "Firmware:"
-                Name_PartList.Text = "Kötet:"
-                Name_DiskSerial.Text = "Sorozatszám:"
-                Name_VideoList.Text = "Videokártya:"
-                Name_VideoMemory.Text = "Videomemória:"
-                Name_VideoResolution.Text = "Felbontás:"
-                Name_InterfaceList.Text = "Interfész:"
-                Name_Bandwidth.Text = "Sávszélesség:"
-                Name_InterfaceUsage.Text = "Interfész kihasználtsága:"
-                Name_DownloadSpeed.Text = "Letöltési sebesség:"
-                Name_UploadSpeed.Text = "Feltöltés sebesség:"
-                Name_ChartVisible.Text = "Diagramok:"
-                Name_UpdateList.Text = "Frissítési időköz:"
-                Name_UpdateUnit.Text = "s"
-
-                ' Csoportfeliratok
-                GroupBox_HWInfo.Text = "Számítógép rendszer információk"
-                GroupBox_CPUInfo.Text = "Processzor információk"
-                GroupBox_MemoryInfo.Text = "Memória információk"
-                GroupBox_OSInfo.Text = "Operációs rendszer információk"
-                GroupBox_DiskInfo.Text = "Meghajtó információk"
-                GroupBox_VideoInfo.Text = "Videovezérlő információk"
-                GroupBox_Network.Text = "Hálózati interfész statisztika"
-
-                ' Menüelemek
-                MainMenuItem_Settings.Text = "&Beállítások"
-                MainMenuItem_Chart.Text = "&Diagram"
-                MainMenuItem_Information.Text = "&Műveletek"
-                MainMenu_SettingsItem_TopMost.Text = "Mi&ndig látható"
-                MainMenu_SettingsItem_TaskbarMinimize.Text = "Kicsinyítés a &rendszerikonok közé"
-                MainMenu_SettingsItem_DisableConfirm.Text = "&Kilépési megerősítés kikapcsolása"
-                MainMenu_SettingsItem_DisableSplash.Text = "&Betöltő képernyő elrejtése"
-                MainMenu_ActionItem_UpdateCheck.Text = "&Frissítések keresése..."
-                MainMenu_ActionItem_About.Text = "&Névjegy..."
-                MainMenu_ActionItem_Exit.Text = "&Kilépés"
-                MainMenu_ChartItem_DownloadVisible.Text = "&Letöltési diagram mutatása"
-                MainMenu_ChartItem_UploadVisible.Text = "&Feltöltési diagram mutatása"
-                MainMenu_ChartItem_SaveChart.Text = "Diagram &mentése az asztalra"
-                MainMenu_ChartItem_ClearChart.Text = "Diagram &törlése"
-
-                ' Checkbox feliratok
-                CheckBoxChart_DownloadVisible.Text = "&Letöltés"
-                CheckBoxChart_UploadVisible.Text = "&Feltöltés"
-
-                ' Gombfeliratok
-                Button_Exit.Text = "&Kilépés"
-
-        End Select
+        ' Menüelemek
+        MainMenuItem_Settings.Text = GetLoc("Menu_Settings")
+        MainMenuItem_Chart.Text = GetLoc("Menu_Chart")
+        MainMenuItem_Information.Text = GetLoc("Menu_Information")
+        MainMenu_SettingsItem_TopMost.Text = GetLoc("Menu_TopMost")
+        MainMenu_SettingsItem_TaskbarMinimize.Text = GetLoc("Menu_TaskbarMinimize")
+        MainMenu_SettingsItem_DisableConfirm.Text = GetLoc("Menu_DisableConfirm")
+        MainMenu_SettingsItem_DisableSplash.Text = GetLoc("Menu_DisableSplash")
+        MainMenu_ActionItem_UpdateCheck.Text = GetLoc("Menu_UpdateCheck")
+        MainMenu_ActionItem_About.Text = GetLoc("Menu_About")
+        MainMenu_ActionItem_Exit.Text = GetLoc("Menu_Exit")
+        MainMenu_ChartItem_DownloadVisible.Text = GetLoc("Menu_DownloadVisible")
+        MainMenu_ChartItem_UploadVisible.Text = GetLoc("Menu_UploadVisible")
+        MainMenu_ChartItem_SaveChart.Text = GetLoc("Menu_SaveChart")
+        MainMenu_ChartItem_ClearChart.Text = GetLoc("Menu_ClearChart")
 
         ' Egyező menüelemek feltöltése (Egyező néven fut, csak másik menüben!)
         MainContextMenuItem_TopMost.Text = MainMenu_SettingsItem_TopMost.Text
@@ -2690,41 +2366,15 @@ Public Class MainWindow
         ChartMenuItem_SaveChart.Text = MainMenu_ChartItem_SaveChart.Text
         ChartMenuItem_ClearChart.Text = MainMenu_ChartItem_ClearChart.Text
 
-        ' Hosztnév beálítása az állapotsorban
-        StatusLabel_Host.Text = Str_Hostname + ": " + Hostname
+        ' Checkbox feliratok
+        CheckBoxChart_DownloadVisible.Text = GetLoc("CB_DownloadVisible")
+        CheckBoxChart_UploadVisible.Text = GetLoc("CB_UploadVisible")
 
-        ' Az ablak címének beállítása
-        Me.Text = MyName + " - " + Str_Title + ", " + Str_Version + " " + VersionString
-
-        ' Taskbar ikon nevének beállítása
-        MainNotifyIcon.Text = MyName + " - " + Str_Title
-
-        ' Alsó link szövegének beállítása
-        Link_Bottom.Text = Str_Title + " - " + Str_Comment
+        ' Gombfeliratok
+        Button_Exit.Text = "E&xit"
 
         ' Kis méretű buborék visszaállítása (Nyelvváltás után a választott nyelven is jelenjen meg adott esetben!)
         DisableBalloon = False
-
-        ' Checkbox és Combobox ToolTip értékek beállítása
-        EventToolTip.SetToolTip(ComboBox_LanguageList, Tip_Language)
-        EventToolTip.SetToolTip(ComboBox_HWList, Tip_HW)
-        EventToolTip.SetToolTip(Button_DiskSmartOpen, Tip_Smart)
-        EventToolTip.SetToolTip(Button_DiskListReload, Tip_Reload)
-        EventToolTip.SetToolTip(Button_VideoListReload, Tip_Reload)
-        EventToolTip.SetToolTip(Button_InterfaceListReload, Tip_Reload)
-        EventToolTip.SetToolTip(PictureBox_TrafficChart, Tip_Chart + " (" + RefreshInterval(SelectedRefresh).ToString + " " + Tip_Average + ")") ' Az átlagértékek is hozzáadva!
-        EventToolTip.SetToolTip(CheckBoxChart_DownloadVisible, Tip_ChartDown)
-        EventToolTip.SetToolTip(CheckBoxChart_UploadVisible, Tip_ChartUp)
-        EventToolTip.SetToolTip(ComboBox_UpdateList, Tip_Refresh)
-        EventToolTip.SetToolTip(Button_Exit, Tip_Exit)
-        EventToolTip.SetToolTip(Link_Bottom, Tip_LinkBottom)
-
-        ' Állapot- és menüsori ToolTip kiírások beállítása
-        StatusLabel_Host.ToolTipText = Tip_Hostname
-        StatusLabel_Uptime.ToolTipText = Tip_Uptime
-        StatusLabel_ChartStatus.ToolTipText = Tip_Status
-        StatusLabel_TopMost.ToolTipText = Tip_TopMost
-        ScreenshotToolStripMenuItem.ToolTipText = Tip_Screenshot
 
         ' Hardver és OS információk frissítése (Minden esetben!)
         SetHWInformation()
@@ -2745,7 +2395,7 @@ Public Class MainWindow
         ' Hamis listaelem hozzáadása, ha nincs jelen interfész
         If InterfacePresent = False Then
             ComboBox_InterfaceList.Items.Clear()
-            InterfaceName(0) = Str_NotAvailable
+            InterfaceName(0) = GetLoc("NotAvailable")
             ComboBox_InterfaceList.Items.Add(InterfaceName(0))
             ComboBox_InterfaceList.SelectedIndex = 0
         End If
@@ -2763,7 +2413,7 @@ Public Class MainWindow
         SelectedRefresh = ComboBox_UpdateList.SelectedIndex
 
         ' Diagram ToolTip beállítása (másodpercek kiírásával)
-        EventToolTip.SetToolTip(PictureBox_TrafficChart, Tip_Chart + " (" + RefreshInterval(SelectedRefresh).ToString + " " + Tip_Average + ")")
+        EventToolTip.SetToolTip(PictureBox_TrafficChart, GetLoc("Tip_Chart") + " (" + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Tip_Average") + ")")
 
         ' Diagram frissítése
         MakeChart(True)
@@ -2780,18 +2430,18 @@ Public Class MainWindow
         ' Komponensek kiírásának beállítása
         If HWVendor(SelectedHardware) = Nothing Then
             Value_HWVendor.Enabled = False
-            Value_HWVendor.Text = Str_NotAvailable
+            Value_HWVendor.Text = GetLoc("NotAvailable")
         Else
             Value_HWVendor.Enabled = True
             Value_HWVendor.Text = HWVendor(SelectedHardware)
         End If
 
         If HWIdentifier(SelectedHardware) = Nothing Then
-            Value_HWIdentifier.Enabled = False
-            Value_HWIdentifier.Text = Str_NotAvailable
+            Value_HWIdent.Enabled = False
+            Value_HWIdent.Text = GetLoc("NotAvailable")
         Else
-            Value_HWIdentifier.Enabled = True
-            Value_HWIdentifier.Text = HWIdentifier(SelectedHardware)
+            Value_HWIdent.Enabled = True
+            Value_HWIdent.Text = HWIdentifier(SelectedHardware)
         End If
 
     End Sub
@@ -2850,7 +2500,7 @@ Public Class MainWindow
         ' Meghajtóbetűjelek kiírása
         If PartLabel(SelectedPartition) = Nothing Then
             Value_PartLabel.Enabled = False
-            Value_PartLabel.Text = Str_None
+            Value_PartLabel.Text = GetLoc("None")
         Else
             Value_PartLabel.Enabled = True
             Value_PartLabel.Text = PartLabel(SelectedPartition)
@@ -2859,7 +2509,7 @@ Public Class MainWindow
         ' Partícióinformációk kiírása
         If PartInfo(SelectedPartition) = Nothing Then
             Value_PartInfo.Enabled = False
-            Value_PartInfo.Text = Str_NotAvailable
+            Value_PartInfo.Text = GetLoc("NotAvailable")
         Else
             Value_PartInfo.Enabled = True
             Value_PartInfo.Text = PartInfo(SelectedPartition)
@@ -2998,6 +2648,10 @@ Public Class MainWindow
     ' Eseményvezérelt: Me.FormClosing -> Ablak bezárása (A 'Me.Close' által, vagy a jobb felső bezárás gombra kattintva)
     Private Sub MainWindow_FormClosing(ByVal sender As System.Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
 
+        ' Külső ablakok bezárása
+        LoadSplash.Close()
+        SmartWindow.Close()
+
         ' Beállításjegyzék értékeinek mentése (Ha a főablak hiba nélkül betöltött)
         If MainWindowDone Then
             RegPath.SetValue("DisableLoadSplash", ToInt32(CheckedSplashDisable), RegistryValueKind.DWord)
@@ -3015,7 +2669,7 @@ Public Class MainWindow
             Me.TopMost = False
 
             ' Megerősítőablak megjelenítése (Igen -> Kilépés, Nem -> Mégse)
-            e.Cancel = MsgBox(Str_QuitAsk, vbQuestion + vbYesNo + vbMsgBoxSetForeground, Str_QuitTitle) = MsgBoxResult.No
+            e.Cancel = MsgBox(GetLoc("QuitAsk"), vbQuestion + vbYesNo + vbMsgBoxSetForeground, GetLoc("QuitTitle")) = MsgBoxResult.No
 
             ' Folyamatos láthatósag visszaállítása
             Me.TopMost = CheckedTopMost
@@ -3028,7 +2682,7 @@ Public Class MainWindow
     ' Eseményvezérelt: Me.Resize -> Ablak átméretezése
     Private Sub MainWindow_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
 
-        ' Splash ablak bezárása
+        ' Külső ablakok bezárása
         LoadSplash.Close()
         SmartWindow.Close()
 
@@ -3039,7 +2693,7 @@ Public Class MainWindow
             ' Buboréküzenet megjelenítése, majd későbbi kikapcsolása (Csak az első tálcára tételkor jelenik meg!)
             If Not DisableBalloon Then
                 OpenFile = False
-                MainNotifyIcon.ShowBalloonTip(3000, MyName + " - " + Str_Note, Str_Taskbar, ToolTipIcon.Info)
+                MainNotifyIcon.ShowBalloonTip(3000, MyName + " - " + GetLoc("Note"), GetLoc("Taskbar"), ToolTipIcon.Info)
                 DisableBalloon = True
             End If
         End If
@@ -3059,7 +2713,7 @@ Public Class MainWindow
             If CheckedMinToTray Then
                 Me.Visible = False
                 If Not DisableBalloon Then
-                    MainNotifyIcon.ShowBalloonTip(3000, MyName, Str_Taskbar, ToolTipIcon.Info)
+                    MainNotifyIcon.ShowBalloonTip(3000, MyName, GetLoc("Taskbar"), ToolTipIcon.Info)
                     DisableBalloon = True
                 End If
             End If
@@ -3205,7 +2859,7 @@ Public Class MainWindow
 
         ' Buboréküzenet állapotának beállítása (fájl megnyitása) és üzenet megjelenítése
         OpenFile = True
-        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + Str_Note, Str_ImageSaved + ": '" + SavePath + "'", ToolTipIcon.Info)
+        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + GetLoc("Note"), GetLoc("ImageSaved") + ": '" + SavePath + "'", ToolTipIcon.Info)
 
     End Sub
 
@@ -3232,7 +2886,7 @@ Public Class MainWindow
 
         ' Buboréküzenet állapotának beállítása (fájl megnyitása) és üzenet megjelenítése
         OpenFile = True
-        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + Str_Note, Str_ImageSaved + ": '" + SavePath + "'", ToolTipIcon.Info)
+        MainNotifyIcon.ShowBalloonTip(5000, MyName + " - " + GetLoc("Note"), GetLoc("ImageSaved") + ": '" + SavePath + "'", ToolTipIcon.Info)
 
     End Sub
 

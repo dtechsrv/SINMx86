@@ -4,21 +4,26 @@ Imports System.Math
 Imports System.Convert
 Imports Microsoft.Win32
 
+Imports SINMx86.Localization
 
+' S.M.A.R.T ablak osztálya
 Public Class SmartWindow
 
     ' WMI feldolgozási objektumok
     Public objSM, objST, objDD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
+    ' S.M.A.R.T tábla változói
     Public SmartPnPID(32) As String                             ' PnP azonosító a S.M.A.R.T-hoz
     Public DiskCount As Int32 = 0                               ' Lemezek száma
     Public SelectedDisk As Int32 = 0                            ' Kiválasztott lemez
     Public SmartRecord(255) As String                           ' Rekord nevek tömbje
 
-    ' Főablak betöltése 
+    ' *** FŐ ELJÁRÁS: S.M.A.R.T ablak betöltése (MyBase.Load -> SmartWindow) ***
+    ' Eseményvezérelt: Ablak megnyitása
     Private Sub SmartWindow_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
+        ' Értékek definiálása
         Dim SmartColunms() As Int32 = {2, 3, 5, 6, 7}           ' Rekordok helye egy soron belül
         Dim SmartValues(UBound(SmartColunms) + 2) As String     ' Értékek tömbje (A kezdő oszlop és a szöveges feliratok miatt 2-vel nagyobb!)
         Dim SmartRow As Int32 = 0                               ' Sorok száma
@@ -33,23 +38,24 @@ Public Class SmartWindow
         ' Értékek átvétele a főablaktól
         Dim SelectedDisk = MainWindow.SelectedDisk
         Dim SmartID As String = MainWindow.DiskSmart(SelectedDisk)
+        Dim DiskName As String = MainWindow.ComboBox_DiskList.Items(SelectedDisk)
 
         ' Ablak nevének  átvétele a főablakból
-        Me.Text = MainWindow.Str_SmartTitle
+        Me.Text = GetLoc("SmartTitle")
 
         ' GroupBox szövegének beállítása
-        GroupBox_Table.Text = MainWindow.Str_Disk + " " + MainWindow.ComboBox_DiskList.Items(SelectedDisk)
+        GroupBox_Table.Text = GetLoc("Disk") + " " + DiskName
 
         ' Bezárás gomb
-        Button_Close.Text = MainWindow.Str_SmartClose
+        Button_Close.Text = GetLoc("SmartClose")
 
         ' Tábla fejléc szövegek átvétele a főablakból
         SMART_Table.Columns(1).Text = "#"
-        SMART_Table.Columns(2).Text = MainWindow.Str_SmartRecord
-        SMART_Table.Columns(3).Text = MainWindow.Str_SmartTreshold
-        SMART_Table.Columns(4).Text = MainWindow.Str_SmartValue
-        SMART_Table.Columns(5).Text = MainWindow.Str_SmartWorst
-        SMART_Table.Columns(6).Text = MainWindow.Str_SmartData
+        SMART_Table.Columns(2).Text = GetLoc("SmartRecord")
+        SMART_Table.Columns(3).Text = GetLoc("SmartTreshold")
+        SMART_Table.Columns(4).Text = GetLoc("SmartValue")
+        SMART_Table.Columns(5).Text = GetLoc("SmartWorst")
+        SMART_Table.Columns(6).Text = GetLoc("SmartData")
 
         ' Formázás -> Félkövér és normál betűk soron belül
         Dim ListBold() As Boolean = {False, True, True, False, False, False, True}
@@ -119,11 +125,11 @@ Public Class SmartWindow
 
                             ' Üzemidő: napok
                             ValueDiff = Int(ValueSum / (24))
-                            SmartValues(6) = ValueDiff.ToString + " " + MainWindow.Str_Days
+                            SmartValues(6) = ValueDiff.ToString + " " + GetLoc("Days")
 
                             ' Üzemidő: órák
                             ValueDiff = ValueSum - (ValueDiff * 24)
-                            SmartValues(6) += ", " + ValueDiff.ToString + " " + MainWindow.Str_Hours
+                            SmartValues(6) += ", " + ValueDiff.ToString + " " + GetLoc("Hours")
 
                         Else
 
@@ -167,6 +173,9 @@ Public Class SmartWindow
 
     End Sub
 
+    ' *** FÜGGVÉNY: S.M.A.R.T rekordok neveinek beállítása ***
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
     Private Function LoadSmartRecords()
 
         ' Minden elem feltöltése
@@ -263,10 +272,13 @@ Public Class SmartWindow
 
     End Function
 
+    ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
+    ' Eseményvezérelt: Button_Close.Click -> Klikk (Gomb)
     Private Sub Button_Close_Click(sender As Object, e As EventArgs) Handles Button_Close.Click
 
         ' Ablak bezárása
         Me.Close()
 
     End Sub
+
 End Class
