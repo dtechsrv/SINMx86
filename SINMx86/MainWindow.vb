@@ -870,7 +870,7 @@ Public Class MainWindow
     ' *** FÜGGVÉNY: Felesleges szóközök eltávolítása ***
     ' Bemenet: RawString -> formázandó sztring (String)
     ' Kimenet: RawString -> formázott sztring (String)
-    Private Function RemoveSpaces(ByVal RawString As String)
+    Public Function RemoveSpaces(ByVal RawString As String)
 
         ' Értékek definiálása
         Dim Str2Char() As Char             ' Sztring-karakter konverzió tömbje
@@ -2178,7 +2178,7 @@ Public Class MainWindow
     End Function
 
     ' *** FÜGGVÉNY: Időzítő időbélyeg ellenőrzése ***
-    ' Bemenet: Tolerance  -> etűrhető késés mértéke másodpercben (Int32)
+    ' Bemenet: Tolerance  -> eltűrhető késés mértéke másodpercben (Int32)
     ' Kimenet: StampValid -> időbélyeg érvényesség (Boolean)
     Private Function CheckTimerStamp(ByVal Tolerance As Int32)
 
@@ -2198,6 +2198,21 @@ Public Class MainWindow
 
         ' Visszatérési érték beállítása
         Return StampValid
+
+    End Function
+
+    ' *** FÜGGVÉNY: Külső ablakok bezárása ***
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
+    Private Function CloseExtForms()
+
+        ' Ablakok bezárása
+        LoadSplash.Close()
+        CPUInfo.Close()
+        SmartWindow.Close()
+
+        ' Visszatérési érték beállítása
+        Return False
 
     End Function
 
@@ -2310,7 +2325,8 @@ Public Class MainWindow
         ' Checkbox és Combobox ToolTip értékek beállítása
         EventToolTip.SetToolTip(ComboBox_LanguageList, GetLoc("Tip_Language"))
         EventToolTip.SetToolTip(ComboBox_HWList, GetLoc("Tip_HW"))
-        EventToolTip.SetToolTip(Button_DiskSmartOpen, GetLoc("Tip_Smart"))
+        EventToolTip.SetToolTip(Button_CPUInfoOpen, GetLoc("Tip_CPUInfo"))
+        EventToolTip.SetToolTip(Button_SmartOpen, GetLoc("Tip_Smart"))
         EventToolTip.SetToolTip(Button_DiskListReload, GetLoc("Tip_Reload"))
         EventToolTip.SetToolTip(Button_VideoListReload, GetLoc("Tip_Reload"))
         EventToolTip.SetToolTip(Button_InterfaceListReload, GetLoc("Tip_Reload"))
@@ -2371,7 +2387,7 @@ Public Class MainWindow
         CheckBoxChart_UploadVisible.Text = GetLoc("CB_UploadVisible")
 
         ' Gombfeliratok
-        Button_Exit.Text = "E&xit"
+        Button_Exit.Text = GetLoc("Button_Exit")
 
         ' Kis méretű buborék visszaállítása (Nyelvváltás után a választott nyelven is jelenjen meg adott esetben!)
         DisableBalloon = False
@@ -2388,9 +2404,6 @@ Public Class MainWindow
 
         ' Hardverlista frissítése
         UpdateHWList(False)
-
-        ' Lemezilista frissítése
-        UpdateDiskList(False)
 
         ' Hamis listaelem hozzáadása, ha nincs jelen interfész
         If InterfacePresent = False Then
@@ -2480,9 +2493,9 @@ Public Class MainWindow
 
         ' S.M.A.R.T tábla ellenőrzése
         If DiskSmart(SelectedDisk) <> Nothing Then
-            Button_DiskSmartOpen.Enabled = True
+            Button_SmartOpen.Enabled = True
         Else
-            Button_DiskSmartOpen.Enabled = False
+            Button_SmartOpen.Enabled = False
         End If
 
         ' ToolTip érték beállítása
@@ -2582,14 +2595,25 @@ Public Class MainWindow
 
     ' *** ELJÁRÁS: S.M.A.R.T ablak megnyitása ***
     ' Eseményvezérelt: Button_DiskSmartOpen.Click -> Klikk (Lemez S.M.A.R.T gomb)
-    Private Sub SmartWindow_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_DiskSmartOpen.Click
+    Private Sub SmartWindow_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_SmartOpen.Click
 
         ' Külső ablakok bezárása
-        LoadSplash.Close()
-        SmartWindow.Close()
+        CloseExtForms()
 
         ' S.M.A.R.T ablak megnyitása
         SmartWindow.Visible = True
+
+    End Sub
+
+    ' *** ELJÁRÁS: CPU-infó ablak megnyitása ***
+    ' Eseményvezérelt: Button_CPUInfoOpen.Click -> Klikk (CPU-infó gomb)
+    Private Sub CPUInfo_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_CPUInfoOpen.Click
+
+        ' Külső ablakok bezárása
+        CloseExtForms()
+
+        ' S.M.A.R.T ablak megnyitása
+        CPUInfo.Visible = True
 
     End Sub
 
@@ -2649,8 +2673,7 @@ Public Class MainWindow
     Private Sub MainWindow_FormClosing(ByVal sender As System.Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
 
         ' Külső ablakok bezárása
-        LoadSplash.Close()
-        SmartWindow.Close()
+        CloseExtForms()
 
         ' Beállításjegyzék értékeinek mentése (Ha a főablak hiba nélkül betöltött)
         If MainWindowDone Then
@@ -2683,8 +2706,7 @@ Public Class MainWindow
     Private Sub MainWindow_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
 
         ' Külső ablakok bezárása
-        LoadSplash.Close()
-        SmartWindow.Close()
+        CloseExtForms()
 
         ' Kis méret állapotának beállítása
         If Me.WindowState = FormWindowState.Minimized And CheckedMinToTray Then
@@ -2705,8 +2727,7 @@ Public Class MainWindow
     Private Sub MainNotifyIcon_DoubleClick(ByVal sender As System.Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles MainNotifyIcon.MouseDoubleClick
 
         ' Külső ablakok bezárása
-        LoadSplash.Close()
-        SmartWindow.Close()
+        CloseExtForms()
 
         ' Változás ellenőrzése és állapot invertálása
         If Me.WindowState = FormWindowState.Normal Then
@@ -2753,8 +2774,7 @@ Public Class MainWindow
     Private Sub TopMost_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_SettingsItem_TopMost.Click, StatusLabel_TopMost.Click, MainContextMenuItem_TopMost.Click
 
         ' Külső ablakok bezárása
-        LoadSplash.Close()
-        SmartWindow.Close()
+        CloseExtForms()
 
         ' Változás ellenőrzése és állapot invertálása
         If Me.TopMost Then
@@ -2830,8 +2850,7 @@ Public Class MainWindow
     Private Sub LoadSplash_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainMenu_ActionItem_About.Click, MainContextMenuItem_About.Click, Link_Bottom.LinkClicked
 
         ' Külső ablakok bezárása
-        LoadSplash.Close()
-        SmartWindow.Close()
+        CloseExtForms()
 
         ' Splash időzítő újbóli elindítása és ablak megjelenítése
         LoadSplash.SplashTimer.Enabled = False

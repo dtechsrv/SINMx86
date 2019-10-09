@@ -40,6 +40,7 @@ Partial Class MainWindow
         Me.Value_OSName = New System.Windows.Forms.Label()
         Me.Name_OSName = New System.Windows.Forms.Label()
         Me.GroupBox_CPUInfo = New System.Windows.Forms.GroupBox()
+        Me.Button_CPUInfoOpen = New System.Windows.Forms.Button()
         Me.Value_CPUMaximum = New System.Windows.Forms.Label()
         Me.Name_CPUMaximum = New System.Windows.Forms.Label()
         Me.Value_CPUCore = New System.Windows.Forms.Label()
@@ -136,7 +137,7 @@ Partial Class MainWindow
         Me.MainMenu_ActionItem_Exit = New System.Windows.Forms.ToolStripMenuItem()
         Me.ScreenshotToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GroupBox_DiskInfo = New System.Windows.Forms.GroupBox()
-        Me.Button_DiskSmartOpen = New System.Windows.Forms.Button()
+        Me.Button_SmartOpen = New System.Windows.Forms.Button()
         Me.Value_PartLabel = New System.Windows.Forms.Label()
         Me.Value_PartInfo = New System.Windows.Forms.Label()
         Me.Button_DiskListReload = New System.Windows.Forms.Button()
@@ -341,6 +342,7 @@ Partial Class MainWindow
         '
         'GroupBox_CPUInfo
         '
+        Me.GroupBox_CPUInfo.Controls.Add(Me.Button_CPUInfoOpen)
         Me.GroupBox_CPUInfo.Controls.Add(Me.ComboBox_CPUList)
         Me.GroupBox_CPUInfo.Controls.Add(Me.Value_CPUMaximum)
         Me.GroupBox_CPUInfo.Controls.Add(Me.Name_CPUMaximum)
@@ -357,13 +359,23 @@ Partial Class MainWindow
         Me.GroupBox_CPUInfo.TabStop = False
         Me.GroupBox_CPUInfo.Text = "Processor information"
         '
+        'Button_CPUInfoOpen
+        '
+        Me.Button_CPUInfoOpen.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Button_CPUInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Control_CPU
+        Me.Button_CPUInfoOpen.Location = New System.Drawing.Point(414, 21)
+        Me.Button_CPUInfoOpen.Name = "Button_CPUInfoOpen"
+        Me.Button_CPUInfoOpen.Size = New System.Drawing.Size(23, 23)
+        Me.Button_CPUInfoOpen.TabIndex = 2
+        Me.Button_CPUInfoOpen.UseVisualStyleBackColor = True
+        '
         'Value_CPUMaximum
         '
         Me.Value_CPUMaximum.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_CPUMaximum.Location = New System.Drawing.Point(376, 48)
         Me.Value_CPUMaximum.Name = "Value_CPUMaximum"
         Me.Value_CPUMaximum.Size = New System.Drawing.Size(61, 13)
-        Me.Value_CPUMaximum.TabIndex = 7
+        Me.Value_CPUMaximum.TabIndex = 8
         Me.Value_CPUMaximum.Text = "9999 MHz"
         Me.Value_CPUMaximum.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -375,7 +387,7 @@ Partial Class MainWindow
         Me.Name_CPUMaximum.Location = New System.Drawing.Point(316, 48)
         Me.Name_CPUMaximum.Name = "Name_CPUMaximum"
         Me.Name_CPUMaximum.Size = New System.Drawing.Size(48, 13)
-        Me.Name_CPUMaximum.TabIndex = 6
+        Me.Name_CPUMaximum.TabIndex = 7
         Me.Name_CPUMaximum.Text = "Native:"
         '
         'Value_CPUCore
@@ -384,7 +396,7 @@ Partial Class MainWindow
         Me.Value_CPUCore.Location = New System.Drawing.Point(124, 48)
         Me.Value_CPUCore.Name = "Value_CPUCore"
         Me.Value_CPUCore.Size = New System.Drawing.Size(61, 13)
-        Me.Value_CPUCore.TabIndex = 3
+        Me.Value_CPUCore.TabIndex = 4
         Me.Value_CPUCore.Text = "99 / 99"
         Me.Value_CPUCore.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -396,7 +408,7 @@ Partial Class MainWindow
         Me.Name_CPUCore.Location = New System.Drawing.Point(15, 48)
         Me.Name_CPUCore.Name = "Name_CPUCore"
         Me.Name_CPUCore.Size = New System.Drawing.Size(103, 13)
-        Me.Name_CPUCore.TabIndex = 2
+        Me.Name_CPUCore.TabIndex = 3
         Me.Name_CPUCore.Text = "Cores / Threads:"
         '
         'Value_CPUClock
@@ -405,7 +417,7 @@ Partial Class MainWindow
         Me.Value_CPUClock.Location = New System.Drawing.Point(248, 48)
         Me.Value_CPUClock.Name = "Value_CPUClock"
         Me.Value_CPUClock.Size = New System.Drawing.Size(60, 13)
-        Me.Value_CPUClock.TabIndex = 5
+        Me.Value_CPUClock.TabIndex = 6
         Me.Value_CPUClock.Text = "9999 MHz"
         Me.Value_CPUClock.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -417,7 +429,7 @@ Partial Class MainWindow
         Me.Name_CPUClock.Location = New System.Drawing.Point(193, 48)
         Me.Name_CPUClock.Name = "Name_CPUClock"
         Me.Name_CPUClock.Size = New System.Drawing.Size(43, 13)
-        Me.Name_CPUClock.TabIndex = 4
+        Me.Name_CPUClock.TabIndex = 5
         Me.Name_CPUClock.Text = "Clock:"
         '
         'Name_CPUList
@@ -1247,7 +1259,7 @@ Partial Class MainWindow
         '
         'GroupBox_DiskInfo
         '
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Button_DiskSmartOpen)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.Button_SmartOpen)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_PartLabel)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_PartInfo)
         Me.GroupBox_DiskInfo.Controls.Add(Me.ComboBox_PartList)
@@ -1271,15 +1283,15 @@ Partial Class MainWindow
         Me.GroupBox_DiskInfo.TabStop = False
         Me.GroupBox_DiskInfo.Text = "Disk information"
         '
-        'Button_DiskSmartOpen
+        'Button_SmartOpen
         '
-        Me.Button_DiskSmartOpen.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_DiskSmartOpen.Image = Global.SINMx86.My.Resources.Resources.Control_HDD
-        Me.Button_DiskSmartOpen.Location = New System.Drawing.Point(385, 21)
-        Me.Button_DiskSmartOpen.Name = "Button_DiskSmartOpen"
-        Me.Button_DiskSmartOpen.Size = New System.Drawing.Size(23, 23)
-        Me.Button_DiskSmartOpen.TabIndex = 2
-        Me.Button_DiskSmartOpen.UseVisualStyleBackColor = True
+        Me.Button_SmartOpen.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Button_SmartOpen.Image = Global.SINMx86.My.Resources.Resources.Control_HDD
+        Me.Button_SmartOpen.Location = New System.Drawing.Point(385, 21)
+        Me.Button_SmartOpen.Name = "Button_SmartOpen"
+        Me.Button_SmartOpen.Size = New System.Drawing.Size(23, 23)
+        Me.Button_SmartOpen.TabIndex = 2
+        Me.Button_SmartOpen.UseVisualStyleBackColor = True
         '
         'Value_PartLabel
         '
@@ -1491,7 +1503,7 @@ Partial Class MainWindow
         Me.ComboBox_CPUList.FormattingEnabled = True
         Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 22)
         Me.ComboBox_CPUList.Name = "ComboBox_CPUList"
-        Me.ComboBox_CPUList.Size = New System.Drawing.Size(326, 21)
+        Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
         Me.ComboBox_CPUList.TabIndex = 1
         '
         'ComboBox_HWList
@@ -1690,7 +1702,8 @@ Partial Class MainWindow
     Friend WithEvents ComboBox_PartList As SINMx86.LeftComboBox
     Friend WithEvents Value_PartInfo As System.Windows.Forms.Label
     Friend WithEvents Value_PartLabel As System.Windows.Forms.Label
-    Friend WithEvents Button_DiskSmartOpen As System.Windows.Forms.Button
+    Friend WithEvents Button_SmartOpen As System.Windows.Forms.Button
+    Friend WithEvents Button_CPUInfoOpen As System.Windows.Forms.Button
 
 End Class
 

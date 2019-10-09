@@ -46,7 +46,7 @@ Public NotInheritable Class LoadSplash
             End If
         Else
             Link_SplashClose.Text = Nothing
-            Splash_Status.Text = GetLoc("SplashLoad") + "..."  ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
+            Splash_Status.Text = GetLoc("SplashLoad") + "..."       ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
 
             Me.TopMost = True
         End If

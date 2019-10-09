@@ -156,6 +156,12 @@
     <Compile Include="LoadSplash.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="CPUInfo.Designer.vb">
+      <DependentUpon>CPUInfo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="CPUInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SmartWindow.Designer.vb">
       <DependentUpon>SmartWindow.vb</DependentUpon>
     </Compile>
@@ -175,6 +181,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LoadSplash.resx">
       <DependentUpon>LoadSplash.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CPUInfo.resx">
+      <DependentUpon>CPUInfo.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SmartWindow.resx">
       <DependentUpon>SmartWindow.vb</DependentUpon>
@@ -228,6 +237,7 @@
     <None Include="Resources\Controls\check.gif" />
     <None Include="Resources\Controls\camera.gif" />
     <None Include="Resources\Controls\hdd.gif" />
+    <None Include="Resources\Controls\cpu.gif" />
     <Content Include="Resources\Icon\main.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

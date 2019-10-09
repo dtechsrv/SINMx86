@@ -71,7 +71,6 @@ Public Class Localization
                 AddLoc("Note", "Notification")
                 AddLoc("Taskbar", "The process is still running in the background.")
                 AddLoc("ImageSaved", "Image saved")
-                AddLoc("Disk", "Disk")
                 AddLoc("NoDisk", "No disk")
                 AddLoc("NoName", "No name")
                 AddLoc("NotAvailable", "Not available")
@@ -88,17 +87,37 @@ Public Class Localization
 
                 ' Külső nyelvi sztingek (S.M.A.R.T ablak)
                 AddLoc("SmartTitle", "S.M.A.R.T information")
+                AddLoc("SmartTable", "Disk")
                 AddLoc("SmartRecord", "Record")
                 AddLoc("SmartTreshold", "Treshold")
                 AddLoc("SmartValue", "Value")
                 AddLoc("SmartWorst", "Worst")
                 AddLoc("SmartData", "Data")
-                AddLoc("SmartClose", "&Close")
+
+                ' Külső nyelvi sztingek (CPU-infó ablak)
+                AddLoc("CPUTitle", "Processor information")
+                AddLoc("CPUTable", "CPU")
+                AddLoc("CPUDescription", "Description")
+                AddLoc("CPUValue", "Value")
+                AddLoc("CPUVendor", "Vendor")
+                AddLoc("CPUName", "Name")
+                AddLoc("CPUIdent", "Identifier")
+                AddLoc("CPUCores", "Number of cores")
+                AddLoc("CPUThreads", "Number of threads")
+                AddLoc("CPUSocket", "Socket")
+                AddLoc("CPUVoltage", "Core voltage")
+                AddLoc("CPUArchitect", "Architecture")
+                AddLoc("CPUCurrentSpeed", "Current clock")
+                AddLoc("CPUMaxSpeed", "Native clock")
+                AddLoc("CPUBusClock", "Bus clock")
+                AddLoc("CPUL2", "Size of L2 cache")
+                AddLoc("CPUL3", "Size of L3 cache")
 
                 ' ToolTip sztringek
                 AddLoc("Tip_Language", "Language selection")
                 AddLoc("Tip_HW", "Component selection")
-                AddLoc("Tip_Smart", "Open S.M.A.R.T table")
+                AddLoc("Tip_CPUInfo", "Details...")
+                AddLoc("Tip_Smart", "Open S.M.A.R.T table...")
                 AddLoc("Tip_Reload", "Reload list")
                 AddLoc("Tip_Chart", "Traffic history chart")
                 AddLoc("Tip_Average", "seconds averages")
@@ -180,6 +199,7 @@ Public Class Localization
 
                 ' Gombfeliratok
                 AddLoc("Button_Exit", "E&xit")
+                AddLoc("Button_Close", "&Close")
 
             Case 1 ' *** NYELV: Magyar kiírások (1) ***
 
@@ -227,7 +247,6 @@ Public Class Localization
                 AddLoc("Note", "Értesítés")
                 AddLoc("Taskbar", "A folyamat továbbra is fut a háttérben.")
                 AddLoc("ImageSaved", "Kép elmentve")
-                AddLoc("Disk", "Lemez")
                 AddLoc("NoDisk", "Nincs lemez")
                 AddLoc("NoName", "Névtelen")
                 AddLoc("NotAvailable", "Nem elérhető")
@@ -244,6 +263,7 @@ Public Class Localization
 
                 ' Külső nyelvi sztingek (S.M.A.R.T ablak)
                 AddLoc("SmartTitle", "S.M.A.R.T információk")
+                AddLoc("SmartTable", "Lemez")
                 AddLoc("SmartRecord", "Rekord")
                 AddLoc("SmartTreshold", "Küszöb")
                 AddLoc("SmartValue", "Érték")
@@ -251,10 +271,30 @@ Public Class Localization
                 AddLoc("SmartData", "Adat")
                 AddLoc("SmartClose", "&Bezárás")
 
+                ' Külső nyelvi sztingek (CPU-infó ablak)
+                AddLoc("CPUTitle", "Processzor információk")
+                AddLoc("CPUTable", "CPU")
+                AddLoc("CPUDescription", "Megnevezés")
+                AddLoc("CPUValue", "Érték")
+                AddLoc("CPUVendor", "Gyártó")
+                AddLoc("CPUName", "Név")
+                AddLoc("CPUIdent", "Azonosító")
+                AddLoc("CPUCores", "Magok száma")
+                AddLoc("CPUThreads", "Logikai szálak száma")
+                AddLoc("CPUSocket", "Tokozás")
+                AddLoc("CPUVoltage", "Magfeszültség")
+                AddLoc("CPUArchitect", "Architectúra")
+                AddLoc("CPUCurrentSpeed", "Jelenlegi órajel")
+                AddLoc("CPUMaxSpeed", "Gyári órajel")
+                AddLoc("CPUBusClock", "Busz órajel")
+                AddLoc("CPUL2", "L2 gyorsítótár mérete")
+                AddLoc("CPUL3", "L3 gyorsítótár mérete")
+
                 ' ToolTip sztringek
                 AddLoc("Tip_Language", "Nyelv kiválasztása")
                 AddLoc("Tip_HW", "Komponens kiválasztása")
-                AddLoc("Tip_Smart", "S.M.A.R.T tábla megnyitása")
+                AddLoc("Tip_CPUInfo", "Részletek...")
+                AddLoc("Tip_Smart", "S.M.A.R.T tábla megnyitása...")
                 AddLoc("Tip_Reload", "Lista újratöltése")
                 AddLoc("Tip_Chart", "Adatforgalmi előzmények diagramja")
                 AddLoc("Tip_Average", "másodperces átlagok")
@@ -336,6 +376,7 @@ Public Class Localization
 
                 ' Gombfeliratok
                 AddLoc("Button_Exit", "&Kilépés")
+                AddLoc("Button_Close", "&Bezárás")
 
         End Select
 

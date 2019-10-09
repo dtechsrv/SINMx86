@@ -24,6 +24,7 @@ Partial Class SmartWindow
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(SmartWindow))
         Me.SMART_Table = New System.Windows.Forms.ListView()
+        Me.Dummy = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.Number = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.Record = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.Treshold = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
@@ -32,7 +33,6 @@ Partial Class SmartWindow
         Me.Data = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.GroupBox_Table = New System.Windows.Forms.GroupBox()
         Me.Button_Close = New System.Windows.Forms.Button()
-        Me.Dummy = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.GroupBox_Table.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -44,10 +44,17 @@ Partial Class SmartWindow
         Me.SMART_Table.Location = New System.Drawing.Point(10, 23)
         Me.SMART_Table.Name = "SMART_Table"
         Me.SMART_Table.ShowGroups = False
-        Me.SMART_Table.Size = New System.Drawing.Size(696, 299)
+        Me.SMART_Table.Size = New System.Drawing.Size(696, 300)
         Me.SMART_Table.TabIndex = 0
         Me.SMART_Table.UseCompatibleStateImageBehavior = False
         Me.SMART_Table.View = System.Windows.Forms.View.Details
+        '
+        'Dummy
+        '
+        Me.Dummy.DisplayIndex = 6
+        Me.Dummy.Tag = "Dummy"
+        Me.Dummy.Text = ""
+        Me.Dummy.Width = 0
         '
         'Number
         '
@@ -101,32 +108,25 @@ Partial Class SmartWindow
         Me.GroupBox_Table.Controls.Add(Me.SMART_Table)
         Me.GroupBox_Table.Location = New System.Drawing.Point(12, 12)
         Me.GroupBox_Table.Name = "GroupBox_Table"
-        Me.GroupBox_Table.Size = New System.Drawing.Size(717, 333)
+        Me.GroupBox_Table.Size = New System.Drawing.Size(716, 334)
         Me.GroupBox_Table.TabIndex = 1
         Me.GroupBox_Table.TabStop = False
         Me.GroupBox_Table.Text = "S.M.A.R.T - Selected disk name"
         '
         'Button_Close
         '
-        Me.Button_Close.Location = New System.Drawing.Point(654, 355)
+        Me.Button_Close.Location = New System.Drawing.Point(653, 356)
         Me.Button_Close.Name = "Button_Close"
         Me.Button_Close.Size = New System.Drawing.Size(75, 23)
         Me.Button_Close.TabIndex = 0
         Me.Button_Close.Text = "&Close"
         Me.Button_Close.UseVisualStyleBackColor = True
         '
-        'Dummy
-        '
-        Me.Dummy.DisplayIndex = 6
-        Me.Dummy.Tag = "Dummy"
-        Me.Dummy.Text = ""
-        Me.Dummy.Width = 0
-        '
         'SmartWindow
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(741, 389)
+        Me.ClientSize = New System.Drawing.Size(740, 389)
         Me.Controls.Add(Me.Button_Close)
         Me.Controls.Add(Me.GroupBox_Table)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle

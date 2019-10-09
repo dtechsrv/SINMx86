@@ -24,16 +24,19 @@ Public Class SmartWindow
     Private Sub SmartWindow_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
         ' Értékek definiálása
-        Dim SmartColunms() As Int32 = {2, 3, 5, 6, 7}           ' Rekordok helye egy soron belül
-        Dim SmartValues(UBound(SmartColunms) + 2) As String     ' Értékek tömbje (A kezdő oszlop és a szöveges feliratok miatt 2-vel nagyobb!)
-        Dim SmartRow As Int32 = 0                               ' Sorok száma
+        Dim SmartColunms() As Int32 = {2, 3, 5, 6, 7}           ' Rekordok kezdeti helye, egy soron belül
         Dim SmartStep As Int32 = 12                             ' S.M.A.R.T bájtok ugrásköze (12-esével)
         Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
         Dim ValueSum As Int64 = 0                               ' Adatok összege (4 bájtból, növekvő nagyságrenddel)
         Dim ValueDiff As Int64 = 0                              ' Matematikai segédváltozó
-        Dim SmartItem As ListViewItem                           ' Egy sor elemei listanézetben
         Dim SmartData() As Byte                                 ' Nyers adatok tömbje
         Dim SmartTreshold() As Byte                             ' Nyers küszöbértékek tömbje
+        Dim ByteDigit As Int32                                  ' Bájt helyiérték (RAW adat számításhoz)
+
+        ' Listaelemek definiálása
+        Dim ListItem As ListViewItem                            ' Egy sor elemei listanézetben
+        Dim ListFields(UBound(SmartColunms) + 2) As String      ' Egy sor értékeinek tömbje (A kezdő oszlop és a szöveges feliratok miatt 2-vel nagyobb!)
+        Dim ListColumn As Int32                                 ' Aktuális oszlop száma
 
         ' Értékek átvétele a főablaktól
         Dim SelectedDisk = MainWindow.SelectedDisk
@@ -44,10 +47,10 @@ Public Class SmartWindow
         Me.Text = GetLoc("SmartTitle")
 
         ' GroupBox szövegének beállítása
-        GroupBox_Table.Text = GetLoc("Disk") + " " + DiskName
+        GroupBox_Table.Text = GetLoc("SmartTable") + " " + DiskName
 
         ' Bezárás gomb
-        Button_Close.Text = GetLoc("SmartClose")
+        Button_Close.Text = GetLoc("Button_Close")
 
         ' Tábla fejléc szövegek átvétele a főablakból
         SMART_Table.Columns(1).Text = "#"
@@ -88,20 +91,20 @@ Public Class SmartWindow
                 ' Értékek rendezése tömbbe (Ameddig tart a lista!)
                 While SmartData(SmartCount + SmartColunms(0)) <> 0
 
-                    ' Rekord száma (0)
-                    SmartValues(1) = SmartData(SmartCount + SmartColunms(0)).ToString
+                    ' Rekord száma (1)
+                    ListFields(1) = SmartData(SmartCount + SmartColunms(0)).ToString
 
                     ' Rekord neve (A 'SmartRecord' tömbből!)
-                    SmartValues(2) = SmartRecord(ToInt32(SmartData(SmartCount + SmartColunms(0))))
+                    ListFields(2) = SmartRecord(ToInt32(SmartData(SmartCount + SmartColunms(0))))
 
-                    ' Küszöbérték (1)
-                    SmartValues(3) = SmartTreshold(SmartCount + SmartColunms(1)).ToString
+                    ' Küszöbérték (3)
+                    ListFields(3) = SmartTreshold(SmartCount + SmartColunms(1)).ToString
 
-                    ' Legrosszabb (2)
-                    SmartValues(4) = SmartData(SmartCount + SmartColunms(2)).ToString
+                    ' Legrosszabb (4)
+                    ListFields(4) = SmartData(SmartCount + SmartColunms(2)).ToString
 
-                    ' Legjobb (3)
-                    SmartValues(5) = SmartData(SmartCount + SmartColunms(3)).ToString
+                    ' Legjobb (5)
+                    ListFields(5) = SmartData(SmartCount + SmartColunms(3)).ToString
 
                     ' Kapott érték alaphelyzetbe állítása (Több értékből származtatva!)
                     ValueSum = 0
@@ -111,58 +114,62 @@ Public Class SmartWindow
 
                         ' Hőmérséklet értékek átalakítása
                         ValueSum = ToInt32(SmartData(SmartCount + SmartColunms(4)))
-                        SmartValues(6) = ValueSum.ToString + " °C"
+                        ListFields(6) = ValueSum.ToString + " °C"
 
                     Else
-
-                        ' Alapértékek helyiérték szerinti összeadása
-                        For i As Int32 = 0 To 4
-                            ValueSum += ToInt32(SmartData(SmartCount + SmartColunms(4) + i)) * (256 ^ i)
-                        Next
 
                         ' Eltérő értékek kezelése
                         If SmartData(SmartCount + SmartColunms(0)) = 9 Then
 
+                            For ByteDigit = 0 To 2
+                                ValueSum += ToInt32(SmartData(SmartCount + SmartColunms(4) + ByteDigit)) * (256 ^ ByteDigit)
+                            Next
+
                             ' Üzemidő: napok
                             ValueDiff = Int(ValueSum / (24))
-                            SmartValues(6) = ValueDiff.ToString + " " + GetLoc("Days")
+                            ListFields(6) = ValueDiff.ToString + " " + GetLoc("Days")
 
                             ' Üzemidő: órák
                             ValueDiff = ValueSum - (ValueDiff * 24)
-                            SmartValues(6) += ", " + ValueDiff.ToString + " " + GetLoc("Hours")
+                            ListFields(6) += ", " + ValueDiff.ToString + " " + GetLoc("Hours")
 
                         Else
 
-                            ' Nincs korrekció, átalakítás nélküli nyers értékek kiírása (Minden egyéb rekordnál)
-                            SmartValues(6) = ValueSum.ToString
+                            ' Alapértékek helyiérték szerinti összeadása
+                            For ByteDigit = 0 To 4
+                                ValueSum += ToInt32(SmartData(SmartCount + SmartColunms(4) + ByteDigit)) * (256 ^ ByteDigit)
+                            Next
+
+                            ' Nincs korrekció, átalakítás nélküli nyers értékek kiírása
+                            ListFields(6) = ValueSum.ToString
 
                         End If
                     End If
 
                     ' Új sor definiálása
-                    SmartItem = New ListViewItem(SmartValues)
+                    ListItem = New ListViewItem(ListFields)
 
                     ' Elemek önálló formázásának engedélyezése
-                    SmartItem.UseItemStyleForSubItems = False
+                    ListItem.UseItemStyleForSubItems = False
 
                     ' Fomrázási beállítások
-                    For i As Int32 = 0 To UBound(ListBold)
-                        If ListBold(i) Then
+                    For ListColumn = 0 To UBound(ListBold)
+                        If ListBold(ListColumn) Then
 
                             ' Félkövér
-                            SmartItem.SubItems(i).Font = New Font(SMART_Table.Font, FontStyle.Bold)
+                            ListItem.SubItems(ListColumn).Font = New Font(SMART_Table.Font, FontStyle.Bold)
                         Else
 
                             ' Normál
-                            SmartItem.SubItems(i).Font = New Font(SMART_Table.Font, FontStyle.Regular)
+                            ListItem.SubItems(ListColumn).Font = New Font(SMART_Table.Font, FontStyle.Regular)
                         End If
 
                         ' Formátum beállítása
-                        SmartItem.SubItems.Add(SmartValues(i))
+                        ListItem.SubItems.Add(ListFields(ListColumn))
                     Next
 
                     ' Sor hozzáadása a lsitához
-                    SMART_Table.Items.Add(SmartItem)
+                    SMART_Table.Items.Add(ListItem)
 
                     ' Számláló növelése az ugrásközzel
                     SmartCount += SmartStep
@@ -268,6 +275,7 @@ Public Class SmartWindow
         SmartRecord(252) = "Newly Added Bad Flash Block"
         SmartRecord(254) = "Free Fall Event Count"
 
+        ' Visszatérési érték beállítása
         Return False
 
     End Function
