@@ -16,6 +16,8 @@ Public Class CPUInfo
     ' CPU-infó tábla változói
     Public CPUCount As Int32 = 0                                ' Processzorok száma
     Public SelectedCPU As Int32 = 0                             ' Kiválasztott processzor
+    Public L2Cache(2) As Double                                 ' L2 cache mérete
+    Public L3Cache(2) As Double                                 ' L3 cache mérete
 
     ' *** FŐ ELJÁRÁS: CPU-infó ablak betöltése (MyBase.Load -> CPUInfo) ***
     ' Eseményvezérelt: Ablak megnyitása
@@ -89,13 +91,19 @@ Public Class CPUInfo
                 TableAddRow(GetLoc("CPUCurrentSpeed"), objMgmt("CurrentClockSpeed").ToString, "MHz")
                 TableAddRow(GetLoc("CPUMaxSpeed"), objMgmt("MaxClockSpeed").ToString, "MHz")
                 TableAddRow(GetLoc("CPUBusClock"), objMgmt("ExtClock").ToString, "MHz")
-                TableAddRow(GetLoc("CPUL2"), objMgmt("L2CacheSize").ToString, "kB")
+
+                ' L2 Cache méretének konvertálása
+                L2Cache = MainWindow.DynByteConv(objMgmt("L2CacheSize") * 1024, 0)
+                TableAddRow(GetLoc("CPUL2"), L2Cache(0).ToString, MainWindow.PrefixTable(L2Cache(1)) + "B")
 
                 ' XP alatt nem szereplő értékek kihagyása
                 If MainWindow.OSMajorVersion >= 6 Then
-                    TableAddRow(GetLoc("CPUL3"), objMgmt("L3CacheSize").ToString, "kB")
-                End If
 
+                    ' L3 Cache méretének konvertálása
+                    L3Cache = MainWindow.DynByteConv(objMgmt("L3CacheSize") * 1024, 0)
+                    TableAddRow(GetLoc("CPUL3"), L3Cache(0).ToString, MainWindow.PrefixTable(L3Cache(1)) + "B")
+
+                End If
             End If
 
             ' Számláló növelése
