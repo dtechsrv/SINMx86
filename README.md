@@ -23,6 +23,8 @@ __License:__ GNU General Public License v2.0.
 
 __2019-10-14 - Version 3.0.0 BETA / Build 5240 (testing)__
 
+- Hibakezelések javítása számos összetevőt illetően,
+- Nyelvi interfész teljes újraírása, külön fájlba implementálva,
 - IP információk megjelenítése a kiválasztott hálózati adatperhez,
 - Részletes processzor információk megjelenítése,
 - S.M.A.R.T értékek lekérdezése belső IDE/SATA lemezeknél,
