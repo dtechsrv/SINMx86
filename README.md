@@ -1,10 +1,10 @@
-# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
+﻿# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
 ### System Information and Network Monitor
 
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 2.5.1 Build 5010 (2019-09-18)
+## Current testing version: 3.0.0 Build 5240 (2019-10-14)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -20,6 +20,15 @@ __License:__ GNU General Public License v2.0.
 ![](Screenshots/SINMx86_MainWindow_Win7.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__2019-10-14 - Version 3.0.0 BETA / Build 5240 (testing)__
+
+- Hibakezelések javítása számos összetevőt illetően,
+- Nyelvi interfész teljes újraírása, külön fájlba implementálva,
+- IP információk megjelenítése a kiválasztott hálózati adatperhez,
+- Részletes processzor információk megjelenítése,
+- S.M.A.R.T értékek lekérdezése belső IDE/SATA lemezeknél,
+- SSD/HDD felismerés hozzáadása.
 
 __2019-09-18 - Version 2.5.1 / Build 5010 (stable)__
 
