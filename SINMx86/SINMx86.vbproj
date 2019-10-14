@@ -127,6 +127,12 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IPInfo.Designer.vb">
+      <DependentUpon>IPInfo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="IPInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Localization.vb" />
     <Compile Include="MainWindow.vb">
       <SubType>Form</SubType>
@@ -170,6 +176,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="IPInfo.resx">
+      <DependentUpon>IPInfo.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.vb</DependentUpon>
     </EmbeddedResource>
@@ -238,6 +247,7 @@
     <None Include="Resources\Controls\camera.gif" />
     <None Include="Resources\Controls\hdd.gif" />
     <None Include="Resources\Controls\cpu.gif" />
+    <None Include="Resources\Controls\nic.gif" />
     <Content Include="Resources\Icon\main.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

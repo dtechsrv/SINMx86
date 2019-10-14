@@ -106,6 +106,7 @@ Partial Class SmartWindow
         'GroupBox_Table
         '
         Me.GroupBox_Table.Controls.Add(Me.SMART_Table)
+        Me.GroupBox_Table.ForeColor = System.Drawing.SystemColors.Highlight
         Me.GroupBox_Table.Location = New System.Drawing.Point(12, 12)
         Me.GroupBox_Table.Name = "GroupBox_Table"
         Me.GroupBox_Table.Size = New System.Drawing.Size(716, 334)

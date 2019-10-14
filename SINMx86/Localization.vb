@@ -78,14 +78,16 @@ Public Class Localization
                 AddLoc("None", "None")
                 AddLoc("Invalid", "Invalid")
                 AddLoc("Inactive", "Inactive")
+                AddLoc("Enabled", "Enabled")
+                AddLoc("Disabled", "Disabled")
 
-                ' Külső nyelvi sztingek (Splash ablak)
+                ' Külső nyelvi sztingek -> Splash ablak
                 AddLoc("SplashLoad", "Loading")
                 AddLoc("SplashReg", "Registry settings")
                 AddLoc("SplashWMI", "WMI database")
                 AddLoc("SplashClose", "Close")
 
-                ' Külső nyelvi sztingek (S.M.A.R.T ablak)
+                ' Külső nyelvi sztingek -> S.M.A.R.T ablak
                 AddLoc("SmartTitle", "S.M.A.R.T information")
                 AddLoc("SmartTable", "Disk")
                 AddLoc("SmartRecord", "Record")
@@ -94,7 +96,7 @@ Public Class Localization
                 AddLoc("SmartWorst", "Worst")
                 AddLoc("SmartData", "Data")
 
-                ' Külső nyelvi sztingek (CPU-infó ablak)
+                ' Külső nyelvi sztingek -> CPU-infó ablak
                 AddLoc("CPUTitle", "Processor information")
                 AddLoc("CPUTable", "CPU")
                 AddLoc("CPUDescription", "Description")
@@ -113,11 +115,32 @@ Public Class Localization
                 AddLoc("CPUL2", "Size of L2 cache")
                 AddLoc("CPUL3", "Size of L3 cache")
 
+                ' Külső nyelvi sztingek -> IP-infó ablak
+                AddLoc("IPTitle", "Interface configuration")
+                AddLoc("IPTable", "Interface")
+                AddLoc("IPDescription", "Description")
+                AddLoc("IPValue", "Value")
+                AddLoc("IPAdapter", "Adapter")
+                AddLoc("IPMACAddr", "MAC address")
+                AddLoc("IPDHCPClient", "DHCP client")
+                AddLoc("IPDHCPServer", "DHCP server")
+                AddLoc("IPDHCPStart", "DHCP lease start")
+                AddLoc("IPDHCPEnd", "DHCP lease end")
+                AddLoc("IPDHCPInt", "DHCP lease interval")
+                AddLoc("IPAddress", "IP address")
+                AddLoc("IPGateway", "Gateway")
+                AddLoc("IPMetric", "Metric")
+                AddLoc("IPDNS", "DNS server")
+                AddLoc("IPDomain", "DNS domain")
+                AddLoc("IPWINS", "WINS server")
+                AddLoc("IPNetBIOS", "NetBIOS over TCP/IP")
+
                 ' ToolTip sztringek
                 AddLoc("Tip_Language", "Language selection")
                 AddLoc("Tip_HW", "Component selection")
                 AddLoc("Tip_CPUInfo", "Details...")
                 AddLoc("Tip_Smart", "Open S.M.A.R.T table...")
+                AddLoc("Tip_IPInfo", "Open configuration...")
                 AddLoc("Tip_Reload", "Reload list")
                 AddLoc("Tip_Chart", "Traffic history chart")
                 AddLoc("Tip_Average", "seconds averages")
@@ -254,14 +277,16 @@ Public Class Localization
                 AddLoc("None", "Nincs")
                 AddLoc("Invalid", "Érvénytelen")
                 AddLoc("Inactive", "Inaktív")
+                AddLoc("Enabled", "Engedélyezve")
+                AddLoc("Disabled", "Letiltva")
 
-                ' Külső nyelvi sztingek (Splash ablak)
+                ' Külső nyelvi sztingek -> Splash ablak
                 AddLoc("SplashLoad", "Betöltés")
                 AddLoc("SplashReg", "Registry beállítások")
                 AddLoc("SplashWMI", "WMI adatbázis")
                 AddLoc("SplashClose", "Bezárás")
 
-                ' Külső nyelvi sztingek (S.M.A.R.T ablak)
+                ' Külső nyelvi sztingek -> S.M.A.R.T ablak
                 AddLoc("SmartTitle", "S.M.A.R.T információk")
                 AddLoc("SmartTable", "Lemez")
                 AddLoc("SmartRecord", "Rekord")
@@ -271,7 +296,7 @@ Public Class Localization
                 AddLoc("SmartData", "Adat")
                 AddLoc("SmartClose", "&Bezárás")
 
-                ' Külső nyelvi sztingek (CPU-infó ablak)
+                ' Külső nyelvi sztingek -> CPU-infó ablak
                 AddLoc("CPUTitle", "Processzor információk")
                 AddLoc("CPUTable", "CPU")
                 AddLoc("CPUDescription", "Megnevezés")
@@ -290,11 +315,32 @@ Public Class Localization
                 AddLoc("CPUL2", "L2 gyorsítótár mérete")
                 AddLoc("CPUL3", "L3 gyorsítótár mérete")
 
+                ' Külső nyelvi sztingek -> IP-infó ablak
+                AddLoc("IPTitle", "Interfész beállítások")
+                AddLoc("IPTable", "Interfész")
+                AddLoc("IPDescription", "Megnevezés")
+                AddLoc("IPValue", "Érték")
+                AddLoc("IPAdapter", "Adapter")
+                AddLoc("IPMACAddr", "Fizikai cím")
+                AddLoc("IPDHCPClient", "DHCP ügyfél")
+                AddLoc("IPDHCPServer", "DHCP kiszolgáló")
+                AddLoc("IPDHCPStart", "DHCP bérlet kezdete")
+                AddLoc("IPDHCPEnd", "DHCP bérlet vége")
+                AddLoc("IPAddress", "IP-cím")
+                AddLoc("IPGateway", "Átjáró")
+                AddLoc("IPMetric", "Metrika")
+                AddLoc("IPDNS", "DNS kiszolgáló")
+                AddLoc("IPDomain", "DNS tartomány")
+                AddLoc("IPWINS", "WINS kiszolgáló")
+                AddLoc("IPNetBIOS", "NetBIOS TCP/IP felett")
+
+
                 ' ToolTip sztringek
                 AddLoc("Tip_Language", "Nyelv kiválasztása")
                 AddLoc("Tip_HW", "Komponens kiválasztása")
                 AddLoc("Tip_CPUInfo", "Részletek...")
                 AddLoc("Tip_Smart", "S.M.A.R.T tábla megnyitása...")
+                AddLoc("Tip_IPInfo", "Beállítások megnyitása...")
                 AddLoc("Tip_Reload", "Lista újratöltése")
                 AddLoc("Tip_Chart", "Adatforgalmi előzmények diagramja")
                 AddLoc("Tip_Average", "másodperces átlagok")

@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class CPUInfo
+Partial Class IPInfo
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -22,8 +22,8 @@ Partial Class CPUInfo
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(CPUInfo))
-        Me.CPU_Table = New System.Windows.Forms.ListView()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(IPInfo))
+        Me.IP_Table = New System.Windows.Forms.ListView()
         Me.Dummy = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.Description = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.Value = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
@@ -32,18 +32,18 @@ Partial Class CPUInfo
         Me.GroupBox_Table.SuspendLayout()
         Me.SuspendLayout()
         '
-        'CPU_Table
+        'IP_Table
         '
-        Me.CPU_Table.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.Dummy, Me.Description, Me.Value})
-        Me.CPU_Table.FullRowSelect = True
-        Me.CPU_Table.GridLines = True
-        Me.CPU_Table.Location = New System.Drawing.Point(10, 23)
-        Me.CPU_Table.Name = "CPU_Table"
-        Me.CPU_Table.ShowGroups = False
-        Me.CPU_Table.Size = New System.Drawing.Size(471, 249)
-        Me.CPU_Table.TabIndex = 0
-        Me.CPU_Table.UseCompatibleStateImageBehavior = False
-        Me.CPU_Table.View = System.Windows.Forms.View.Details
+        Me.IP_Table.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.Dummy, Me.Description, Me.Value})
+        Me.IP_Table.FullRowSelect = True
+        Me.IP_Table.GridLines = True
+        Me.IP_Table.Location = New System.Drawing.Point(10, 23)
+        Me.IP_Table.Name = "IP_Table"
+        Me.IP_Table.ShowGroups = False
+        Me.IP_Table.Size = New System.Drawing.Size(471, 249)
+        Me.IP_Table.TabIndex = 0
+        Me.IP_Table.UseCompatibleStateImageBehavior = False
+        Me.IP_Table.View = System.Windows.Forms.View.Details
         '
         'Dummy
         '
@@ -68,14 +68,14 @@ Partial Class CPUInfo
         '
         'GroupBox_Table
         '
-        Me.GroupBox_Table.Controls.Add(Me.CPU_Table)
+        Me.GroupBox_Table.Controls.Add(Me.IP_Table)
         Me.GroupBox_Table.ForeColor = System.Drawing.SystemColors.Highlight
         Me.GroupBox_Table.Location = New System.Drawing.Point(12, 12)
         Me.GroupBox_Table.Name = "GroupBox_Table"
         Me.GroupBox_Table.Size = New System.Drawing.Size(491, 283)
         Me.GroupBox_Table.TabIndex = 1
         Me.GroupBox_Table.TabStop = False
-        Me.GroupBox_Table.Text = "CPU - Selected CPU name"
+        Me.GroupBox_Table.Text = "Interface - Selected interface name"
         '
         'Button_Close
         '
@@ -86,7 +86,7 @@ Partial Class CPUInfo
         Me.Button_Close.Text = "&Close"
         Me.Button_Close.UseVisualStyleBackColor = True
         '
-        'CPUInfo
+        'IPInfo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -97,15 +97,15 @@ Partial Class CPUInfo
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.Name = "CPUInfo"
+        Me.Name = "IPInfo"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Processor information"
+        Me.Text = "Interface configuration"
         Me.TopMost = True
         Me.GroupBox_Table.ResumeLayout(False)
         Me.ResumeLayout(False)
 
     End Sub
-    Friend WithEvents CPU_Table As System.Windows.Forms.ListView
+    Friend WithEvents IP_Table As System.Windows.Forms.ListView
     Friend WithEvents Description As System.Windows.Forms.ColumnHeader
     Friend WithEvents Value As System.Windows.Forms.ColumnHeader
     Friend WithEvents GroupBox_Table As System.Windows.Forms.GroupBox

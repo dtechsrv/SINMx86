@@ -27,12 +27,18 @@ Public Class CPUInfo
         Dim ArchID As Int32                                      ' CPU architektúra azonosítója
         Dim ArchStr As String                                    ' CPU architektúra (szöveges)
 
+        ' CPU feketelistás sztringek (Dummy szövegek, amelyeket az alaplap gyártója "elfelejtett" kitölteni.)
+        Dim Blacklist() As String = {"PROCESSOR", "PROCESSOR 0", "SOCKET", "SOCKET 0", "CPU", "CPU0", "CPU 0"}
+
         ' Értékek átvétele a főablaktól
         Dim SelectedCPU = MainWindow.SelectedCPU
         Dim CPUName As String = MainWindow.ComboBox_CPUList.Items(SelectedCPU)
 
         ' Ablak nevének  átvétele a főablakból
         Me.Text = GetLoc("CPUTitle")
+
+        ' Billentyűk figyelése
+        Me.KeyPreview = True
 
         ' GroupBox szövegének beállítása
         GroupBox_Table.Text = GetLoc("CPUTable") + " " + CPUName
@@ -80,28 +86,50 @@ Public Class CPUInfo
                 End If
 
                 ' Sorok felvitele
-                TableAddRow(GetLoc("CPUVendor"), MainWindow.RemoveSpaces(objMgmt("Manufacturer")), Nothing)
-                TableAddRow(GetLoc("CPUName"), MainWindow.RemoveSpaces(objMgmt("Name")), Nothing)
-                TableAddRow(GetLoc("CPUIdent"), MainWindow.RemoveSpaces(objMgmt("Description")), Nothing)
-                TableAddRow(GetLoc("CPUCores"), objMgmt("NumberOfCores").ToString, Nothing)
-                TableAddRow(GetLoc("CPUThreads"), objMgmt("NumberOfLogicalProcessors").ToString, Nothing)
-                TableAddRow(GetLoc("CPUSocket"), objMgmt("SocketDesignation"), Nothing)
-                TableAddRow(GetLoc("CPUVoltage"), FixDigitSeparator(objMgmt("CurrentVoltage") / 10, 1, False), "V")
-                TableAddRow(GetLoc("CPUArchitect"), ArchStr, Nothing)
-                TableAddRow(GetLoc("CPUCurrentSpeed"), objMgmt("CurrentClockSpeed").ToString, "MHz")
-                TableAddRow(GetLoc("CPUMaxSpeed"), objMgmt("MaxClockSpeed").ToString, "MHz")
-                TableAddRow(GetLoc("CPUBusClock"), objMgmt("ExtClock").ToString, "MHz")
+                CPUTableAddRow(GetLoc("CPUVendor"), MainWindow.RemoveSpaces(objMgmt("Manufacturer")), Nothing)
+                CPUTableAddRow(GetLoc("CPUName"), MainWindow.RemoveSpaces(objMgmt("Name")), Nothing)
+                CPUTableAddRow(GetLoc("CPUIdent"), MainWindow.RemoveSpaces(objMgmt("Description")), Nothing)
+                CPUTableAddRow(GetLoc("CPUCores"), objMgmt("NumberOfCores").ToString, Nothing)
+                CPUTableAddRow(GetLoc("CPUThreads"), objMgmt("NumberOfLogicalProcessors").ToString, Nothing)
+
+                ' Gyártói "lustaság" sztingek keresése
+                If Not MainWindow.CheckStrMatch(objMgmt("SocketDesignation"), Blacklist, False) Then
+                    CPUTableAddRow(GetLoc("CPUSocket"), objMgmt("SocketDesignation"), Nothing)
+                End If
+
+                ' Üres feszültségérték ellenőrzése
+                If objMgmt("CurrentVoltage") <> 0 Then
+                    CPUTableAddRow(GetLoc("CPUVoltage"), FixDigitSeparator(objMgmt("CurrentVoltage") / 10, 1, False), "V")
+                End If
+
+                ' Architektúra hozzáadása
+                CPUTableAddRow(GetLoc("CPUArchitect"), ArchStr, Nothing)
+
+                ' Üres aktuális órajel ellenőrzése
+                If objMgmt("CurrentClockSpeed") <> 0 Then
+                    CPUTableAddRow(GetLoc("CPUCurrentSpeed"), objMgmt("CurrentClockSpeed").ToString, "MHz")
+                End If
+
+                ' Üres gyári órajel ellenőrzése
+                If objMgmt("MaxClockSpeed") <> 0 Then
+                    CPUTableAddRow(GetLoc("CPUMaxSpeed"), objMgmt("MaxClockSpeed").ToString, "MHz")
+                End If
+
+                ' Üres busz órajel ellenőrzése
+                If objMgmt("ExtClock") <> 0 Then
+                    CPUTableAddRow(GetLoc("CPUBusClock"), objMgmt("ExtClock").ToString, "MHz")
+                End If
 
                 ' L2 Cache méretének konvertálása
                 L2Cache = MainWindow.DynByteConv(objMgmt("L2CacheSize") * 1024, 0)
-                TableAddRow(GetLoc("CPUL2"), L2Cache(0).ToString, MainWindow.PrefixTable(L2Cache(1)) + "B")
+                CPUTableAddRow(GetLoc("CPUL2"), L2Cache(0).ToString, MainWindow.PrefixTable(L2Cache(1)) + "B")
 
                 ' XP alatt nem szereplő értékek kihagyása
                 If MainWindow.OSMajorVersion >= 6 Then
 
                     ' L3 Cache méretének konvertálása
                     L3Cache = MainWindow.DynByteConv(objMgmt("L3CacheSize") * 1024, 0)
-                    TableAddRow(GetLoc("CPUL3"), L3Cache(0).ToString, MainWindow.PrefixTable(L3Cache(1)) + "B")
+                    CPUTableAddRow(GetLoc("CPUL3"), L3Cache(0).ToString, MainWindow.PrefixTable(L3Cache(1)) + "B")
 
                 End If
             End If
@@ -112,12 +140,12 @@ Public Class CPUInfo
 
     End Sub
 
-    ' *** FÜGGVÉNY: Sor hozzáadása a táblához ***
+    ' *** FÜGGVÉNY: Sor hozzáadása a CPU-táblához ***
     ' Bemenet: Name  -> név (String)
     '          Value -> érték (String)
     '          Unit  -> mértékegység (String)
     ' Kimenet: *     -> hamis érték (Boolean)
-    Private Function TableAddRow(ByVal Name As String, ByVal Value As String, ByVal Unit As String)
+    Private Function CPUTableAddRow(ByVal Name As String, ByVal Value As String, ByVal Unit As String)
 
         ' Értékek definiálása
         Dim ListItem As ListViewItem                            ' Egy sor elemei listanézetben
@@ -128,7 +156,9 @@ Public Class CPUInfo
         Dim ListBold() As Boolean = {False, True, False}
 
         ' Név hozzáadása (1)
-        ListFields(1) = Name + ":"
+        If Name <> Nothing Then
+            ListFields(1) = Name + ":"
+        End If
 
         ' Érték hozzáadása (2)
         If Value = "0" Or Value = Nothing Then
@@ -178,8 +208,19 @@ Public Class CPUInfo
     End Function
 
     ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
+    ' Eseményvezérelt: Me.KeyDown -> ESC (Fizikai gomb lenyomása)
+    Private Sub KeyDown_Escape_Close(ByVal sender As System.Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
+
+        ' Ablak bezárása ESC lenyomására
+        If e.KeyCode = Keys.Escape Then
+            Me.Close()
+        End If
+
+    End Sub
+
+    ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
     ' Eseményvezérelt: Button_Close.Click -> Klikk (Gomb)
-    Private Sub Button_Close_Click(sender As Object, e As EventArgs) Handles Button_Close.Click
+    Private Sub Button_Close_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_Close.Click
 
         ' Ablak bezárása
         Me.Close()

@@ -19,7 +19,7 @@ Public Class MainWindow
     Public SplashDefineAsAbout As Boolean = False                                   ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objBT, objPR, objPE, objNI, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objBT, objPR, objNA, objNI, objNC, objVC, objDD, objSM, objST, objDP, objLP, objLD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
     ' Beállításjegyzék változói
@@ -43,11 +43,13 @@ Public Class MainWindow
     Public Hostname As String                                                       ' Hosztnév
     Public InterfaceList(32) As String                                              ' Interfészlista tömbje (lekérdezésekhez)
     Public InterfaceName(32) As String                                              ' Interfészek formázott neve (kiírásokhoz)
-    Public InterfacePresent As Boolean                                              ' Interfészek ellenőrzése (Ha nincs egy sem, akkor hamis!)
+    Public InterfaceID(32) As String                                                ' Interfész lekérdezési indexe (ha az IP kapcsolat tiltott, akkor üres lesz)
+    Public InterfacePresent As Boolean                                              ' Interfészek ellenőrzése (ha nincs egy sem, akkor hamis)
     Public DiskList(32) As String                                                   ' Meghajtóindexek tömbje (lekérdezésekhez)
     Public DiskName(32) As String                                                   ' Meghajtók neve (kiírásokhoz)
     Public DiskSmart(32) As String                                                  ' Meghajtó S.M.A.R.T azonosítója (ha van, egyékbént üres)
     Public DiskType(32) As String                                                   ' Meghajtó típusa: SSD/HDD (Ha nincs S.M.A.R.T, akkor üres)
+    Public SmartException As Boolean = False                                        ' Hibakezelés S.M.A.R.T tábla lekérése esetén
     Public PartLabel(32) As String                                                  ' Partíció betűjele (kiírásokhoz)
     Public PartInfo(32) As String                                                   ' Partíció információk (kiírásokhoz)
     Public VideoName(32) As String                                                  ' Videókártyák nevei (kiírásokhoz)
@@ -213,21 +215,6 @@ Public Class MainWindow
         CheckedDownChart = True
         CheckedUpChart = True
 
-        ' *** LISTAFELTÖLTÉS: Hardver komponensek ***
-        UpdateHWList(True)
-
-        ' *** LISTAFELTÖLTÉS: Processzorok ***
-        UpdateCPUList(True)
-
-        ' *** LISTAFELTÖLTÉS: Lemez információk ***
-        UpdateDiskList(True)
-
-        ' *** LISTAFELTÖLTÉS: Interfészek ***
-        UpdateInterfaceList(True)
-
-        ' *** LISTAFELTÖLTÉS: Videokártyák ***
-        UpdateVideoList(True)
-
         ' Checkbox és menüelemek állapotának beállítása
         MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
@@ -305,6 +292,21 @@ Public Class MainWindow
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Memória információk ***
         SetMemoryInformation()
+
+        ' *** LISTAFELTÖLTÉS: Hardver komponensek ***
+        UpdateHWList(True)
+
+        ' *** LISTAFELTÖLTÉS: Processzorok ***
+        UpdateCPUList(True)
+
+        ' *** LISTAFELTÖLTÉS: Lemez információk ***
+        UpdateDiskList(True)
+
+        ' *** LISTAFELTÖLTÉS: Videokártyák ***
+        UpdateVideoList(True)
+
+        ' *** LISTAFELTÖLTÉS: Interfészek ***
+        UpdateInterfaceList(True)
 
         ' ----- ZÁRÓ MŰVELETEK -----
 
@@ -712,14 +714,14 @@ Public Class MainWindow
         Dim PartSize(2) As Double                           ' Partíció mérete
         Dim PartFS As String = Nothing                      ' Partíció fájlrendszere
 
-        ' WMI értékek lekérdezése -> Win32_DiskPartition
+        ' WMI értékek összevetése: Win32_DiskDrive -> Win32_DiskDriveToDiskPartition
         objDP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskID + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
 
         ' Partíciók kinyerése a WMI-ből
         For Each Me.objMgmt In objDP.Get()
             PartID = objMgmt("DeviceID")
 
-            ' Meghajtóbetűjelek kinyerése a WMI-ből
+            ' WMI értékek összevetése: Win32_DiskPartition -> Win32_LogicalDiskToPartition
             objLP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + PartID + "'} WHERE AssocClass = Win32_LogicalDiskToPartition")
             For Each Me.objRes In objLP.Get()
                 PartList(PartNum) = objRes("DeviceID")
@@ -742,7 +744,7 @@ Public Class MainWindow
                 objLD = New ManagementObjectSearcher("SELECT DeviceID, FileSystem, Size, VolumeName FROM Win32_LogicalDisk WHERE DeviceID = '" + PartList(PartCount) + "'")
                 For Each Me.objMgmt In objLD.Get()
 
-                    ' Meghajtóbetűjel
+                    ' Meghajtó betűjel
                     PartList(PartCount) = objMgmt("DeviceID")
 
                     If objMgmt("FileSystem") = Nothing Then
@@ -922,7 +924,7 @@ Public Class MainWindow
     '          ChkArr()  -> keresett elemek tömbje (String)
     '          CSense    -> case sensitive összehasonlítás (Boolean)
     ' Kimenet: *         -> egyezés állapota (Boolean)
-    Private Function CheckStrMatch(ByVal RawString As String, ByVal ChkArr() As String, ByVal CSense As Boolean)
+    Public Function CheckStrMatch(ByVal RawString As String, ByVal ChkArr() As String, ByVal CSense As Boolean)
 
         ' Értékek definiálása
         Dim Match As Boolean = False   ' Egyezés állapota
@@ -950,7 +952,7 @@ Public Class MainWindow
     ' *** FÜGGVÉNY: Statisztikai név konverzió (Nem visszafordítható névátalakítás!) ***
     ' Bemenet: RawString -> formázandó sztring (String)
     ' Kimenet: RawString -> formázott sztring (String)
-    Private Function StatNameConv(ByVal RawString As String)
+    Public Function StatNameConv(ByVal RawString As String)
 
         ' Zárójelek átalakítása
         While (InStr(RawString, "("))
@@ -978,7 +980,7 @@ Public Class MainWindow
     ' *** FÜGGVÉNY: WMI alapú DateTime változó konverzió ***
     ' Bemenet: WMIDateTime -> WMI datetime formátumú változó (String)
     ' Kimenet: Converted   -> hagyományos DateTime változó (DateTime)
-    Private Function DateTimeConv(ByVal WMIDateTime As String)
+    Public Function DateTimeConv(ByVal WMIDateTime As String)
 
         ' Értékek definiálása
         Dim Converted As DateTime                           ' DateTime változó
@@ -1003,7 +1005,7 @@ Public Class MainWindow
     ' *** FÜGGVÉNY: Nem elfogadhatóü karakterek eltávolítása ***
     ' Bemenet: RawString -> formázandó sztring (String)
     ' Kimenet: RawString -> formázott érték (String)
-    Private Function RemoveInvalidChars(ByVal RawString As String)
+    Public Function RemoveInvalidChars(ByVal RawString As String)
 
         ' Értékek definiálása
         Dim Str2Char() As Char             ' Sztring-karakter konverzió tömbje
@@ -1485,45 +1487,53 @@ Public Class MainWindow
         Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
 
         ' S.M.A.R.T értékek kiértékelése
-        For Each Me.objMgmt In objSM.Get()
-            SmartPnPID = objMgmt("InstanceName")
-            SmartData = objMgmt("VendorSpecific")
+        ' Megjegyzés: Ha üres a tábla, akkor 'ManagementException'-t okoz, ezért kell a 'Try'!
+        Try
+            For Each Me.objMgmt In objSM.Get()
+                SmartPnPID = objMgmt("InstanceName")
+                SmartData = objMgmt("VendorSpecific")
 
-            ' S.M.A.R.T PnP átalakítása az összehasonlításhoz (Csupa nagybetű, az utolsó két karakter levágva!)
-            ConvertID = UCase(SmartPnPID.Substring(0, SmartPnPID.Length - 2))
+                ' S.M.A.R.T PnP átalakítása az összehasonlításhoz (Csupa nagybetű, az utolsó két karakter levágva!)
+                ConvertID = UCase(SmartPnPID.Substring(0, SmartPnPID.Length - 2))
 
-            ' S.M.A.R.T azonosíók keresése
-            For ListCount = 0 To DiskCount - 1
+                ' S.M.A.R.T azonosíók keresése
+                For ListCount = 0 To DiskCount - 1
 
-                ' Lemez PnP ID és a konvertált azonosító összehasonlítása
-                If ConvertID = DiskPnPID(ListCount) Then
+                    ' Lemez PnP ID és a konvertált azonosító összehasonlítása
+                    If ConvertID = DiskPnPID(ListCount) Then
 
-                    ' Lemez S.M.A.R.T azonosítójának mentése
-                    DiskSmart(DiskSort(ListCount)) = Replace(SmartPnPID, "\", "\\")
+                        ' Lemez S.M.A.R.T azonosítójának mentése
+                        DiskSmart(DiskSort(ListCount)) = Replace(SmartPnPID, "\", "\\")
 
-                    ' Ugrási kezdőérték beállíása
-                    SmartCount = SmartStart
+                        ' Ugrási kezdőérték beállítása
+                        SmartCount = SmartStart
 
-                    ' Léptetés a rekordok között, amíg el nem fogynak
-                    While SmartData(SmartCount) <> 0
+                        ' Léptetés a rekordok között, amíg el nem fogynak
+                        While SmartData(SmartCount) <> 0
 
-                        ' SSD-re jellemző rekord keresése -> Wear Leveling Count (173) vagy Wear Range Delta (177)
-                        If SmartData(SmartCount) = 173 Or SmartData(SmartCount) = 177 Then
-                            DiskType(DiskSort(ListCount)) = "SSD"
+                            ' SSD-re jellemző rekord keresése -> Wear Leveling Count (173) vagy Wear Range Delta (177)
+                            If SmartData(SmartCount) = 173 Or SmartData(SmartCount) = 177 Then
+                                DiskType(DiskSort(ListCount)) = "SSD"
+                            End If
+
+                            ' Lépésköz beállítása
+                            SmartCount += SmartStep
+                        End While
+
+                        ' HDD beállítása, ha lemez nem SSD
+                        If DiskType(DiskSort(ListCount)) = Nothing Then
+                            DiskType(DiskSort(ListCount)) = "HDD"
                         End If
 
-                        ' Lépésköz beállítása
-                        SmartCount += SmartStep
-                    End While
-
-                    ' HDD beállítása, ha lemez nem SSD
-                    If DiskType(DiskSort(ListCount)) = Nothing Then
-                        DiskType(DiskSort(ListCount)) = "HDD"
                     End If
-
-                End If
+                Next
             Next
-        Next
+        Catch
+
+            ' Kivételkezelés
+            SmartException = True
+
+        End Try
 
         ' Lemezlista neveinek legenerálása
         For ListCount = 0 To DiskCount - 1
@@ -1603,27 +1613,26 @@ Public Class MainWindow
     Private Function UpdateInterfaceList(ByVal ResetFlag As Boolean)
 
         ' Értékek definiálása
-        Dim PnPNum As Int32 = 0                                 ' Listaelemek darabszáma
+        Dim AdapterNum As Int32 = 0                         ' Listaelemek darabszáma
 
         ' WMI lekérdezés: Win32_PnPEntity -> Interfészek
-        objPE = New ManagementObjectSearcher("SELECT Name FROM Win32_PnPEntity")
+        objNA = New ManagementObjectSearcher("SELECT Name, DeviceID FROM Win32_NetworkAdapter")
 
         ' Eszközszám meghatározása
-        PnPNum = objPE.Get().Count
+        AdapterNum = objNA.Get().Count
 
         ' Értékek definiálása
-        Dim PnPList(PnPNum - 1) As String                       ' PnP eszhöznevek tömbje
-        Dim PnPName(PnPNum - 1) As String                       ' Előformázott eszköznevek tömbje (összehasonlításhoz)
-        Dim PnPCount As Int32 = 0                               ' Eszköz sorszáma
+        Dim AdapterList(AdapterNum - 1) As String           ' Hálózati adapterek eszközneveinek tömbje
+        Dim AdapterName(AdapterNum - 1) As String           ' Előformázott eszköznevek tömbje (összehasonlításhoz)
+        Dim AdapterID(AdapterNum - 1) As String             ' Hálózati adapter azonosítója
+        Dim AdapterCount As Int32 = 0                       ' Eszköz sorszáma
 
         ' PnP hálózati kártya nevek lekérdezése 
-        For Each Me.objMgmt In objPE.Get()
-            PnPList(PnPCount) = RemoveSpaces(objMgmt("Name"))
-            If InStr(PnPList(PnPCount), " - Packet Scheduler Miniport") Then
-                PnPList(PnPCount) = Replace(PnPList(PnPCount), " - Packet Scheduler Miniport", "")
-            End If
-            PnPName(PnPCount) = StatNameConv(objMgmt("Name"))
-            PnPCount += 1
+        For Each Me.objMgmt In objNA.Get()
+            AdapterList(AdapterCount) = objMgmt("Name")
+            AdapterName(AdapterCount) = StatNameConv(objMgmt("Name"))
+            AdapterID(AdapterCount) = objMgmt("DeviceID")
+            AdapterCount += 1
         Next
 
         ' Lista kiürítése
@@ -1633,25 +1642,56 @@ Public Class MainWindow
         objNI = New ManagementObjectSearcher("SELECT Name FROM Win32_PerfRawData_Tcpip_NetworkInterface")
 
         ' Számláló beállítása
-        Dim InterfaceCount As Int32 = 0                         ' Interfészek sorszáma
+        Dim InterfaceCount As Int32 = 0                     ' Interfészek sorszáma
+        Dim IPEnabled As Boolean = False                    ' IP kapcsolat engedélyezése
 
         ' Interfészlista feltöltése (isatap adapterek kihagyása a listából)
         For Each Me.objMgmt In objNI.Get()
             If InStr(objMgmt("Name"), "isatap") = False Then
                 InterfaceList(InterfaceCount) = objMgmt("Name")
+                If InStr(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport") Then
+                    InterfaceName(InterfaceCount) = Replace(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport", "")
+                Else
+                    InterfaceName(InterfaceCount) = InterfaceList(InterfaceCount)
+                End If
 
                 ' Statisztikához átalakított eszköznevek keresése (Ha van egyezés, akkor az lesz a név, egyébként a gyári!)
-                For i As Int32 = 0 To (PnPNum - 1)
-                    If (PnPName(i) = objMgmt("Name")) Then
-                        InterfaceName(InterfaceCount) = PnPList(i)
+                For i As Int32 = 0 To (AdapterNum - 1)
+                    If (AdapterName(i) = InterfaceName(InterfaceCount)) Then
+                        InterfaceName(InterfaceCount) = AdapterList(i)
+                        InterfaceID(InterfaceCount) = AdapterID(i)
                     End If
                 Next
 
+                ' IP endegélyezés visszaállítása
+                IPEnabled = False
+
+                ' Beállított név keresése
                 If InterfaceName(InterfaceCount) = Nothing Then
+
+                    ' Eredeti név felhasználása, ha az összehasonlítás nem járt sikerrel
                     InterfaceName(InterfaceCount) = RemoveSpaces(objMgmt("Name"))
+
+                Else
+
+                    ' WMI lekérdezés: Win32_NetworkAdapterConfiguration -> Interfész azonosító alapján történő lekérdezés
+                    objNC = New ManagementObjectSearcher("SELECT IPEnabled FROM Win32_NetworkAdapterConfiguration WHERE Index = '" + InterfaceID(InterfaceCount) + "'")
+
+                    ' IP engedélyezés keresése
+                    For Each Me.objRes In objNC.Get()
+                        IPEnabled = objRes("IPEnabled")
+                    Next
+
+                    ' Interfész azonosító kiürítése, ha az IP kapcsolat nincs engedélyezve (Ez a referencia az IP-infó ablakhoz)
+                    If IPEnabled = False Then
+                        InterfaceID(InterfaceCount) = Nothing
+                    End If
+
                 End If
 
+                ' Interfész számláló növelése
                 InterfaceCount += 1
+
             End If
         Next
 
@@ -2210,6 +2250,7 @@ Public Class MainWindow
         LoadSplash.Close()
         CPUInfo.Close()
         SmartWindow.Close()
+        IPInfo.Close()
 
         ' Visszatérési érték beállítása
         Return False
@@ -2327,6 +2368,7 @@ Public Class MainWindow
         EventToolTip.SetToolTip(ComboBox_HWList, GetLoc("Tip_HW"))
         EventToolTip.SetToolTip(Button_CPUInfoOpen, GetLoc("Tip_CPUInfo"))
         EventToolTip.SetToolTip(Button_SmartOpen, GetLoc("Tip_Smart"))
+        EventToolTip.SetToolTip(Button_IPInfoOpen, GetLoc("Tip_IPInfo"))
         EventToolTip.SetToolTip(Button_DiskListReload, GetLoc("Tip_Reload"))
         EventToolTip.SetToolTip(Button_VideoListReload, GetLoc("Tip_Reload"))
         EventToolTip.SetToolTip(Button_InterfaceListReload, GetLoc("Tip_Reload"))
@@ -2486,16 +2528,17 @@ Public Class MainWindow
 
             ' Partíciólista beállításra alapértelmezettre 
             SelectedPartition = 0
+
         End If
 
         ' Értékek lekérdezése
         SetDiskInformation()
 
         ' S.M.A.R.T tábla ellenőrzése
-        If DiskSmart(SelectedDisk) <> Nothing Then
-            Button_SmartOpen.Enabled = True
-        Else
+        If DiskSmart(SelectedDisk) = Nothing Or SmartException Then
             Button_SmartOpen.Enabled = False
+        Else
+            Button_SmartOpen.Enabled = True
         End If
 
         ' ToolTip érték beállítása
@@ -2555,6 +2598,13 @@ Public Class MainWindow
         ' Változás beállítása
         SelectedInterface = ComboBox_InterfaceList.SelectedIndex
 
+        ' (IP engedélyezés ellenőrzése)
+        If InterfaceID(SelectedInterface) <> Nothing Then
+            Button_IPInfoOpen.Enabled = True
+        Else
+            Button_IPInfoOpen.Enabled = False
+        End If
+
         ' Statisztika nullázása
         UpdateSpeedStatistics(True)
 
@@ -2601,7 +2651,9 @@ Public Class MainWindow
         CloseExtForms()
 
         ' S.M.A.R.T ablak megnyitása
-        SmartWindow.Visible = True
+        If SmartException = False Then
+            SmartWindow.Visible = True
+        End If
 
     End Sub
 
@@ -2612,8 +2664,20 @@ Public Class MainWindow
         ' Külső ablakok bezárása
         CloseExtForms()
 
-        ' S.M.A.R.T ablak megnyitása
+        ' CPU-infó ablak megnyitása
         CPUInfo.Visible = True
+
+    End Sub
+
+    ' *** ELJÁRÁS: IP-infó ablak megnyitása ***
+    ' Eseményvezérelt: Button_IPInfoOpen.Click -> Klikk (IP-infó gomb)
+    Private Sub IPInfo_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_IPInfoOpen.Click
+
+        ' Külső ablakok bezárása
+        CloseExtForms()
+
+        ' IP-infó ablak megnyitása
+        IPInfo.Visible = True
 
     End Sub
 

@@ -46,6 +46,9 @@ Public Class SmartWindow
         ' Ablak nevének  átvétele a főablakból
         Me.Text = GetLoc("SmartTitle")
 
+        ' Billentyűk figyelése
+        Me.KeyPreview = True
+
         ' GroupBox szövegének beállítása
         GroupBox_Table.Text = GetLoc("SmartTable") + " " + DiskName
 
@@ -281,8 +284,19 @@ Public Class SmartWindow
     End Function
 
     ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
+    ' Eseményvezérelt: Me.KeyDown -> ESC (Fizikai gomb lenyomása)
+    Private Sub KeyDown_Escape_Close(ByVal sender As System.Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
+
+        ' Ablak bezárása ESC lenyomására
+        If e.KeyCode = Keys.Escape Then
+            Me.Close()
+        End If
+
+    End Sub
+
+    ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
     ' Eseményvezérelt: Button_Close.Click -> Klikk (Gomb)
-    Private Sub Button_Close_Click(sender As Object, e As EventArgs) Handles Button_Close.Click
+    Private Sub Button_Close_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_Close.Click
 
         ' Ablak bezárása
         Me.Close()
