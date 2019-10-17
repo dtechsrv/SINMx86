@@ -1,9 +1,8 @@
-﻿Imports System
-Imports System.Management
-Imports System.Math
+﻿Imports System.Math
 Imports System.Convert
-Imports Microsoft.Win32
+Imports System.Management
 
+Imports SINMx86.Functions
 Imports SINMx86.Localization
 
 ' S.M.A.R.T ablak osztálya
@@ -16,7 +15,6 @@ Public Class SmartWindow
     ' S.M.A.R.T tábla változói
     Public SmartPnPID(32) As String                             ' PnP azonosító a S.M.A.R.T-hoz
     Public DiskCount As Int32 = 0                               ' Lemezek száma
-    Public SelectedDisk As Int32 = 0                            ' Kiválasztott lemez
     Public SmartRecord(255) As String                           ' Rekord nevek tömbje
 
     ' *** FŐ ELJÁRÁS: S.M.A.R.T ablak betöltése (MyBase.Load -> SmartWindow) ***
@@ -39,11 +37,13 @@ Public Class SmartWindow
         Dim ListColumn As Int32                                 ' Aktuális oszlop száma
 
         ' Értékek átvétele a főablaktól
-        Dim SelectedDisk = MainWindow.SelectedDisk
-        Dim SmartID As String = MainWindow.DiskSmart(SelectedDisk)
+        Dim SmartID As String = DiskSmart(SelectedDisk)
         Dim DiskName As String = MainWindow.ComboBox_DiskList.Items(SelectedDisk)
 
-        ' Ablak nevének  átvétele a főablakból
+        ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
+        Me.TopMost = MainWindow.TopMost
+
+        ' Ablak nevének beállítása
         Me.Text = GetLoc("SmartTitle")
 
         ' Billentyűk figyelése
@@ -65,13 +65,6 @@ Public Class SmartWindow
 
         ' Formázás -> Félkövér és normál betűk soron belül
         Dim ListBold() As Boolean = {False, True, True, False, False, False, True}
-
-        ' Ablak láthatósága
-        If MainWindow.TopMost Then
-            Me.TopMost = True
-        Else
-            Me.TopMost = False
-        End If
 
         ' Sorok törlése
         SMART_Table.Items.Clear()
@@ -119,6 +112,10 @@ Public Class SmartWindow
                         ValueSum = ToInt32(SmartData(SmartCount + SmartColunms(4)))
                         ListFields(6) = ValueSum.ToString + " °C"
 
+                        ' Fahrenheit átalakítás
+                        ValueSum = Round((9 * ValueSum / 5) + 32)
+                        ListFields(6) += " / " + ValueSum.ToString + " °F"
+
                     Else
 
                         ' Eltérő értékek kezelése
@@ -144,7 +141,7 @@ Public Class SmartWindow
                             Next
 
                             ' Nincs korrekció, átalakítás nélküli nyers értékek kiírása
-                            ListFields(6) = ValueSum.ToString
+                            ListFields(6) = FixNumberFormat(ValueSum, 0, False)
 
                         End If
                     End If
@@ -182,6 +179,8 @@ Public Class SmartWindow
         Next
 
     End Sub
+
+    ' ----- FÜGGVÉNYEK -----
 
     ' *** FÜGGVÉNY: S.M.A.R.T rekordok neveinek beállítása ***
     ' Bemenet: * -> üres (Void)
@@ -282,6 +281,8 @@ Public Class SmartWindow
         Return False
 
     End Function
+
+    ' ----- ELJÁRÁSOK -----
 
     ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
     ' Eseményvezérelt: Me.KeyDown -> ESC (Fizikai gomb lenyomása)

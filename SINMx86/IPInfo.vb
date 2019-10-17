@@ -1,9 +1,6 @@
-﻿Imports System
-Imports System.Management
-Imports System.Math
-Imports System.Convert
-Imports Microsoft.Win32
+﻿Imports System.Management
 
+Imports SINMx86.Functions
 Imports SINMx86.Localization
 
 ' Processzor információs ablak osztálya
@@ -34,11 +31,13 @@ Public Class IPInfo
         Dim NetBIOS As Int32 = 0                                ' NetBIOS TCP/IP felett
 
         ' Értékek átvétele a főablaktól
-        Dim SelectedInterface = MainWindow.SelectedInterface
         Dim InterfaceName As String = MainWindow.ComboBox_InterfaceList.Items(SelectedInterface)
         Dim InterfaceID As String = MainWindow.InterfaceID(SelectedInterface)
 
-        ' Ablak nevének  átvétele a főablakból
+        ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
+        Me.TopMost = MainWindow.TopMost
+
+        ' Ablak nevének beállítása
         Me.Text = GetLoc("IPTitle")
 
         ' Billentyűk figyelése
@@ -53,13 +52,6 @@ Public Class IPInfo
         ' Tábla fejléc szövegek átvétele a főablakból
         IP_Table.Columns(1).Text = GetLoc("IPDescription")
         IP_Table.Columns(2).Text = GetLoc("IPValue")
-
-        ' Ablak láthatósága
-        If MainWindow.TopMost Then
-            Me.TopMost = True
-        Else
-            Me.TopMost = False
-        End If
 
         ' Sorok törlése
         IP_Table.Items.Clear()
@@ -165,8 +157,8 @@ Public Class IPInfo
                         IPTableAddRow(GetLoc("IPDHCPServer"), GetLoc("NotAvailable"))
                     Else
                         IPTableAddRow(GetLoc("IPDHCPServer"), objMgmt("DHCPServer"))
-                        LeaseStart = MainWindow.DateTimeConv(objMgmt("DHCPLeaseObtained"))
-                        LeaseEnd = MainWindow.DateTimeConv(objMgmt("DHCPLeaseExpires"))
+                        LeaseStart = DateTimeConv(objMgmt("DHCPLeaseObtained"))
+                        LeaseEnd = DateTimeConv(objMgmt("DHCPLeaseExpires"))
 
                         ' Bérleti idő ellenőrzése (Win10 hiba miatt!)
                         If DateDiff("s", LeaseStart, DateTime.Now) > 0 And DateDiff("s", LeaseEnd, DateTime.Now) < 0 Then
@@ -191,6 +183,8 @@ Public Class IPInfo
         Next
 
     End Sub
+
+    ' ----- FÜGGVÉNYEK -----
 
     ' *** FÜGGVÉNY: Sor hozzáadása az IP-táblához ***
     ' Bemenet: Name  -> név (String)
@@ -318,6 +312,8 @@ Public Class IPInfo
         Return Value
 
     End Function
+
+    ' ----- ELJÁRÁSOK -----
 
     ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
     ' Eseményvezérelt: Me.KeyDown -> ESC (Fizikai gomb lenyomása)

@@ -1,6 +1,6 @@
-﻿Imports System
-Imports System.Math
-Imports System.Convert
+﻿Imports System.Math
+
+Imports SINMx86.Functions
 
 ' Nyelvi osztály
 Public Class Localization
@@ -15,6 +15,8 @@ Public Class Localization
 
     ' Önálló nyelvi változók
     Public Shared LocDayName(7), LocMonthName(12) As String                 ' Napok és hónapok nevei
+
+    ' ----- FÜGGVÉNYEK -----
 
     ' *** FÜGGVÉNY: Nyelvek betöltése ***
     ' Bemenet: LangID -> kiválasztott nyelv sorszáma (Int32)
@@ -36,6 +38,7 @@ Public Class Localization
                 AddLoc("Comment", "This software is open source and portable.")
                 AddLoc("Version", "Version")
                 AddLoc("DigitSeparator", ".")
+                AddLoc("ScaleSeparator", ",")
                 AddLoc("Interval", "Intervals")
                 AddLoc("Traffic", "Traffic")
                 AddLoc("Motherboard", "Motherboard")
@@ -235,6 +238,7 @@ Public Class Localization
                 AddLoc("Comment", "Ez a szoftver nyílt forrású és hordozható.")
                 AddLoc("Version", "Verziószám")
                 AddLoc("DigitSeparator", ",")
+                AddLoc("ScaleSeparator", " ")
                 AddLoc("Interval", "Intervallumok")
                 AddLoc("Traffic", "Forgalom")
                 AddLoc("Motherboard", "Alaplap")
@@ -541,20 +545,38 @@ Public Class Localization
 
     End Function
 
-    ' *** FÜGGVÉNY: Tizedes elválaszó javítása (területi beállítás felülbírálása) ***
+    ' *** FÜGGVÉNY: Számformátumra alakítás: 1000-es elválaszó és tizedesvessző javítása (területi beállítás felülbírálása) ***
     ' Bemenet: Value      -> módosítatlan tizedestört érték (Double)
     '          Digit      -> elválasztó utáni helyiértékek száma (Int32)
     '          FloatFract -> lebegő (True) vagy statikus (False) törtformátum (Boolean)
     ' Kimenet: ConvString -> formázott tizedestört (String)
-    Public Shared Function FixDigitSeparator(ByVal Value As Double, ByVal Digit As Int32, ByVal FloatFract As Boolean)
+    Public Shared Function FixNumberFormat(ByVal Value As Double, ByVal Digit As Int32, ByVal FloatFract As Boolean)
 
         ' Értékek definiálása
-        Dim IntString, ConvString As String
+        Dim IntValue, ConvString As String
+        Dim IntString As String = Nothing
+        Dim IntDigits() As Char
+        Dim IntLength, IntCount As Int32
         Dim ConvFract As Double
         Dim FractString As String = Nothing
 
-        ' Értékek számítása
-        IntString = Fix(Value).ToString
+        ' Egész érték beállítása
+        IntValue = Fix(Value).ToString
+
+        ' Helyiértékek számának meghatározása
+        IntLength = IntValue.Length
+
+        ' Egész érték karakterekre bontása
+        IntDigits = IntValue.ToCharArray
+
+        ' Egész értékek összefűzése karakterenként
+        For IntCount = 0 To IntLength - 1
+            If (IntLength - IntCount) Mod 3 = 0 And IntCount <> 0 Then
+                IntString += GetLoc("ScaleSeparator") + IntDigits(IntCount)
+            Else
+                IntString += IntDigits(IntCount)
+            End If
+        Next
 
         ' Tizedes elválasztó ellenőrzése -> Ha nincs helyiérték, akkor nem kell!
         If Digit <> 0 Then

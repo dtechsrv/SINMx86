@@ -1,44 +1,20 @@
-﻿Imports System
-Imports System.Timers
-Imports System.Management
-Imports System.Math
-Imports System.Drawing
+﻿Imports System.Math
 Imports System.Convert
-Imports System.Text.RegularExpressions
-Imports Microsoft.Win32
+Imports System.Management
 
+Imports SINMx86.Functions
 Imports SINMx86.Localization
 
 ' Főablak osztálya
 Public Class MainWindow
 
-    ' Alkalmazás adatai
-    Public MyVersion As String = Application.ProductVersion                         ' Saját verziószám
-    Public MyName As String = My.Application.Info.Title                             ' Program neve
-    Public MyLink As String = My.Application.Info.Description + "/releases/latest"  ' Támogatási link
-    Public SplashDefineAsAbout As Boolean = False                                   ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
-
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objBT, objPR, objNA, objNI, objNC, objVC, objDD, objSM, objST, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objBT, objPR, objNA, objNI, objNC, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
-    ' Beállításjegyzék változói
-    Public RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\\" + MyName, True)
-
-    ' Checkboxok és menüelemek változói
-    Public CheckedSplashDisable, CheckedDownChart, CheckedUpChart, CheckedTopMost, CheckedNoQuitAsk, CheckedMinToTray As Boolean
-
-    ' Listák kiválasztott elemeinek sorszáma
-    Public SelectedRefresh, SelectedHardware, SelectedCPU, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
-
-    ' További változók
-    Public ReleaseStatus As String = Nothing                                        ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
-    Public VersionString As String                                                  ' Formázott verziószám
+    ' Főablak változói
     Public HWVendor(3), HWIdentifier(3) As String                                   ' Komponensinformációs tömbök
-    Public OSMajorVersion, OSMinorVersion, OSBuildVersion As Int32                  ' OS fő-, al- és build verziószáma (hibakereséshez)
     Public OSRelease As Int32                                                       ' Kiadás típusa (32/64 bit)
-    Public RefreshInterval() As Int32 = {1, 2, 3, 4, 5, 10, 15, 30, 60}             ' Frissítési intervallumok
-    Public PrefixTable() As String = {"", "k", "M", "G", "T"}                       ' Prefixumok tömbje (amíg szükséges lehet)
     Public TraffGenCounter As Int32                                                 ' Diagram generálási időköz visszaszámlálója
     Public Hostname As String                                                       ' Hosztnév
     Public InterfaceList(32) As String                                              ' Interfészlista tömbje (lekérdezésekhez)
@@ -47,7 +23,6 @@ Public Class MainWindow
     Public InterfacePresent As Boolean                                              ' Interfészek ellenőrzése (ha nincs egy sem, akkor hamis)
     Public DiskList(32) As String                                                   ' Meghajtóindexek tömbje (lekérdezésekhez)
     Public DiskName(32) As String                                                   ' Meghajtók neve (kiírásokhoz)
-    Public DiskSmart(32) As String                                                  ' Meghajtó S.M.A.R.T azonosítója (ha van, egyékbént üres)
     Public DiskType(32) As String                                                   ' Meghajtó típusa: SSD/HDD (Ha nincs S.M.A.R.T, akkor üres)
     Public SmartException As Boolean = False                                        ' Hibakezelés S.M.A.R.T tábla lekérése esetén
     Public PartLabel(32) As String                                                  ' Partíció betűjele (kiírásokhoz)
@@ -69,91 +44,21 @@ Public Class MainWindow
     ' Forgalmi diagramok (2-vel több eleműnek kell lennie, mint a kijelzett érték!)
     Public TraffDownArray(TraffResolution + 2), TraffUpArray(TraffResolution + 2) As Double
 
+    ' Checkboxok és menüelemek változói
+    Public CheckedDownChart As Boolean = True                                       ' Letöltési diagram engedélyezése (alapérték: engedélyezve)
+    Public CheckedUpChart As Boolean = True                                         ' Feltöltési diagram engedélyezése (alapérték: engedélyezve)
+
     ' *** FŐ ELJÁRÁS: Főablak betöltése (MyBase.Load -> MainWindow) ***
     ' Eseményvezérelt: Indítás
     Private Sub MainWindow_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
-        ' Alapértelmezett értékek beállítása (Ismeretlen érték vagy üres registryváltozó esetén)
-        Dim DefaultRefresh As Int32 = 2         ' Frissítési időköz: 3 másodperc
-
         ' Debug sztring beállítása (ha a főablak betöltődik, akkor előtte ki kell üríteni!)
         Value_Debug.Text = "LOAD_FAIL"
 
-        ' Veriószám felbontása (Build-del)
-        Dim VersionArray() As String = Split(MyVersion, ".")                        ' Verziószámok elemeinek tömbje (Major, Minor, Sub, Build)
-        ReDim Preserve VersionArray(0 To 3)
-
-        ' Alverzió ellenőrzés: BETA (900+) és RC (500+) tagek ellenőrzése
-        Dim SubVersion As Int32 = ToInt32(VersionArray(2))                          ' Alverzió
-
-        ' Alverzió és kiadási állapot módosítása (Pl. 901 = 'vx.y.1 BETA', 502 = 'vx.y.1 RC')
-        If SubVersion >= 900 And SubVersion < 1000 Then
-            ReleaseStatus = "BETA"
-            VersionArray(2) = (SubVersion Mod 900).ToString + " " + ReleaseStatus
-        ElseIf SubVersion >= 500 Then
-            ReleaseStatus = "RC"
-            VersionArray(2) = (SubVersion Mod 500).ToString + " " + ReleaseStatus
-        End If
-
-        ' Verzió sztring beállítása
-        VersionString = VersionArray(0) + "." + VersionArray(1) + "." + VersionArray(2) + " (Build " + VersionArray(3) + ")"
-
-        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Operációs rendszer verzió ***
-        ' Megjegyzés: Ez több paraméternek is függősége, így a lekérdezést már most meg kell tenni!
-        objOS = New ManagementObjectSearcher("SELECT Version FROM Win32_OperatingSystem")
-
-        ' Értékek definiálása
-        Dim OSVersionArray() As String = Nothing                                    ' OS tagolt verziószám tömbje
-
-        ' Értékek beállítása
-        For Each Me.objMgmt In objOS.Get()
-            OSVersionArray = Split(objMgmt("Version"), ".")
-        Next
-
-        ' OS fő- és alverzió beállítása
-        ReDim Preserve OSVersionArray(0 To 2)
-        OSMajorVersion = OSVersionArray(0)
-        OSMinorVersion = OSVersionArray(1)
-        OSBuildVersion = OSVersionArray(2)
-
-        ' *** WMI LEKÉRDEZÉS: Win32_Processor -> Operációs rendszer kiadás (32/64-bit) ***
-        ' Megjegyzés: Az OS kiadásnál egyes esetekben sajnos le van fordítva a sztring (pl. '32-bites'),
-        ' de a processzor címbusz szélessége mindig megegyezik vele, mivel ezt az OS korlátozza, ez viszont integer!
-        ' XP-nél nincs alapból az OS kiadásnál ilyen WMI érték, de a CPU címbuszból ott is származtatható.
-        objPR = New ManagementObjectSearcher("SELECT AddressWidth FROM Win32_Processor")
-
-        Dim CPUAddressWidth As Int32 = 0                                            ' Processzor címbusz szélessége
-
-        ' Értékek beállítása
-        For Each Me.objMgmt In objPR.Get()
-            CPUAddressWidth = ToInt32(objMgmt("AddressWidth"))
-        Next
-
-        ' OS kiadás korrekció
-        OSRelease = CPUAddressWidth
-
         ' ----- REGISTRY LEKÉRDEZÉSEK ÉS LISTÁK FELTÖLTÉSE -----
 
-        ' *** REGISTRY LEKÉRDEZÉS: Regisztrációs kulcs létrehozása, ha nem létezik (HKCU\Software) ***
-        If RegPath Is Nothing Then
-            RegPath = Registry.CurrentUser.CreateSubKey("Software\\" + MyName, RegistryKeyPermissionCheck.ReadWriteSubTree)
-        End If
-
-        ' *** REGISTRY LEKÉRDEZÉS: Utolsó beállított értékek lekérdezése ***
-        ' Megjegyzés: a beállított számérték sztringként tér vissza, ha nem létezik, akkor üres lesz!
-        Dim ReadLanguage As String = RegPath.GetValue("SelectedLanguage")           ' Nyelv beállítása
-        Dim ReadSplash As String = RegPath.GetValue("DisableLoadSplash")            ' Splash Screen megjelenítése
-        Dim ReadRefresh As String = RegPath.GetValue("SelectedRefreshIndex")        ' Frissítési időköz
-        Dim ReadTopMost As String = RegPath.GetValue("EnableTopMost")               ' Láthatóság
-        Dim ReadMinToTray As String = RegPath.GetValue("MinimizeToTaskbar")         ' Kicsinyítés állapota
-        Dim ReadNoQuitAsk As String = RegPath.GetValue("DisableExitConfirmation")   ' Kilépési megerősítés
-
-        ' *** REGISTRY ELEMZÉS: Nyelv kiválasztása (SelectedLanguage) ***
-        If ReadLanguage <> Nothing And ReadLanguage <= UBound(Languages) Then
-            SelectedLanguage = ToInt32(ReadLanguage)
-        Else
-            SelectedLanguage = 0
-        End If
+        ' Registry értékek lekérdezése
+        GetRegValues()
 
         ' *** LISTAFELTÖLTÉS: Nyelv kiválasztása ***
         Dim LanguageList(UBound(Languages)) As String                               ' Nyelvlista
@@ -167,15 +72,8 @@ Public Class MainWindow
         ' Kiválasztott listaelem állapotának beállítása
         ComboBox_LanguageList.SelectedIndex = LanguageList(SelectedLanguage)
 
-        ' *** REGISTRY ELEMZÉS: Splash Screen elrejtése indításkor (DisableLoadSplash) ***
-        If ReadSplash Is Nothing Or ToInt32(ReadSplash) = 0 Then
-            CheckedSplashDisable = False
-        Else
-            CheckedSplashDisable = True
-        End If
-
         ' XP esetén Splash letiltása (Felülírja a registry beállítást, mivel XP-n hibásan jelenik meg!)
-        If OSMajorVersion < 6 Then
+        If OSVersion(0) < 6 Then
             CheckedSplashDisable = True
             MainContextMenuItem_DisableSplash.Enabled = False
             MainMenu_SettingsItem_DisableSplash.Enabled = False
@@ -185,17 +83,10 @@ Public Class MainWindow
         MainMenu_SettingsItem_DisableSplash.Checked = CheckedSplashDisable
         MainContextMenuItem_DisableSplash.Checked = CheckedSplashDisable
 
-        ' Splash Screen betöltése és státusz frissítése
+        ' Splash Screen betöltése és státusz frissítése: Registry
         If Not CheckedSplashDisable Then
             LoadSplash.Visible = True
             LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + GetLoc("SplashReg") + "..."
-        End If
-
-        ' *** REGISTRY LEKÉRDEZÉS: Frissítési időköz ***
-        If ReadRefresh Is Nothing Or ToInt32(ReadRefresh) > UBound(RefreshInterval) Then
-            SelectedRefresh = DefaultRefresh
-        Else
-            SelectedRefresh = ToInt32(ReadRefresh)
         End If
 
         ' *** LISTAFELTÖLTÉS: Frissítési időköz ***
@@ -211,10 +102,6 @@ Public Class MainWindow
         ComboBox_UpdateList.SelectedIndex = RefreshList(SelectedRefresh)
         TraffGenCounter = ComboBox_UpdateList.SelectedIndex
 
-        ' Diagramleképezés beállítása
-        CheckedDownChart = True
-        CheckedUpChart = True
-
         ' Checkbox és menüelemek állapotának beállítása
         MainMenu_ChartItem_DownloadVisible.Checked = CheckedDownChart
         MainMenu_ChartItem_UploadVisible.Checked = CheckedUpChart
@@ -223,55 +110,39 @@ Public Class MainWindow
         CheckBoxChart_DownloadVisible.Checked = CheckedDownChart
         CheckBoxChart_UploadVisible.Checked = CheckedUpChart
 
-        ' *** REGISTRY ELEMZÉS: Állandó láthatóság ellenőrzése ***
-        If ReadTopMost Is Nothing Or ToInt32(ReadTopMost) = 0 Then
-            CheckedTopMost = False
-            StatusLabel_TopMost.Image = My.Resources.Resources.Control_RedPin
-        Else
-            CheckedTopMost = True
-            StatusLabel_TopMost.Image = My.Resources.Resources.Control_GreenPin
-        End If
-
         ' Ablak láthatóságának beállítása
         Me.TopMost = CheckedTopMost
+
+        ' Jelző kép lecserélése
+        If CheckedTopMost Then
+            StatusLabel_TopMost.Image = My.Resources.Resources.Control_GreenPin
+        Else
+            StatusLabel_TopMost.Image = My.Resources.Resources.Control_RedPin
+        End If
 
         ' Menüelemek állapotának beállítása
         MainMenu_SettingsItem_TopMost.Checked = CheckedTopMost
         MainContextMenuItem_TopMost.Checked = CheckedTopMost
 
-        ' *** REGISTRY ELEMZÉS: Kicsinyítés a rendszerikonok közé ***
-        If ReadMinToTray Is Nothing Or ToInt32(ReadMinToTray) = 0 Then
-            CheckedMinToTray = False
-        Else
-            CheckedMinToTray = True
-        End If
-
         ' Menüelemek állapotának beállítása
         MainMenu_SettingsItem_TaskbarMinimize.Checked = CheckedMinToTray
         MainContextMenuItem_TaskbarMinimize.Checked = CheckedMinToTray
-
-        ' *** REGISTRY ELEMZÉS: Kilépési megerősítés kiírásának tiltása ***
-        If ReadNoQuitAsk Is Nothing Or ToInt32(ReadNoQuitAsk) <> 1 Then
-            CheckedNoQuitAsk = False
-        Else
-            CheckedNoQuitAsk = True
-        End If
 
         ' Menüelem állapotának beállítása
         MainMenu_SettingsItem_DisableConfirm.Checked = CheckedNoQuitAsk
         MainContextMenuItem_DisableConfirm.Checked = CheckedNoQuitAsk
 
-        ' ----- WMI LEKÉRDEZÉSEK -----
-
-        ' Splash Screen státusz frissítése
+        ' Splash Screen státusz frissítése: WMI
         If Not CheckedSplashDisable Then
             LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + GetLoc("SplashWMI") + "..."
         End If
 
-        ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem" -> Hosztnév ***
+        ' ----- WMI LEKÉRDEZÉSEK -----
+
+        ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
         objCS = New ManagementObjectSearcher("SELECT Name FROM Win32_ComputerSystem")
 
-        ' Értékek beállítása
+        ' Értékek beállítása -> Hosztnév
         For Each Me.objMgmt In objCS.Get()
             Hostname = objMgmt("Name")
         Next
@@ -280,12 +151,15 @@ Public Class MainWindow
         StatusLabel_Host.Text = GetLoc("Hostname") + ": " + Hostname
 
         ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Rendszerindítás ideje ***
+        ' Megjegyés: ez a referencia a SetUpTime() függvényhez.
         objOS = New ManagementObjectSearcher("SELECT LastBootUptime FROM Win32_OperatingSystem")
 
-        ' Értékek beállítása
+        ' Értékek beállítása -> Indítás ideje
         For Each Me.objMgmt In objOS.Get()
             SysStartTime = DateTimeConv(objMgmt("LastBootUptime"))
         Next
+
+        ' ----- KEZDŐÉRTÉK BEÁLLÍTÁSOK -----
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Futásidő ***
         SetUptime()
@@ -293,13 +167,15 @@ Public Class MainWindow
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Memória információk ***
         SetMemoryInformation()
 
+        ' ----- LISTÁK FELTÖLTÉSE -----
+
         ' *** LISTAFELTÖLTÉS: Hardver komponensek ***
         UpdateHWList(True)
 
         ' *** LISTAFELTÖLTÉS: Processzorok ***
         UpdateCPUList(True)
 
-        ' *** LISTAFELTÖLTÉS: Lemez információk ***
+        ' *** LISTAFELTÖLTÉS: Lemezmeghajtók ***
         UpdateDiskList(True)
 
         ' *** LISTAFELTÖLTÉS: Videokártyák ***
@@ -353,7 +229,7 @@ Public Class MainWindow
         ' OEM feketelistás sztringek (Dummy szövegek, amelyeket a gyártó "elfelejtett" kitölteni.)
         Dim Blacklist() As String = {"To be filled by O.E.M.", "Not Available", "Default string", "System manufacturer", "System Product Name", "System Serial Number", "Base Board Serial Number"}
 
-        ' *** WMI LEKÉRDEZÉS: Win32_Baseboard -> Alaplap információ ***
+        ' WMI értékek lekérdezése: Win32_Baseboard -> Alaplap információ
         objBB = New ManagementObjectSearcher("SELECT Manufacturer, Product, SerialNumber FROM Win32_Baseboard")
 
         ' Értékek beállítása -> Alaplap: gyártó, modell, sorozatszám
@@ -378,7 +254,7 @@ Public Class MainWindow
             HWIdentifier(0) = RemoveInvalidChars(Model) + ", " + GetLoc("Serial") + ": " + RemoveInvalidChars(Identifier)
         End If
 
-        ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
+        ' WMI értékek lekérdezése: Win32_ComputerSystem -> Számítógép információi
         objCS = New ManagementObjectSearcher("SELECT Manufacturer, Model FROM Win32_ComputerSystem")
 
         ' Értékek beállítása -> Számítógép: gyártó, modell
@@ -387,7 +263,7 @@ Public Class MainWindow
             Model = RemoveSpaces(objMgmt("Model"))
         Next
 
-        ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> BIOS információk ***
+        ' WMI értékek lekérdezése: Win32_BIOS -> BIOS információk
         ' Megjegyzés: A rendszer sorozatszáma is itt van tárolva!
         objBS = New ManagementObjectSearcher("SELECT SerialNumber, Manufacturer, SMBIOSBIOSVersion, ReleaseDate FROM Win32_BIOS")
 
@@ -433,7 +309,7 @@ Public Class MainWindow
             HWIdentifier(2) = RemoveInvalidChars(Model) + ", " + GetLoc("Date") + ": " + Identifier
         End If
 
-        ' *** WMI LEKÉRDEZÉS: Win32_BIOS -> Akkumulátor információk ***
+        ' WMI értékek lekérdezése:Win32_BIOS -> Akkumulátor információ
         objBT = New ManagementObjectSearcher("SELECT Name, DeviceID, DesignVoltage FROM Win32_Battery")
 
         Dim BattCount As Int32 = 0                          ' Akkumulátorok száma
@@ -442,11 +318,13 @@ Public Class MainWindow
         ' Akkumulátorok számának meghatározása
         BattCount = objBT.Get().Count
 
-        ' Értékek beállítása -> Akkumulátor: név, azonosító, feszültség
+        ' Hibakezelés: nincs akkumulátor
         If BattCount = 0 Then
             HWVendor(3) = Nothing
             HWIdentifier(3) = Nothing
         Else
+
+            ' Értékek beállítása -> Akkumulátor: név, azonosító, feszültség
             For Each Me.objMgmt In objBT.Get()
                 Vendor = RemoveSpaces(RemoveInvalidChars(objMgmt("DeviceID")))
                 Model = RemoveSpaces(RemoveInvalidChars(objMgmt("Name")))
@@ -456,18 +334,21 @@ Public Class MainWindow
             ' Gyártó leválasztása a modellről
             Vendor = Replace(Vendor, Model, "")
 
+            ' Hibakezelés: hibás feszültségérték (0 V)
             If BattVolt <> 0 Then
-                Identifier = FixDigitSeparator((BattVolt / 1000), 1, False).ToString + " V"
+                Identifier = FixNumberFormat((BattVolt / 1000), 1, False).ToString + " V"
             Else
                 Identifier = Nothing
             End If
 
+            ' Hibakezelés: üres gyártói sztring
             If Vendor = Nothing Then
                 HWVendor(3) = Nothing
             Else
                 HWVendor(3) = Vendor
             End If
 
+            ' Hibakezelés: üres modell sztring
             If Model = Nothing Then
                 HWIdentifier(3) = Nothing
             Else
@@ -496,10 +377,10 @@ Public Class MainWindow
         Dim CPUMaximumClock As Int32                            ' Natív CPU órajel
         Dim CPUCount As Int32 = 0                               ' Processzor sorszáma
 
-        ' WMI érték definiálása
+        ' WMI értékek lekérdezése: Win32_Processor -> Processzor információi
         objPR = New ManagementObjectSearcher("SELECT NumberOfCores, NumberOfLogicalProcessors, CurrentClockSpeed, MaxClockSpeed FROM Win32_Processor")
 
-        ' Értékek kinyerése a WMI-ből
+        ' Értékek beállítása -> Számítógép: magok, szálak, órajelek
         For Each Me.objMgmt In objPR.Get()
             If CPUCount = SelectedCPU Then
                 CPUCoreNumber = objMgmt("NumberOfCores")
@@ -512,8 +393,8 @@ Public Class MainWindow
 
         ' Kiírások frissítése
         Value_CPUCore.Text = CPUCoreNumber.ToString + " / " + CPUThreadNumber.ToString
-        Value_CPUClock.Text = CPUCurrentClock.ToString + " MHz"
-        Value_CPUMaximum.Text = CPUMaximumClock.ToString + " MHz"
+        Value_CPUClock.Text = FixNumberFormat(CPUCurrentClock, 0, False) + " MHz"
+        Value_CPUMaximum.Text = FixNumberFormat(CPUMaximumClock, 0, False) + " MHz"
 
         ' Visszatérési érték beállítása
         Return False
@@ -529,37 +410,50 @@ Public Class MainWindow
         Dim OSName As String = Nothing                          ' OS neve
         Dim OSService As Int32 = 0                              ' Szervizcsomag
         Dim OSLanguage(32) As String                            ' Nyelv
+        Dim OSRelease As String = Nothing                       ' Kiadás típusa
 
-        ' WMI érték definiálása
+        ' WMI értékek lekérdezése: Win32_OperatingSystem -> Operációs rendszer információi
+        ' Megjegyzés: Szándékosan van wildcard a lekérdezésben, mert XP alatt nem szerepel minden érték!
         objOS = New ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem")
 
-        ' Értékek kinyerése a WMI-ből
+        ' Értékek beállítása -> Operációs rendszer: gyártó, modell
         For Each Me.objMgmt In objOS.Get()
             OSName = RemoveSpaces(objMgmt("Caption"))
             OSService = objMgmt("ServicePackMajorVersion")
-            If OSMajorVersion > 5 Then
+            If OSVersion(0) > 5 Then
                 OSLanguage = objMgmt("MUILanguages")
             End If
         Next
 
-        ' Kiírások értékének frissítése
+        ' WMI értékek lekérdezése: Win32_Processor -> Operációs rendszer kiadás (32/64-bit)
+        ' Megjegyzés: Az OS kiadásnál egyes esetekben sajnos le van fordítva a sztring (pl. '32-bites'),
+        ' de a processzor címbusz szélessége mindig megegyezik vele, mivel ezt az OS korlátozza, ez viszont integer!
+        ' XP-nél nincs alapból az OS kiadásnál ilyen WMI érték, de a CPU címbuszból ott is származtatható.
+        objPR = New ManagementObjectSearcher("SELECT AddressWidth FROM Win32_Processor")
+
+        ' Értékek beállítása
+        For Each Me.objMgmt In objPR.Get()
+            OSRelease = objMgmt("AddressWidth").ToString
+        Next
+
+        ' Kiírások frissítése
         If OSService = 0 Then
             Value_OSName.Text = OSName
         Else
             Value_OSName.Text = OSName + ", " + GetLoc("SvcPack") + " " + OSService.ToString
         End If
 
-        Value_OSRelease.Text = OSRelease.ToString + "-bit"
-        Value_OSVersion.Text = OSMajorVersion.ToString + "." + OSMinorVersion.ToString + "." + OSBuildVersion.ToString
+        Value_OSRelease.Text = OSRelease + "-bit"
+        Value_OSVersion.Text = OSVersion(0).ToString + "." + OSVersion(1).ToString + "." + OSVersion(2).ToString
 
-        If OSMajorVersion > 5 Then
+        ' Windows XP alatt nem támogatott a nyelv lekérdezése
+        If OSVersion(0) > 5 Then
             Value_OSLang.Enabled = True
             Value_OSLang.Text = OSLanguage(0)
         Else
             Value_OSLang.Enabled = False
             Value_OSLang.Text = GetLoc("Unknown")
         End If
-
 
         ' Visszatérési érték beállítása
         Return False
@@ -572,50 +466,49 @@ Public Class MainWindow
     Private Function SetMemoryInformation()
 
         ' Értékek definiálása
-        Dim PMemSize As String = Nothing ' Fizikai memória mérete
-        Dim PMemFree As String = Nothing ' Szabad fizikai memória
-        Dim PMemPerc As String = Nothing ' Fizikai memória kihasználtsága
-        Dim VMemSize As String = Nothing ' Virtuális memória mérete
-        Dim VMemFree As String = Nothing ' Szabad virtuális memória
-        Dim VMemPerc As String = Nothing ' Virtuális memória kihasználtsága
+        Dim PMemSize, PMemFree, VMemSize, VMemFree As String
+        Dim PMemPerc, VMemPerc As Int32
+        Dim PMemSizeConv(2), PMemFreeConv(2), VMemSizeConv(2), VMemFreeConv(2) As Double
 
-        ' WMI érték definiálása
+        ' WMI értékek lekérdezése: Win32_OperatingSystem -> Memória információk (kiB-ban vannak az értékek!)
         objOS = New ManagementObjectSearcher("SELECT TotalVisibleMemorySize, FreePhysicalMemory, TotalVirtualMemorySize, FreeVirtualMemory FROM Win32_OperatingSystem")
 
-        ' Értékek kinyerése a WMI-ből
+        ' Értékek beállítása -> Számítógép: fizikai és virtuális memória, valamint a szabad memória mérete
         For Each Me.objMgmt In objOS.Get()
+
+            ' Fizikai memória mérete
             PMemSize = objMgmt("TotalVisibleMemorySize")
+            PMemSizeConv = ScaleConversion(PMemSize * 1024, 2, True)
+
+            ' Szabad fizikai memória mérete
             PMemFree = objMgmt("FreePhysicalMemory")
-            PMemPerc = Round(((PMemSize - PMemFree) / PMemSize) * 100).ToString
+            PMemFreeConv = ScaleConversion(PMemFree * 1024, 2, True)
+
+            ' Fizikai memória kihasználtsága
+            PMemPerc = Round(((PMemSize - PMemFree) / PMemSize) * 100)
+            If PMemPerc > 100 Then PMemPerc = 100
+
+            ' Virtuális memória mérete
             VMemSize = objMgmt("TotalVirtualMemorySize")
+            VMemSizeConv = ScaleConversion(VMemSize * 1024, 2, True)
+
+            ' Szabad virtuális memória mérete
             VMemFree = objMgmt("FreeVirtualMemory")
-            VMemPerc = Round(((VMemSize - VMemFree) / VMemSize) * 100).ToString
+            VMemFreeConv = ScaleConversion(VMemFree * 1024, 2, True)
+
+            ' Virtuális memória kihasználtsága
+            VMemPerc = Round(((VMemSize - VMemFree) / VMemSize) * 100)
+            If PMemPerc > 100 Then PMemPerc = 100
+
         Next
 
-        ' Hibakorrekció: Fizikai memória (100%-nál nagyobb kihasználtság. Nem fordulhat elő, de ha mégis, akkor 100-ra betonozva a plafon!)
-        If PMemPerc > 100 Then
-            PMemPerc = 100
-        End If
-
-        ' Hibakorrekció: Virtuális memória (Szintúgy...)
-        If VMemPerc > 100 Then
-            VMemPerc = 100
-        End If
-
-        ' Memóriaértékek formázása
-        Dim PMemSizeConv(2), PMemFreeConv(2), VMemSizeConv(2), VMemFreeConv(2) As Double
-        PMemSizeConv = DynByteConv(PMemSize * 1024, 2)
-        PMemFreeConv = DynByteConv(PMemFree * 1024, 2)
-        VMemSizeConv = DynByteConv(VMemSize * 1024, 2)
-        VMemFreeConv = DynByteConv(VMemFree * 1024, 2)
-
         ' Kiírások formázása
-        Value_PhyMemSize.Text = FixDigitSeparator(PMemSizeConv(0), 2, True) + " " + PrefixTable(PMemSizeConv(1)) + "B"
-        Value_PhyMemFree.Text = FixDigitSeparator(PMemFreeConv(0), 2, True) + " " + PrefixTable(PMemFreeConv(1)) + "B"
-        Value_PhyMemUsed.Text = PMemPerc + " %"
-        Value_VirtMemSize.Text = FixDigitSeparator(VMemSizeConv(0), 2, True) + " " + PrefixTable(VMemSizeConv(1)) + "B"
-        Value_VirtMemFree.Text = FixDigitSeparator(VMemFreeConv(0), 2, True) + " " + PrefixTable(VMemFreeConv(1)) + "B"
-        Value_VirtMemUsed.Text = VMemPerc + " %"
+        Value_PhyMemSize.Text = FixNumberFormat(PMemSizeConv(0), 2, True) + " " + BytePrefix(PMemSizeConv(1)) + "B"
+        Value_PhyMemFree.Text = FixNumberFormat(PMemFreeConv(0), 2, True) + " " + BytePrefix(PMemFreeConv(1)) + "B"
+        Value_PhyMemUsed.Text = PMemPerc.ToString + " %"
+        Value_VirtMemSize.Text = FixNumberFormat(VMemSizeConv(0), 2, True) + " " + BytePrefix(VMemSizeConv(1)) + "B"
+        Value_VirtMemFree.Text = FixNumberFormat(VMemFreeConv(0), 2, True) + " " + BytePrefix(VMemFreeConv(1)) + "B"
+        Value_VirtMemUsed.Text = VMemPerc.ToString + " %"
 
         ' Visszatérési érték beállítása
         Return False
@@ -634,17 +527,18 @@ Public Class MainWindow
         Dim SerialNumber As String = Nothing                ' Sorozatszám
         Dim DiskID As String = Nothing                      ' Lemez azonosító
 
-        ' WMI értékek lekérdezése -> Win32_DiskDrive (Szándékosan van wildcard a lekérdezésben, mert XP alatt nem szerepel minden érték!)
+        ' WMI értékek lekérdezése: Win32_DiskDrive -> Lemezmeghajtó információk
+        ' Megjegyzés: Szándékosan van wildcard a lekérdezésben, mert XP alatt nem szerepel minden érték!
         objDD = New ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive WHERE Index = '" + DiskList(SelectedDisk) + "'")
 
-        ' Lemezinformáció kinyerése a WMI-ből
+        ' Értékek beállítása -> Lemezmeghajtó: index, interfész, azonosító, firmware, sorozatszám
         For Each Me.objMgmt In objDD.Get()
             Connector = objMgmt("InterfaceType")
             DiskIndex = objMgmt("Index")
             DiskID = objMgmt("DeviceID")
 
             ' Windows XP alatt nem támogatott néhány érték lekérdezése
-            If OSMajorVersion >= 6 Then
+            If OSVersion(0) >= 6 Then
                 SerialNumber = RemoveSpaces(objMgmt("SerialNumber"))
                 Firmware = RemoveSpaces(objMgmt("FirmwareRevision"))
             Else
@@ -654,9 +548,9 @@ Public Class MainWindow
         Next
 
         ' OS Verzióellenőrzés: XP -> Ismeretlen, Vista és 7 -> Konverzió indítása
-        If OSMajorVersion < 6 Then
+        If OSVersion(0) < 6 Then
             SerialNumber = Nothing
-        ElseIf OSMajorVersion = 6 And OSMinorVersion <= 1 And SerialNumber <> Nothing Then
+        ElseIf OSVersion(0) = 6 And OSVersion(1) <= 1 And SerialNumber <> Nothing Then
             SerialNumber = RemoveSpaces(DiskSerialNumberConv(SerialNumber))
         End If
 
@@ -713,16 +607,19 @@ Public Class MainWindow
         Dim PartName As String = Nothing                    ' Partíció neve
         Dim PartSize(2) As Double                           ' Partíció mérete
         Dim PartFS As String = Nothing                      ' Partíció fájlrendszere
+        Dim PartUnit As String = Nothing                    ' Partíció méret mértékegység előtag
 
-        ' WMI értékek összevetése: Win32_DiskDrive -> Win32_DiskDriveToDiskPartition
+        ' WMI értékek összevetése: Win32_DiskDrive -> Win32_DiskDriveToDiskPartition (Referencia: DeviceID)
         objDP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskID + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
 
-        ' Partíciók kinyerése a WMI-ből
+        ' Értékek beállítása -> Lemez azonosító
         For Each Me.objMgmt In objDP.Get()
             PartID = objMgmt("DeviceID")
 
-            ' WMI értékek összevetése: Win32_DiskPartition -> Win32_LogicalDiskToPartition
+            ' WMI értékek összevetése: Win32_DiskPartition -> Win32_LogicalDiskToPartition (Referencia: DeviceID)
             objLP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + PartID + "'} WHERE AssocClass = Win32_LogicalDiskToPartition")
+
+            ' Értékek beállítása -> Partíció azonosító
             For Each Me.objRes In objLP.Get()
                 PartList(PartNum) = objRes("DeviceID")
                 PartNum += 1
@@ -741,7 +638,11 @@ Public Class MainWindow
         Else
             ComboBox_PartList.Enabled = True
             For PartCount = 0 To PartNum - 1
+
+                ' WMI értékek lekérdezése: Win32_LogicalDisk -> Partíció információk
                 objLD = New ManagementObjectSearcher("SELECT DeviceID, FileSystem, Size, VolumeName FROM Win32_LogicalDisk WHERE DeviceID = '" + PartList(PartCount) + "'")
+
+                ' Értékek beállítása -> Partíció: azonosító, fájlrendszer, méret, kötetcímke
                 For Each Me.objMgmt In objLD.Get()
 
                     ' Meghajtó betűjel
@@ -770,8 +671,8 @@ Public Class MainWindow
                         PartInfo(PartCount) = Nothing
                     Else
                         ' Partícióméret konvertálása
-                        PartSize = DynByteConv(objMgmt("Size"), 2)
-                        PartInfo(PartCount) = PartName + " (" + FixDigitSeparator(PartSize(0), 2, True) + " " + PrefixTable(PartSize(1)) + "B)"
+                        PartSize = ScaleConversion(objMgmt("Size"), 2, True)
+                        PartInfo(PartCount) = PartName + " (" + FixNumberFormat(PartSize(0), 2, True) + " " + BytePrefix(PartSize(1)) + "B)"
                     End If
 
                 Next
@@ -817,11 +718,11 @@ Public Class MainWindow
         Else
             ' Memóriaérték formázása
             Dim VideoMemoryConv(2) As Double
-            VideoMemoryConv = DynByteConv(VideoMemory, 2)
+            VideoMemoryConv = ScaleConversion(VideoMemory, 2, True)
 
             ' Kiírás értékének frissítése
             Value_VideoMemory.Enabled = True
-            Value_VideoMemory.Text = FixDigitSeparator(VideoMemoryConv(0), 2, True) + " " + PrefixTable(VideoMemoryConv(1)) + "B"
+            Value_VideoMemory.Text = FixNumberFormat(VideoMemoryConv(0), 2, True) + " " + BytePrefix(VideoMemoryConv(1)) + "B"
         End If
 
         ' Ismeretlen felbontás (Pl.: 0 x 0, 0 bit)
@@ -844,14 +745,14 @@ Public Class MainWindow
     Private Function SetUptime()
 
         ' Értékek definiálása
-        Dim UptimeSeconds As Int32                 ' Indítás óta eltelt másodpercek száma
-        Dim Days, Hours, Minutes, Seconds As Int32 ' Időváltozók (nap, óra, perc, másodperc)
-        Dim UptimeString As String = Nothing       ' Futásidő sztring
+        Dim UptimeSeconds As Int32                              ' Indítás óta eltelt másodpercek száma
+        Dim Days, Hours, Minutes, Seconds As Int32              ' Időváltozók (nap, óra, perc, másodperc)
+        Dim UptimeString As String = Nothing                    ' Futásidő sztring
 
         ' Futásidő érték számítása (másodperc)
         UptimeSeconds = DateDiff("s", SysStartTime, DateTime.Now)
 
-        ' Egységekre bontás
+        ' Egységekre bontás (napok, órák, percek, másodpercek)
         Days = Int(UptimeSeconds / (24 * 3600))
         UptimeSeconds = UptimeSeconds - (Days * 24 * 3600)
         Hours = Int(UptimeSeconds / 3600)
@@ -869,86 +770,6 @@ Public Class MainWindow
 
     End Function
 
-    ' *** FÜGGVÉNY: Felesleges szóközök eltávolítása ***
-    ' Bemenet: RawString -> formázandó sztring (String)
-    ' Kimenet: RawString -> formázott sztring (String)
-    Public Function RemoveSpaces(ByVal RawString As String)
-
-        ' Értékek definiálása
-        Dim Str2Char() As Char             ' Sztring-karakter konverzió tömbje
-        Dim TempString As String = Nothing ' Ideiglenes sztring az elemzéshez
-
-        ' Dupla szóközök eltávolítása
-        While (InStr(RawString, "  "))
-            RawString = Replace(RawString, "  ", " ")
-        End While
-
-        ' Kezdőszóköz eltávolítása
-        If RawString <> Nothing Then
-
-            ' Karaktertömbre bontás
-            Str2Char = RawString.ToCharArray()
-
-            ' Kezdőszóköz eltávolítása
-            If Str2Char(0) = " " Then
-                For i As Int32 = 1 To UBound(Str2Char)
-                    TempString += Str2Char(i)
-                Next
-                RawString = TempString
-            End If
-
-            ' Zárószóköz eltávolítása
-            If Str2Char(UBound(Str2Char)) = " " And RawString <> Nothing Then
-
-                ' Ideiglenes sztring kiürítése
-                TempString = Nothing
-
-                ' Karaktertömbre bontás (újra)
-                Str2Char = RawString.ToCharArray()
-
-                For i As Int32 = 0 To (UBound(Str2Char) - 1)
-                    TempString += Str2Char(i)
-                Next
-                RawString = TempString
-            End If
-
-        End If
-
-        ' Visszatérési érték beállítása
-        Return RawString
-
-    End Function
-
-    ' *** FÜGGVÉNY: Sztring egyezés keresése tömbből ***
-    ' Bemenet: RawString -> keresési forrás sztring (String)
-    '          ChkArr()  -> keresett elemek tömbje (String)
-    '          CSense    -> case sensitive összehasonlítás (Boolean)
-    ' Kimenet: *         -> egyezés állapota (Boolean)
-    Public Function CheckStrMatch(ByVal RawString As String, ByVal ChkArr() As String, ByVal CSense As Boolean)
-
-        ' Értékek definiálása
-        Dim Match As Boolean = False   ' Egyezés állapota
-
-        ' Egyezés keresés a tömb elemei között
-        For i As Int32 = 0 To UBound(ChkArr)
-
-            ' Case insensitive átalakítás
-            If CSense = False Then
-                If LCase(RawString) = LCase(ChkArr(i)) And Match = False Then
-                    Match = True
-                End If
-            Else
-                If RawString = ChkArr(i) And Match = False Then
-                    Match = True
-                End If
-            End If
-        Next
-
-        ' Visszatérési érték beállítása
-        Return Match
-
-    End Function
-
     ' *** FÜGGVÉNY: Statisztikai név konverzió (Nem visszafordítható névátalakítás!) ***
     ' Bemenet: RawString -> formázandó sztring (String)
     ' Kimenet: RawString -> formázott sztring (String)
@@ -958,6 +779,7 @@ Public Class MainWindow
         While (InStr(RawString, "("))
             RawString = Replace(RawString, "(", "[")
         End While
+
         While (InStr(RawString, ")"))
             RawString = Replace(RawString, ")", "]")
         End While
@@ -977,141 +799,32 @@ Public Class MainWindow
 
     End Function
 
-    ' *** FÜGGVÉNY: WMI alapú DateTime változó konverzió ***
-    ' Bemenet: WMIDateTime -> WMI datetime formátumú változó (String)
-    ' Kimenet: Converted   -> hagyományos DateTime változó (DateTime)
-    Public Function DateTimeConv(ByVal WMIDateTime As String)
-
-        ' Értékek definiálása
-        Dim Converted As DateTime                           ' DateTime változó
-        Dim Year, Month, Day, Hour, Minute, Second As Int32 ' Időváltozók (év, hónap, nap, óra, perc, másodperc)
-
-        ' Értékek részekre bontása
-        Year = Mid(WMIDateTime, 1, 4)
-        Month = Mid(WMIDateTime, 5, 2)
-        Day = Mid(WMIDateTime, 7, 2)
-        Hour = Mid(WMIDateTime, 9, 2)
-        Minute = Mid(WMIDateTime, 11, 2)
-        Second = Mid(WMIDateTime, 13, 2)
-
-        ' Kimenet beállítása
-        Converted = New DateTime(Year, Month, Day, Hour, Minute, Second)
-
-        ' Visszatérési érték beállítása
-        Return Converted
-
-    End Function
-
-    ' *** FÜGGVÉNY: Nem elfogadhatóü karakterek eltávolítása ***
-    ' Bemenet: RawString -> formázandó sztring (String)
-    ' Kimenet: RawString -> formázott érték (String)
-    Public Function RemoveInvalidChars(ByVal RawString As String)
-
-        ' Értékek definiálása
-        Dim Str2Char() As Char             ' Sztring-karakter konverzió tömbje
-        Dim TempString As String = Nothing ' Ideiglenes sztring az összefűzéshez
-
-        ' Bemeneti érték formázása
-        If RawString <> Nothing Then
-
-            ' Karaktertömbre bontás
-            Str2Char = RawString.ToCharArray()
-
-            ' Elemzés: az ismert és elfogadható karakterek kivételével minden egyéb eltávolítása
-            For i As Int32 = 0 To UBound(Str2Char)
-                TempString += Regex.Replace(Str2Char(i), "[^a-zA-Z0-9 \(\)\[\]\\/\-_~\*?$#&'%+=!|<>{},.:;@]", "")
-            Next
-
-            RawString = TempString
-        End If
-
-        ' Visszatérési érték beállítása
-        Return RawString
-
-    End Function
-
-    ' *** FÜGGVÉNY: Statikus bájtkonverzió ***
-    ' Bemenet: Value -> bájt (Double)
-    ' Kimenet: *     -> formázott érték (String)
-    Private Function StatByteConv(ByVal Value As Double, ByVal Prefix As Int32)
-
-        ' Bemeneti érték formázása
-        Value = Round(Value / (1024 ^ Prefix))
-
-        ' Visszatérési érték beállítása
-        Return Value.ToString + " " + PrefixTable(Prefix)
-
-    End Function
-
-    ' *** FÜGGVÉNY: Dinamikus bájtkonverzió ***
-    ' Bemenet: Value       -> bájt (Double)
-    '          Digit       -> elválasztó utáni helyiértékek száma (Int32)
-    ' Kimenet: ConvValue() -> formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
-    Public Function DynByteConv(ByVal Value As Double, ByVal Digit As Int32)
-
-        ' Értékek definiálása
-        Dim Prefix, ConvValue(2) As Double
-
-        ' Prefixum görgetés indítása (Minden hurok eggyel feljebb tolja a tömbben lévő szorzó számát)
-        Prefix = 0
-        While (Value >= 1024)
-            Prefix += 1
-            Value = Round((Value / (1024)) * 10 ^ Digit) / (10 ^ Digit) ' A Microsoft nem SI alapján számol a bájtnál! (Valójában ez iB, kiB, MiB, stb. lenne.)
-        End While
-
-        ' Kimenet formázása
-        ConvValue(0) = Round(Value, 2)
-        ConvValue(1) = Prefix
-
-        ' Visszatérési érték beállítása
-        Return ConvValue
-
-    End Function
-
-    ' *** FÜGGVÉNY: Dinamikus bitkonverzió ***
-    ' Bemenet: Value       -> bit (Double)
-    '          Digit       -> elválasztó utáni helyiértékek száma (Int32)
-    ' Kimenet: ConvValue() -> formázott érték tömbje (Double): Kerekített érték, Prefixum sorszáma
-    Public Function DynBitConv(ByVal Value As Double, ByVal Digit As Int32)
-
-        ' Értékek definiálása
-        Dim Prefix, ConvValue(2) As Double
-
-        ' Prefixum görgetés indítása (Minden hurok eggyel feljebb tolja a tömbben lévő szorzó számát)
-        Prefix = 0
-        While (Value >= 1000)
-            Prefix += 1
-            Value = Round((Value / (1000)) * 10 ^ Digit) / (10 ^ Digit) ' A Microsoft SI alapján számol a bitnél!
-        End While
-
-        ' Kimenet formázása
-        ConvValue(0) = Round(Value, 2)
-        ConvValue(1) = Prefix
-
-        ' Visszatérési érték beállítása
-        Return ConvValue
-
-    End Function
-
-    ' *** FÜGGVÉNY: Lemez sorozatszám korrekció (Windows 7) ***
+    ' *** FÜGGVÉNY: Lemez sorozatszám korrekció (Csak Windows 7 esetén szükséges!) ***
     ' Bemenet: Value     -> sorozatszám (String)
     ' Kimenet: ConvValue -> formázott érték (String)
     Private Function DiskSerialNumberConv(ByVal Value As String)
 
         ' Értékek definiálása
-        Dim HexArr() As Char = Value.ToCharArray
-        Dim TempHex As String
-        Dim ConvValue As String = Nothing
-        Dim TempChar As Int32
-        Dim CharNum As Int32 = UBound(HexArr) + 1
-        Dim CharArr((CharNum / 2) - 1) As String
+        Dim TempHex As String                                   ' Aktuális karakter ASCII kódja (hexadecimális)
+        Dim TempChar As Int32                                   ' Aktuális karakter ASCII kódja (decimális)
+        Dim Position As Int32                                   ' Aktuális karakter pozíciója
+        Dim ConvValue As String = Nothing                       ' Visszatérési érték
 
-        ' Érvénytelen sorozatszám ellenőrzés (Ha nem pont 40 karakter, akkor konvertálás nélkül írja ki!)
+        ' Függő értékek definiálása
+        Dim HexArr() As Char = Value.ToCharArray                ' Hexadecimális karakterek tömbje
+        Dim CharNum As Int32 = UBound(HexArr) + 1               ' Karakterek száma
+        Dim CharArr((CharNum / 2) - 1) As String                ' Összefűzési karaktertömb
+
+        ' Érvénytelen sorozatszám ellenőrzés
         If Value.Length <> 40 Then
+
+            ' Ha nem pont 40 karakter, akkor konvertálás nélkül írja ki!
             ConvValue = Value
+
         Else
-            ' Konverzió
-            For Position As Int32 = 0 To (CharNum / 2) - 1
+
+            ' Konverzió indítása
+            For Position = 0 To (CharNum / 2) - 1
                 TempHex = HexArr(Position * 2) + HexArr((Position * 2) + 1)
                 TempChar = Convert.ToInt32(TempHex, 16)
 
@@ -1149,8 +862,9 @@ Public Class MainWindow
         Dim UsageValue As Double                                ' Kihasználtsági érték
         Dim UIntCorrection As Double                            ' Előjel nélküli integer korrekció
 
-        ' Előjel nélküli integer korrekció -> Előjel átfordulás: NT 6.0-tól UInt64, XP-nél még UInt32 volt!
-        If OSMajorVersion < 6 Then
+        ' Előjel nélküli integer korrekció -> Előjel átfordulás kikerülése
+        ' Megjegyzés: XP alatt csak UInt32-ben voltak tárolva ezek az értékek, de ez NT 6.0-tól UInt64-re változott!
+        If OSVersion(0) < 6 Then
             UIntCorrection = 2 ^ 31
         Else
             UIntCorrection = 2 ^ 63
@@ -1159,10 +873,10 @@ Public Class MainWindow
         ' Interfész jelenlétének ellenőrzése
         If InterfacePresent Then
 
-            ' WMI érték definiálása
+        ' WMI értékek lekérdezése: Win32_PerfRawData_Tcpip_NetworkInterface -> Forgalmi adatok
             objNI = New ManagementObjectSearcher("SELECT CurrentBandwidth, BytesReceivedPersec, BytesSentPersec FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
 
-            ' Lekérdezett értékek feldolgozása
+            ' Értékek beállítása -> Forgalmi adatok: fogadott és küldött bájtok
             For Each Me.objMgmt In objNI.Get()
 
                 ' Maximálisan felvehető sebességérték (A sávszélesség nyolcadrésze)
@@ -1184,7 +898,7 @@ Public Class MainWindow
             Next
 
             ' Sávszélesség érték konverziója
-            MaxBandwidth = DynBitConv(objMgmt("CurrentBandwidth"), 2)
+            MaxBandwidth = ScaleConversion(objMgmt("CurrentBandwidth"), 2, False)
 
             ' Kiírási értékek láthatóságának beállítása
             Value_Bandwidth.Enabled = True
@@ -1203,8 +917,8 @@ Public Class MainWindow
         End If
 
         ' Sávszélesség kiírás formázása
-        Value_Bandwidth.Text = FixDigitSeparator(MaxBandwidth(0), 2, True)
-        Value_BandwidthUnit.Text = PrefixTable(MaxBandwidth(1)) + "bps"
+        Value_Bandwidth.Text = FixNumberFormat(MaxBandwidth(0), 2, True)
+        Value_BandwidthUnit.Text = SIPrefix(MaxBandwidth(1)) + "bps"
 
         ' Forgalomtörlés ellenőrzése és 0-val való osztás elkerülése
         If TraffReset Or MaxRelativeSpeed = 0 Then
@@ -1250,14 +964,14 @@ Public Class MainWindow
         End If
 
         ' Sebesség értékek kiszámítása és konvertálása
-        DownloadSpeed = DynByteConv(Abs(CurrentDownload - LatestDownload), 2)
-        UploadSpeed = DynByteConv(Abs(CurrentUpload - LatestUpload), 2)
+        DownloadSpeed = ScaleConversion(Abs(CurrentDownload - LatestDownload), 2, True)
+        UploadSpeed = ScaleConversion(Abs(CurrentUpload - LatestUpload), 2, True)
 
         ' Kiírási értékek frissítése
-        Value_DownloadSpeed.Text = FixDigitSeparator(DownloadSpeed(0), 2, False)
-        Value_DownloadSpeedUnit.Text = PrefixTable(DownloadSpeed(1)) + "B/s"
-        Value_UploadSpeed.Text = FixDigitSeparator(UploadSpeed(0), 2, False)
-        Value_UploadSpeedUnit.Text = PrefixTable(UploadSpeed(1)) + "B/s"
+        Value_DownloadSpeed.Text = FixNumberFormat(DownloadSpeed(0), 2, False)
+        Value_DownloadSpeedUnit.Text = BytePrefix(DownloadSpeed(1)) + "B/s"
+        Value_UploadSpeed.Text = FixNumberFormat(UploadSpeed(0), 2, False)
+        Value_UploadSpeedUnit.Text = BytePrefix(UploadSpeed(1)) + "B/s"
 
         ' Számítási hibakorrekció (100-nál nem lehet több!)
         If CurrentUsage > 100 Then
@@ -1282,21 +996,22 @@ Public Class MainWindow
     Private Function UpdateTraffArray(ByVal TraffReset As Boolean)
 
         ' Értékek definiálása
-        Dim Download(UBound(TraffDownArray)) As Double  ' Letöltött bájtok tömbje
-        Dim Upload(UBound(TraffUpArray)) As Double      ' Feltöltött bájtok tömbje
-        Dim UIntCorrection As Double                    ' Előjel nélküli integer korrekció
+        Dim Download(UBound(TraffDownArray)) As Double          ' Letöltött bájtok tömbje
+        Dim Upload(UBound(TraffUpArray)) As Double              ' Feltöltött bájtok tömbje
+        Dim UIntCorrection As Double                            ' Előjel nélküli integer korrekció
 
-        ' Előjel nélküli integer korrekció -> Előjel átfordulás: NT 6.0-tól UInt64, XP-nél még UInt32 volt!
-        If OSMajorVersion < 6 Then
+        ' Előjel nélküli integer korrekció -> Előjel átfordulás kikerülése
+        ' Megjegyzés: XP alatt csak UInt32-ben voltak tárolva ezek az értékek, de ez NT 6.0-tól UInt64-re változott!
+        If OSVersion(0) < 6 Then
             UIntCorrection = 2 ^ 31
         Else
             UIntCorrection = 2 ^ 63
         End If
 
-        ' WMI érték definiálása
-        objNI = New ManagementObjectSearcher("SELECT * FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
+        ' WMI értékek lekérdezése: Win32_PerfRawData_Tcpip_NetworkInterface -> Forgalmi adatok
+        objNI = New ManagementObjectSearcher("SELECT BytesReceivedPersec, BytesSentPersec FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
 
-        ' Lekérdezett értékek feldolgozása
+        ' Értékek beállítása -> Forgalmi adatok: fogadott és küldött bájtok
         For Each Me.objMgmt In objNI.Get()
 
             ' Aktuális letöltési érték az első helyre
@@ -1372,18 +1087,18 @@ Public Class MainWindow
     ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateCPUList(ByVal ResetFlag As Boolean)
 
+        ' Értékek definiálása
+        Dim CPUCount As Int32 = 0                               ' Processzor sorszáma
+        Dim CPUString(32) As String                             ' Processzor neve
+        Dim CPUDataWidth As Int32 = 0                           ' Processzor adatbusz szélessége
+
         ' Lista kiürítése
         ComboBox_CPUList.Items.Clear()
 
         ' WMI lekérdezés: Win32_Processor -> Processzor információk
         objPR = New ManagementObjectSearcher("SELECT Name, DataWidth FROM Win32_Processor")
 
-        ' Értékek definiálása
-        Dim CPUCount As Int32 = 0                               ' Processzor sorszáma
-        Dim CPUString(32) As String                             ' Processzor neve
-        Dim CPUDataWidth As Int32 = 0                           ' Processzor adatbusz szélessége
-
-        ' Értékek beállítása
+        ' Értékek beállítása -> Számítógép: név, adatbusz szélessége
         For Each Me.objMgmt In objPR.Get()
             CPUString(CPUCount) = RemoveSpaces(objMgmt("Name"))
             CPUDataWidth = objMgmt("DataWidth")
@@ -1420,12 +1135,6 @@ Public Class MainWindow
     ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateDiskList(ByVal ResetFlag As Boolean)
 
-        ' Lista kiürítése
-        ComboBox_DiskList.Items.Clear()
-
-        ' WMI lekérdezés: Win32_DiskDrive -> Lemezmeghajtók
-        objDD = New ManagementObjectSearcher("SELECT Index, Model, Size, PNPDeviceID FROM Win32_DiskDrive")
-
         ' Számláló beállítása
         Dim DiskCount As Int32 = 0                              ' Lemezek sorszáma
         Dim ListCount As Int32 = 0                              ' Lista szerinti sorszámok
@@ -1434,7 +1143,20 @@ Public Class MainWindow
         Dim Capacity(32) As Double                              ' Lemez kapacitása
         Dim FormattedCapacity(2) As Double                      ' Formázott kapacitás érték
         Dim Listlabel As String = Nothing                       ' Lemez megjelenítendő neve
+        Dim SmartPnPID As String = Nothing                      ' Eredeti PnP azonosító a S.M.A.R.T-hoz
+        Dim ConvertID As String = Nothing                       ' Konvertált PnP azonosító az összehasonlításhoz
+        Dim SmartData() As Byte                                 ' S.M.A.R.T adatok tömbje
+        Dim SmartStart As Int32 = 2                             ' S.M.A.R.T rekord kezdő bájtja (az első 2-es)
+        Dim SmartStep As Int32 = 12                             ' S.M.A.R.T bájtok ugrásköze (12-esével)
+        Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
 
+        ' Lista kiürítése
+        ComboBox_DiskList.Items.Clear()
+
+        ' WMI lekérdezés: Win32_DiskDrive -> Lemezmeghajtók
+        objDD = New ManagementObjectSearcher("SELECT Index, Model, Size, PNPDeviceID FROM Win32_DiskDrive")
+
+        ' Értékek beállítása -> Lemezmeghajtók: index, modell, azonosító, kapacitás
         For Each Me.objMgmt In objDD.Get()
             ListCount = ToInt32(objMgmt("Index"))
             DiskName(ListCount) = RemoveSpaces(objMgmt("Model"))
@@ -1444,16 +1166,18 @@ Public Class MainWindow
             DiskCount += 1
         Next
 
-        ' Sorbarendezés index alapján
+        ' Függő értékek definiálása
         Dim DiskSort(DiskCount - 1) As Int32                    ' Lemezek sorrendje
 
+        ' Sorbarendezési tömb feltöltése
         For SortCount = 0 To DiskCount - 1
             DiskSort(SortCount) = DiskList(SortCount)
         Next
 
+        ' Sorbarendezés index alapján
         Array.Sort(DiskSort)
 
-        ' Lemezek nevéből a felesleges jelölése eltávolítása
+        ' Lemezek nevéből a felesleges jelölések eltávolítása
         For ListCount = 0 To DiskCount - 1
 
             ' Felesleges szóközök eltávolítása (OEM lemezek esetén előfordul, hogy telenyomják szóközzel)
@@ -1476,19 +1200,15 @@ Public Class MainWindow
 
         Next
 
-        ' Lemez típusának meghatározása (S.M.A.R.T értékből -> Ez nem a "ROOT\CIMV2"-ből való bejegyzés!)
+        ' WMI lekérdezés: MSStorageDriver_ATAPISmartData -> Lemez típusának meghatározása (S.M.A.R.T értékből)
+        ' Megjegyzés: Ez nem a "ROOT\CIMV2"-ből való bejegyzés!)
         objSM = New ManagementObjectSearcher("ROOT\WMI", "SELECT InstanceName, VendorSpecific FROM MSStorageDriver_ATAPISmartData")
-
-        Dim SmartPnPID As String = Nothing                      ' PnP azonosító a S.M.A.R.T-hoz
-        Dim ConvertID As String = Nothing                       ' Konvertált PnP azonosító (összehasonlításhoz)
-        Dim SmartData() As Byte                                 ' S.M.A.R.T adatok tömbje
-        Dim SmartStart As Int32 = 2                             ' S.M.A.R.T rekord kezdő bájtja (az első 2-es)
-        Dim SmartStep As Int32 = 12                             ' S.M.A.R.T bájtok ugrásköze (12-esével)
-        Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
 
         ' S.M.A.R.T értékek kiértékelése
         ' Megjegyzés: Ha üres a tábla, akkor 'ManagementException'-t okoz, ezért kell a 'Try'!
         Try
+
+            ' Értékek beállítása -> S.M.A.R.T: név, adatok tömbje
             For Each Me.objMgmt In objSM.Get()
                 SmartPnPID = objMgmt("InstanceName")
                 SmartData = objMgmt("VendorSpecific")
@@ -1545,14 +1265,17 @@ Public Class MainWindow
             ' Lemezméret beállítása
             If Capacity(DiskSort(ListCount)) <> 0 Then
 
-                ' Kapacitás konvertálása
-                FormattedCapacity = DynByteConv(Capacity(DiskSort(ListCount)), 2)
-                Listlabel += " (" + FixDigitSeparator(FormattedCapacity(0), 2, True) + " " + PrefixTable(FormattedCapacity(1)) + "B)"
+                ' Kapacitás érték konvertálása
+                ' Megjegyzés: mivel itt nyers adat szerepel, így SI-re van konvertálva! (A gyártói címkén is ez van feltűntetve, az adathordozó tetején!)
+                FormattedCapacity = ScaleConversion(Capacity(DiskSort(ListCount)), 2, False)
+                Listlabel += " (" + FixNumberFormat(FormattedCapacity(0), 1, True) + " " + SIPrefix(FormattedCapacity(1)) + "B)"
+
             End If
 
             ' Lista feltöltése
             DiskName(ListCount) = ComboBox_DiskList.Items.Add(Listlabel)
             DiskList(ListCount) = DiskSort(ListCount)
+
         Next
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
@@ -1574,16 +1297,16 @@ Public Class MainWindow
     ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateVideoList(ByVal ResetFlag As Boolean)
 
-        ' Lista kiürítése
-        ComboBox_VideoList.Items.Clear()
-
-        ' WMI lekérdezés: Win32_DiskDrive -> Lemezmeghajtók
-        objVC = New ManagementObjectSearcher("SELECT Name FROM Win32_VideoController")
-
         ' Értékek definiálása
         Dim VideoCount As Int32 = 0                             ' Kártya sorszáma
 
-        ' Értékek beállítása
+        ' Lista kiürítése
+        ComboBox_VideoList.Items.Clear()
+
+        ' WMI lekérdezés: Win32_VideoController -> Videokártyák
+        objVC = New ManagementObjectSearcher("SELECT Name FROM Win32_VideoController")
+
+        ' Értékek beállítása -> Videokártya: név
         For Each Me.objMgmt In objVC.Get()
             VideoName(VideoCount) = RemoveSpaces(objMgmt("Name"))
             VideoCount += 1
@@ -1614,20 +1337,21 @@ Public Class MainWindow
 
         ' Értékek definiálása
         Dim AdapterNum As Int32 = 0                         ' Listaelemek darabszáma
+        Dim AdapterCount As Int32 = 0                       ' Adapterek sorszáma
+        Dim InterfaceCount As Int32 = 0                     ' Interfészek sorszáma
 
-        ' WMI lekérdezés: Win32_PnPEntity -> Interfészek
+        ' WMI lekérdezés: Win32_PnPEntity -> Hálózati adapterek
         objNA = New ManagementObjectSearcher("SELECT Name, DeviceID FROM Win32_NetworkAdapter")
 
         ' Eszközszám meghatározása
         AdapterNum = objNA.Get().Count
 
-        ' Értékek definiálása
+        ' Függő értékek definiálása
         Dim AdapterList(AdapterNum - 1) As String           ' Hálózati adapterek eszközneveinek tömbje
         Dim AdapterName(AdapterNum - 1) As String           ' Előformázott eszköznevek tömbje (összehasonlításhoz)
         Dim AdapterID(AdapterNum - 1) As String             ' Hálózati adapter azonosítója
-        Dim AdapterCount As Int32 = 0                       ' Eszköz sorszáma
 
-        ' PnP hálózati kártya nevek lekérdezése 
+        ' Értékek beállítása ->  Hálózati adapterek neveinek kártya nevek lekérdezése 
         For Each Me.objMgmt In objNA.Get()
             AdapterList(AdapterCount) = objMgmt("Name")
             AdapterName(AdapterCount) = StatNameConv(objMgmt("Name"))
@@ -1641,13 +1365,11 @@ Public Class MainWindow
         ' WMI lekérdezés: Win32_PerfRawData_Tcpip_NetworkInterface -> Interfészek
         objNI = New ManagementObjectSearcher("SELECT Name FROM Win32_PerfRawData_Tcpip_NetworkInterface")
 
-        ' Számláló beállítása
-        Dim InterfaceCount As Int32 = 0                     ' Interfészek sorszáma
-        Dim IPEnabled As Boolean = False                    ' IP kapcsolat engedélyezése
-
-        ' Interfészlista feltöltése (isatap adapterek kihagyása a listából)
+        ' Értékek beállítása -> Interfészlista feltöltése
         For Each Me.objMgmt In objNI.Get()
-            If InStr(objMgmt("Name"), "isatap") = False Then
+
+            ' Hibakezelés: ISATAP és virtuális ('*'-ot tartlmaz a neve, pl.: PAN) adapterek kihagyása
+            If CheckStrContain(objMgmt("Name"), {"isatap", "*"}, False) = False Then
                 InterfaceList(InterfaceCount) = objMgmt("Name")
                 If InStr(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport") Then
                     InterfaceName(InterfaceCount) = Replace(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport", "")
@@ -1663,9 +1385,6 @@ Public Class MainWindow
                     End If
                 Next
 
-                ' IP endegélyezés visszaállítása
-                IPEnabled = False
-
                 ' Beállított név keresése
                 If InterfaceName(InterfaceCount) = Nothing Then
 
@@ -1677,15 +1396,10 @@ Public Class MainWindow
                     ' WMI lekérdezés: Win32_NetworkAdapterConfiguration -> Interfész azonosító alapján történő lekérdezés
                     objNC = New ManagementObjectSearcher("SELECT IPEnabled FROM Win32_NetworkAdapterConfiguration WHERE Index = '" + InterfaceID(InterfaceCount) + "'")
 
-                    ' IP engedélyezés keresése
+                    ' Értékek beállítása -> Interfész azonosító kiürítése, ha az IP kapcsolat nincs engedélyezve (Ez a referencia az IP-infó ablakhoz)
                     For Each Me.objRes In objNC.Get()
-                        IPEnabled = objRes("IPEnabled")
+                        If Not objRes("IPEnabled") Then InterfaceID(InterfaceCount) = Nothing
                     Next
-
-                    ' Interfész azonosító kiürítése, ha az IP kapcsolat nincs engedélyezve (Ez a referencia az IP-infó ablakhoz)
-                    If IPEnabled = False Then
-                        InterfaceID(InterfaceCount) = Nothing
-                    End If
 
                 End If
 
@@ -1908,7 +1622,7 @@ Public Class MainWindow
         Dim LineCuts As Int32 = 50          ' Szaggatás beállítása a segédegyenesehkhez
 
         ' Skála maximumának meghatározása (2 tizedesjegyig)
-        ScaleMax = DynByteConv(Amplitude, 2)
+        ScaleMax = ScaleConversion(Amplitude, 2, True)
 
         ' Osztó és kitevő beállítása
         If ScaleMax(0) > 100 Then
@@ -1929,7 +1643,7 @@ Public Class MainWindow
         ' Értékek definiálása
         Dim UpPeakLine As Int32
         Dim UpPeakConv(2) As Double
-        UpPeakConv = DynByteConv(UpPeak, TraffDigit)
+        UpPeakConv = ScaleConversion(UpPeak, TraffDigit, True)
 
         ' Koordinátacsúszás beállítása: vízszintesen változatlan, függőlegesen kettővel felfelé -> Mindig a csúcsérték felett látszódik, az meg már el van tolva eggyel!
         DrawOffset = {0, -2}
@@ -1968,7 +1682,7 @@ Public Class MainWindow
         ' Értékek definiálása
         Dim DownPeakLine As Int32
         Dim DownPeakConv(2) As Double
-        DownPeakConv = DynByteConv(DownPeak, TraffDigit)
+        DownPeakConv = ScaleConversion(DownPeak, TraffDigit, True)
 
         ' Koordinátacsúszás beállítása: Vízszintesen változatlan, kettővel felfelé -> Mindig a csúcsérték felett látszódik, az meg már el van tolva eggyel!
         DrawOffset = {0, -2}
@@ -2028,8 +1742,8 @@ Public Class MainWindow
             For Count As Int32 = 0 To (TraffResolution - 1)
 
                 ' Értékek számítása (jelenlegi, eggyel korábbi)
-                UpByteDiffCurrent = DynByteConv(ChartUpNumbers(TraffResolution - Count), 2)
-                UpByteDiffLast = DynByteConv(ChartUpNumbers(TraffResolution - (Count + 1)), 2)
+                UpByteDiffCurrent = ScaleConversion(ChartUpNumbers(TraffResolution - Count), 2, True)
+                UpByteDiffLast = ScaleConversion(ChartUpNumbers(TraffResolution - (Count + 1)), 2, True)
 
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
                 UpTraffLine(0).X = DrawOffset(0)
@@ -2065,8 +1779,8 @@ Public Class MainWindow
             For Count As Int32 = 0 To (TraffResolution - 1)
 
                 ' Értékek számítása (jelenlegi, eggyel korábbi)
-                DownByteDiffCurrent = DynByteConv(ChartDownNumbers(TraffResolution - Count), 2)
-                DownByteDiffLast = DynByteConv(ChartDownNumbers(TraffResolution - (Count + 1)), 2)
+                DownByteDiffCurrent = ScaleConversion(ChartDownNumbers(TraffResolution - Count), 2, True)
+                DownByteDiffLast = ScaleConversion(ChartDownNumbers(TraffResolution - (Count + 1)), 2, True)
 
                 ' Koordináták feltöltése (X0, X1, Y0, Y1)
                 DownTraffLine(0).X = DrawOffset(0)
@@ -2120,7 +1834,7 @@ Public Class MainWindow
         End If
 
         ' Intervallum sor kiírása
-        Chart.DrawString(GetLoc("Interval") + " - " + GetLoc("Traffic") + ": " + PeakDiv.ToString + " " + PrefixTable(PeakExp) + "B / " +
+        Chart.DrawString(GetLoc("Interval") + " - " + GetLoc("Traffic") + ": " + PeakDiv.ToString + " " + BytePrefix(PeakExp) + "B / " +
                          GetLoc("Time") + ": " + IntervalTag + " (" + GetLoc("Update") + ": " + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Secs") + ")",
                          SignFont, Brushes.DeepSkyBlue, TextOffset(0), TextOffset(1))
 
@@ -2148,13 +1862,13 @@ Public Class MainWindow
         Chart.DrawString(GetLoc("ChartDown"), SignFont, Brushes.Lime, TextOffset(0) + 25, TextOffset(1))
 
         ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
-        DownCurrentConv = DynByteConv(ChartDownNumbers(0), TraffDigit)
+        DownCurrentConv = ScaleConversion(ChartDownNumbers(0), TraffDigit, True)
 
         If CheckedDownChart And InterfacePresent Then
-            Chart.DrawString(GetLoc("Current") + ": " + FixDigitSeparator(DownCurrentConv(0), TraffDigit, True) + " " +
-                             PrefixTable(DownCurrentConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
-            Chart.DrawString(GetLoc("Peak") + ": " + FixDigitSeparator(DownPeakConv(0), TraffDigit, True) + " " +
-                             PrefixTable(DownPeakConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(1), TextOffset(1))
+            Chart.DrawString(GetLoc("Current") + ": " + FixNumberFormat(DownCurrentConv(0), TraffDigit, True) + " " +
+                             BytePrefix(DownCurrentConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
+            Chart.DrawString(GetLoc("Peak") + ": " + FixNumberFormat(DownPeakConv(0), TraffDigit, True) + " " +
+                             BytePrefix(DownPeakConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(1), TextOffset(1))
         Else
             Chart.DrawString(GetLoc("ChartHide"), SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
         End If
@@ -2175,13 +1889,13 @@ Public Class MainWindow
         Chart.DrawString(GetLoc("ChartUp"), SignFont, Brushes.Red, TextOffset(0) + 25, TextOffset(1))
 
         ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
-        UpCurrentConv = DynByteConv(ChartUpNumbers(0), TraffDigit)
+        UpCurrentConv = ScaleConversion(ChartUpNumbers(0), TraffDigit, True)
 
         If CheckedUpChart And InterfacePresent Then
-            Chart.DrawString(GetLoc("Current") + ": " + FixDigitSeparator(UpCurrentConv(0), TraffDigit, True) + " " +
-                             PrefixTable(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(0), TextOffset(1))
-            Chart.DrawString(GetLoc("Peak") + ": " + FixDigitSeparator(UpPeakConv(0), TraffDigit, True) + " " +
-                             PrefixTable(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(1), TextOffset(1))
+            Chart.DrawString(GetLoc("Current") + ": " + FixNumberFormat(UpCurrentConv(0), TraffDigit, True) + " " +
+                             BytePrefix(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(0), TextOffset(1))
+            Chart.DrawString(GetLoc("Peak") + ": " + FixNumberFormat(UpPeakConv(0), TraffDigit, True) + " " +
+                             BytePrefix(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(1), TextOffset(1))
         Else
             Chart.DrawString(GetLoc("ChartHide"), SignFont, Brushes.Gray, TextOffset(0) + TextSpacing(0), TextOffset(1))
         End If
@@ -2223,8 +1937,8 @@ Public Class MainWindow
     Private Function CheckTimerStamp(ByVal Tolerance As Int32)
 
         ' Értékek definiálása
-        Dim TimeDiff As Int32                   ' Az utolsó és a jelenlegi ciklus közti eltérés
-        Dim StampValid As Boolean = False       ' Bélyeg ellenőrzés -> Ha a tartományon kívül van, akkor hamis!
+        Dim TimeDiff As Int32                                   ' Az utolsó és a jelenlegi ciklus közti eltérés
+        Dim StampValid As Boolean = False                       ' Bélyeg ellenőrzés -> Ha a tartományon kívül van, akkor hamis!
 
         ' Az utolsó ciklus és a jelenlegi idő összehasonlítása
         TimeDiff = DateDiff("s", TimerLastTick, DateTime.Now)
@@ -2739,15 +2453,8 @@ Public Class MainWindow
         ' Külső ablakok bezárása
         CloseExtForms()
 
-        ' Beállításjegyzék értékeinek mentése (Ha a főablak hiba nélkül betöltött)
-        If MainWindowDone Then
-            RegPath.SetValue("DisableLoadSplash", ToInt32(CheckedSplashDisable), RegistryValueKind.DWord)
-            RegPath.SetValue("SelectedLanguage", SelectedLanguage, RegistryValueKind.DWord)
-            RegPath.SetValue("SelectedRefreshIndex", SelectedRefresh, RegistryValueKind.DWord)
-            RegPath.SetValue("EnableTopMost", ToInt32(CheckedTopMost), RegistryValueKind.DWord)
-            RegPath.SetValue("DisableExitConfirmation", ToInt32(CheckedNoQuitAsk), RegistryValueKind.DWord)
-            RegPath.SetValue("MinimizeToTaskbar", ToInt32(CheckedMinToTray), RegistryValueKind.DWord)
-        End If
+        ' Beállításjegyzék értékeinek mentése, ha a főablak hiba nélkül betöltött
+        If MainWindowDone Then SetRegValues()
 
         ' Kilépési megerősítés
         If CheckedNoQuitAsk = False Then

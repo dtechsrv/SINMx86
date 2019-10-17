@@ -127,13 +127,14 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Include\Functions.vb" />
     <Compile Include="IPInfo.Designer.vb">
       <DependentUpon>IPInfo.vb</DependentUpon>
     </Compile>
     <Compile Include="IPInfo.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Localization.vb" />
+    <Compile Include="Include\Localization.vb" />
     <Compile Include="MainWindow.vb">
       <SubType>Form</SubType>
     </Compile>

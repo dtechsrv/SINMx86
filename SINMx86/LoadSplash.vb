@@ -1,6 +1,6 @@
 ﻿Imports System.Convert
-Imports Microsoft.Win32
 
+Imports SINMx86.Functions
 Imports SINMx86.Localization
 
 ' Betöltőképernyő osztálya
@@ -21,34 +21,29 @@ Public NotInheritable Class LoadSplash
         Dim MyVersion As String = Application.ProductVersion        ' Saját verziószám
         Dim MyName As String = My.Application.Info.Title            ' Program neve
 
+        ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
+        Me.TopMost = MainWindow.TopMost
+
         ' Háttérkép generálása
         RandomImage()
 
         ' Címsor feltöltése
-        If MainWindow.ReleaseStatus = Nothing Then
+        If ReleaseStatus = Nothing Then
             Splash_Title.Text = MyName
         Else
-            Splash_Title.Text = MyName + " " + MainWindow.ReleaseStatus
+            Splash_Title.Text = MyName + " " + ReleaseStatus
         End If
 
         ' Megjegyzés feltöltése
-        Splash_Comment.Text = GetLoc("Title") + ChrW(13) + ChrW(10) + GetLoc("Version") + " " + MainWindow.VersionString
+        Splash_Comment.Text = GetLoc("Title") + ChrW(13) + ChrW(10) + GetLoc("Version") + " " + VersionString
 
         ' Állapotellenőrzés: Névjegy vagy betöltőképernyő?
-        If MainWindow.SplashDefineAsAbout Then
+        If SplashDefineAsAbout Then
             Link_SplashClose.Text = GetLoc("SplashClose")
             Splash_Status.Text = My.Application.Info.Copyright
-
-            If MainWindow.TopMost Then
-                Me.TopMost = True
-            Else
-                Me.TopMost = False
-            End If
         Else
             Link_SplashClose.Text = Nothing
             Splash_Status.Text = GetLoc("SplashLoad") + "..."       ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
-
-            Me.TopMost = True
         End If
 
     End Sub

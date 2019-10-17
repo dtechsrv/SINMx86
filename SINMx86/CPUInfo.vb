@@ -1,9 +1,7 @@
-﻿Imports System
+﻿Imports System.Convert
 Imports System.Management
-Imports System.Math
-Imports System.Convert
-Imports Microsoft.Win32
 
+Imports SINMx86.Functions
 Imports SINMx86.Localization
 
 ' Processzor információs ablak osztálya
@@ -15,7 +13,6 @@ Public Class CPUInfo
 
     ' CPU-infó tábla változói
     Public CPUCount As Int32 = 0                                ' Processzorok száma
-    Public SelectedCPU As Int32 = 0                             ' Kiválasztott processzor
     Public L2Cache(2) As Double                                 ' L2 cache mérete
     Public L3Cache(2) As Double                                 ' L3 cache mérete
 
@@ -31,10 +28,12 @@ Public Class CPUInfo
         Dim Blacklist() As String = {"PROCESSOR", "PROCESSOR 0", "SOCKET", "SOCKET 0", "CPU", "CPU0", "CPU 0"}
 
         ' Értékek átvétele a főablaktól
-        Dim SelectedCPU = MainWindow.SelectedCPU
         Dim CPUName As String = MainWindow.ComboBox_CPUList.Items(SelectedCPU)
 
-        ' Ablak nevének  átvétele a főablakból
+        ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
+        Me.TopMost = MainWindow.TopMost
+
+        ' Ablak nevének beállítása
         Me.Text = GetLoc("CPUTitle")
 
         ' Billentyűk figyelése
@@ -49,13 +48,6 @@ Public Class CPUInfo
         ' Tábla fejléc szövegek átvétele a főablakból
         CPU_Table.Columns(1).Text = GetLoc("CPUDescription")
         CPU_Table.Columns(2).Text = GetLoc("CPUValue")
-
-        ' Ablak láthatósága
-        If MainWindow.TopMost Then
-            Me.TopMost = True
-        Else
-            Me.TopMost = False
-        End If
 
         ' Sorok törlése
         CPU_Table.Items.Clear()
@@ -86,20 +78,20 @@ Public Class CPUInfo
                 End If
 
                 ' Sorok felvitele
-                CPUTableAddRow(GetLoc("CPUVendor"), MainWindow.RemoveSpaces(objMgmt("Manufacturer")), Nothing)
-                CPUTableAddRow(GetLoc("CPUName"), MainWindow.RemoveSpaces(objMgmt("Name")), Nothing)
-                CPUTableAddRow(GetLoc("CPUIdent"), MainWindow.RemoveSpaces(objMgmt("Description")), Nothing)
+                CPUTableAddRow(GetLoc("CPUVendor"), RemoveSpaces(objMgmt("Manufacturer")), Nothing)
+                CPUTableAddRow(GetLoc("CPUName"), RemoveSpaces(objMgmt("Name")), Nothing)
+                CPUTableAddRow(GetLoc("CPUIdent"), RemoveSpaces(objMgmt("Description")), Nothing)
                 CPUTableAddRow(GetLoc("CPUCores"), objMgmt("NumberOfCores").ToString, Nothing)
                 CPUTableAddRow(GetLoc("CPUThreads"), objMgmt("NumberOfLogicalProcessors").ToString, Nothing)
 
                 ' Gyártói "lustaság" sztingek keresése
-                If Not MainWindow.CheckStrMatch(objMgmt("SocketDesignation"), Blacklist, False) Then
+                If Not CheckStrMatch(objMgmt("SocketDesignation"), Blacklist, False) Then
                     CPUTableAddRow(GetLoc("CPUSocket"), objMgmt("SocketDesignation"), Nothing)
                 End If
 
                 ' Üres feszültségérték ellenőrzése
                 If objMgmt("CurrentVoltage") <> 0 Then
-                    CPUTableAddRow(GetLoc("CPUVoltage"), FixDigitSeparator(objMgmt("CurrentVoltage") / 10, 1, False), "V")
+                    CPUTableAddRow(GetLoc("CPUVoltage"), FixNumberFormat(objMgmt("CurrentVoltage") / 10, 1, False), "V")
                 End If
 
                 ' Architektúra hozzáadása
@@ -107,29 +99,33 @@ Public Class CPUInfo
 
                 ' Üres aktuális órajel ellenőrzése
                 If objMgmt("CurrentClockSpeed") <> 0 Then
-                    CPUTableAddRow(GetLoc("CPUCurrentSpeed"), objMgmt("CurrentClockSpeed").ToString, "MHz")
+                    CPUTableAddRow(GetLoc("CPUCurrentSpeed"), FixNumberFormat(objMgmt("CurrentClockSpeed"), 0, False), "MHz")
                 End If
 
                 ' Üres gyári órajel ellenőrzése
                 If objMgmt("MaxClockSpeed") <> 0 Then
-                    CPUTableAddRow(GetLoc("CPUMaxSpeed"), objMgmt("MaxClockSpeed").ToString, "MHz")
+                    CPUTableAddRow(GetLoc("CPUMaxSpeed"), FixNumberFormat(objMgmt("MaxClockSpeed"), 0, False), "MHz")
                 End If
 
                 ' Üres busz órajel ellenőrzése
                 If objMgmt("ExtClock") <> 0 Then
-                    CPUTableAddRow(GetLoc("CPUBusClock"), objMgmt("ExtClock").ToString, "MHz")
+                    CPUTableAddRow(GetLoc("CPUBusClock"), FixNumberFormat(objMgmt("ExtClock"), 0, False), "MHz")
                 End If
 
                 ' L2 Cache méretének konvertálása
-                L2Cache = MainWindow.DynByteConv(objMgmt("L2CacheSize") * 1024, 0)
-                CPUTableAddRow(GetLoc("CPUL2"), L2Cache(0).ToString, MainWindow.PrefixTable(L2Cache(1)) + "B")
+                If objMgmt("L2CacheSize") <> 0 Then
+                    L2Cache = ScaleConversion(objMgmt("L2CacheSize") * 1024, 0, True)
+                    CPUTableAddRow(GetLoc("CPUL2"), FixNumberFormat(L2Cache(0), 0, False), BytePrefix(L2Cache(1)) + "B")
+                End If
 
                 ' XP alatt nem szereplő értékek kihagyása
-                If MainWindow.OSMajorVersion >= 6 Then
+                If OSVersion(0) >= 6 Then
 
                     ' L3 Cache méretének konvertálása
-                    L3Cache = MainWindow.DynByteConv(objMgmt("L3CacheSize") * 1024, 0)
-                    CPUTableAddRow(GetLoc("CPUL3"), L3Cache(0).ToString, MainWindow.PrefixTable(L3Cache(1)) + "B")
+                    If objMgmt("L3CacheSize") <> 0 Then
+                        L3Cache = ScaleConversion(objMgmt("L3CacheSize") * 1024, 0, True)
+                        CPUTableAddRow(GetLoc("CPUL3"), FixNumberFormat(L3Cache(0), 0, False), BytePrefix(L3Cache(1)) + "B")
+                    End If
 
                 End If
             End If
@@ -139,6 +135,8 @@ Public Class CPUInfo
         Next
 
     End Sub
+
+    ' ----- FÜGGVÉNYEK -----
 
     ' *** FÜGGVÉNY: Sor hozzáadása a CPU-táblához ***
     ' Bemenet: Name  -> név (String)
@@ -206,6 +204,8 @@ Public Class CPUInfo
         Return False
 
     End Function
+
+    ' ----- ELJÁRÁSOK -----
 
     ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
     ' Eseményvezérelt: Me.KeyDown -> ESC (Fizikai gomb lenyomása)

@@ -27,7 +27,6 @@ Partial Class MainWindow
         Me.GroupBox_HWInfo = New System.Windows.Forms.GroupBox()
         Me.Value_HWIdent = New System.Windows.Forms.Label()
         Me.Name_HWIdent = New System.Windows.Forms.Label()
-        Me.ComboBox_HWList = New SINMx86.LeftComboBox()
         Me.Name_HWList = New System.Windows.Forms.Label()
         Me.Value_HWVendor = New System.Windows.Forms.Label()
         Me.Name_HWVendor = New System.Windows.Forms.Label()
@@ -42,7 +41,6 @@ Partial Class MainWindow
         Me.Name_OSName = New System.Windows.Forms.Label()
         Me.GroupBox_CPUInfo = New System.Windows.Forms.GroupBox()
         Me.Button_CPUInfoOpen = New System.Windows.Forms.Button()
-        Me.ComboBox_CPUList = New SINMx86.LeftComboBox()
         Me.Value_CPUMaximum = New System.Windows.Forms.Label()
         Me.Name_CPUMaximum = New System.Windows.Forms.Label()
         Me.Value_CPUCore = New System.Windows.Forms.Label()
@@ -65,7 +63,6 @@ Partial Class MainWindow
         Me.Name_PhyMemSize = New System.Windows.Forms.Label()
         Me.GroupBox_VideoInfo = New System.Windows.Forms.GroupBox()
         Me.Button_VideoListReload = New System.Windows.Forms.Button()
-        Me.ComboBox_VideoList = New SINMx86.LeftComboBox()
         Me.Value_VideoResolution = New System.Windows.Forms.Label()
         Me.Value_VideoMemory = New System.Windows.Forms.Label()
         Me.Name_VideoResolution = New System.Windows.Forms.Label()
@@ -80,7 +77,6 @@ Partial Class MainWindow
         Me.Button_IPInfoOpen = New System.Windows.Forms.Button()
         Me.Button_InterfaceListReload = New System.Windows.Forms.Button()
         Me.Value_UploadSpeedUnit = New System.Windows.Forms.Label()
-        Me.ComboBox_InterfaceList = New SINMx86.LeftComboBox()
         Me.Value_BandwidthUnit = New System.Windows.Forms.Label()
         Me.Value_DownloadSpeedUnit = New System.Windows.Forms.Label()
         Me.Value_UploadSpeed = New System.Windows.Forms.Label()
@@ -88,7 +84,6 @@ Partial Class MainWindow
         Me.Value_DownloadSpeed = New System.Windows.Forms.Label()
         Me.Value_Bandwidth = New System.Windows.Forms.Label()
         Me.Name_UpdateUnit = New System.Windows.Forms.Label()
-        Me.ComboBox_UpdateList = New SINMx86.RightComboBox()
         Me.Name_UpdateList = New System.Windows.Forms.Label()
         Me.Name_ChartVisible = New System.Windows.Forms.Label()
         Me.CheckBoxChart_UploadVisible = New System.Windows.Forms.CheckBox()
@@ -146,7 +141,6 @@ Partial Class MainWindow
         Me.Button_SmartOpen = New System.Windows.Forms.Button()
         Me.Value_PartLabel = New System.Windows.Forms.Label()
         Me.Value_PartInfo = New System.Windows.Forms.Label()
-        Me.ComboBox_PartList = New SINMx86.LeftComboBox()
         Me.Button_DiskListReload = New System.Windows.Forms.Button()
         Me.Value_DiskSerial = New System.Windows.Forms.Label()
         Me.Name_DiskSerial = New System.Windows.Forms.Label()
@@ -157,9 +151,15 @@ Partial Class MainWindow
         Me.Value_MediaType = New System.Windows.Forms.Label()
         Me.Name_DiskInterface = New System.Windows.Forms.Label()
         Me.Name_MediaType = New System.Windows.Forms.Label()
-        Me.ComboBox_DiskList = New SINMx86.LeftComboBox()
         Me.Name_DiskList = New System.Windows.Forms.Label()
+        Me.ComboBox_PartList = New SINMx86.LeftComboBox()
+        Me.ComboBox_DiskList = New SINMx86.LeftComboBox()
         Me.ComboBox_LanguageList = New SINMx86.LeftComboBox()
+        Me.ComboBox_InterfaceList = New SINMx86.LeftComboBox()
+        Me.ComboBox_UpdateList = New SINMx86.RightComboBox()
+        Me.ComboBox_VideoList = New SINMx86.LeftComboBox()
+        Me.ComboBox_CPUList = New SINMx86.LeftComboBox()
+        Me.ComboBox_HWList = New SINMx86.LeftComboBox()
         Me.GroupBox_HWInfo.SuspendLayout()
         Me.GroupBox_OSInfo.SuspendLayout()
         Me.GroupBox_CPUInfo.SuspendLayout()
@@ -209,17 +209,6 @@ Partial Class MainWindow
         Me.Name_HWIdent.Size = New System.Drawing.Size(61, 13)
         Me.Name_HWIdent.TabIndex = 4
         Me.Name_HWIdent.Text = "Identifier:"
-        '
-        'ComboBox_HWList
-        '
-        Me.ComboBox_HWList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_HWList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_HWList.FormattingEnabled = True
-        Me.ComboBox_HWList.Items.AddRange(New Object() {"1", "2", "3"})
-        Me.ComboBox_HWList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_HWList.Name = "ComboBox_HWList"
-        Me.ComboBox_HWList.Size = New System.Drawing.Size(326, 21)
-        Me.ComboBox_HWList.TabIndex = 1
         '
         'Name_HWList
         '
@@ -381,16 +370,6 @@ Partial Class MainWindow
         Me.Button_CPUInfoOpen.TabIndex = 2
         Me.Button_CPUInfoOpen.UseVisualStyleBackColor = True
         '
-        'ComboBox_CPUList
-        '
-        Me.ComboBox_CPUList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_CPUList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_CPUList.FormattingEnabled = True
-        Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_CPUList.Name = "ComboBox_CPUList"
-        Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
-        Me.ComboBox_CPUList.TabIndex = 1
-        '
         'Value_CPUMaximum
         '
         Me.Value_CPUMaximum.ForeColor = System.Drawing.SystemColors.ControlText
@@ -415,7 +394,7 @@ Partial Class MainWindow
         'Value_CPUCore
         '
         Me.Value_CPUCore.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUCore.Location = New System.Drawing.Point(124, 48)
+        Me.Value_CPUCore.Location = New System.Drawing.Point(128, 48)
         Me.Value_CPUCore.Name = "Value_CPUCore"
         Me.Value_CPUCore.Size = New System.Drawing.Size(61, 13)
         Me.Value_CPUCore.TabIndex = 4
@@ -436,7 +415,7 @@ Partial Class MainWindow
         'Value_CPUClock
         '
         Me.Value_CPUClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUClock.Location = New System.Drawing.Point(248, 48)
+        Me.Value_CPUClock.Location = New System.Drawing.Point(252, 48)
         Me.Value_CPUClock.Name = "Value_CPUClock"
         Me.Value_CPUClock.Size = New System.Drawing.Size(60, 13)
         Me.Value_CPUClock.TabIndex = 6
@@ -490,21 +469,21 @@ Partial Class MainWindow
         'Value_PhyMemFree
         '
         Me.Value_PhyMemFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_PhyMemFree.Location = New System.Drawing.Point(242, 25)
+        Me.Value_PhyMemFree.Location = New System.Drawing.Point(244, 25)
         Me.Value_PhyMemFree.Name = "Value_PhyMemFree"
-        Me.Value_PhyMemFree.Size = New System.Drawing.Size(66, 13)
+        Me.Value_PhyMemFree.Size = New System.Drawing.Size(68, 13)
         Me.Value_PhyMemFree.TabIndex = 3
-        Me.Value_PhyMemFree.Text = "1000.00 MB"
+        Me.Value_PhyMemFree.Text = "1000.00 MiB"
         Me.Value_PhyMemFree.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_VirtMemFree
         '
         Me.Value_VirtMemFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VirtMemFree.Location = New System.Drawing.Point(242, 48)
+        Me.Value_VirtMemFree.Location = New System.Drawing.Point(244, 48)
         Me.Value_VirtMemFree.Name = "Value_VirtMemFree"
-        Me.Value_VirtMemFree.Size = New System.Drawing.Size(66, 13)
+        Me.Value_VirtMemFree.Size = New System.Drawing.Size(68, 13)
         Me.Value_VirtMemFree.TabIndex = 9
-        Me.Value_VirtMemFree.Text = "1000.00 MB"
+        Me.Value_VirtMemFree.Text = "1000.00 MiB"
         Me.Value_VirtMemFree.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_VirtMemFree
@@ -574,21 +553,21 @@ Partial Class MainWindow
         'Value_VirtMemSize
         '
         Me.Value_VirtMemSize.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VirtMemSize.Location = New System.Drawing.Point(120, 48)
+        Me.Value_VirtMemSize.Location = New System.Drawing.Point(124, 48)
         Me.Value_VirtMemSize.Name = "Value_VirtMemSize"
         Me.Value_VirtMemSize.Size = New System.Drawing.Size(68, 13)
         Me.Value_VirtMemSize.TabIndex = 7
-        Me.Value_VirtMemSize.Text = "1000.00 MB"
+        Me.Value_VirtMemSize.Text = "1000.00 MiB"
         Me.Value_VirtMemSize.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_PhyMemSize
         '
         Me.Value_PhyMemSize.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_PhyMemSize.Location = New System.Drawing.Point(120, 25)
+        Me.Value_PhyMemSize.Location = New System.Drawing.Point(124, 25)
         Me.Value_PhyMemSize.Name = "Value_PhyMemSize"
         Me.Value_PhyMemSize.Size = New System.Drawing.Size(68, 13)
         Me.Value_PhyMemSize.TabIndex = 1
-        Me.Value_PhyMemSize.Text = "1000.00 MB"
+        Me.Value_PhyMemSize.Text = "1000.00 MiB"
         Me.Value_PhyMemSize.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_VirtMemSize
@@ -639,16 +618,6 @@ Partial Class MainWindow
         Me.Button_VideoListReload.Size = New System.Drawing.Size(23, 23)
         Me.Button_VideoListReload.TabIndex = 2
         Me.Button_VideoListReload.UseVisualStyleBackColor = True
-        '
-        'ComboBox_VideoList
-        '
-        Me.ComboBox_VideoList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_VideoList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_VideoList.FormattingEnabled = True
-        Me.ComboBox_VideoList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_VideoList.Name = "ComboBox_VideoList"
-        Me.ComboBox_VideoList.Size = New System.Drawing.Size(297, 21)
-        Me.ComboBox_VideoList.TabIndex = 1
         '
         'Value_VideoResolution
         '
@@ -731,7 +700,7 @@ Partial Class MainWindow
         Me.Name_Bandwidth.Location = New System.Drawing.Point(15, 48)
         Me.Name_Bandwidth.Name = "Name_Bandwidth"
         Me.Name_Bandwidth.Size = New System.Drawing.Size(70, 13)
-        Me.Name_Bandwidth.TabIndex = 3
+        Me.Name_Bandwidth.TabIndex = 4
         Me.Name_Bandwidth.Text = "Bandwidth:"
         '
         'Name_DownloadSpeed
@@ -742,7 +711,7 @@ Partial Class MainWindow
         Me.Name_DownloadSpeed.Location = New System.Drawing.Point(15, 71)
         Me.Name_DownloadSpeed.Name = "Name_DownloadSpeed"
         Me.Name_DownloadSpeed.Size = New System.Drawing.Size(105, 13)
-        Me.Name_DownloadSpeed.TabIndex = 8
+        Me.Name_DownloadSpeed.TabIndex = 9
         Me.Name_DownloadSpeed.Text = "Download speed:"
         '
         'Name_UploadSpeed
@@ -753,7 +722,7 @@ Partial Class MainWindow
         Me.Name_UploadSpeed.Location = New System.Drawing.Point(228, 71)
         Me.Name_UploadSpeed.Name = "Name_UploadSpeed"
         Me.Name_UploadSpeed.Size = New System.Drawing.Size(89, 13)
-        Me.Name_UploadSpeed.TabIndex = 11
+        Me.Name_UploadSpeed.TabIndex = 12
         Me.Name_UploadSpeed.Text = "Upload speed:"
         '
         'GroupBox_Network
@@ -795,7 +764,7 @@ Partial Class MainWindow
         Me.Button_IPInfoOpen.Location = New System.Drawing.Point(385, 21)
         Me.Button_IPInfoOpen.Name = "Button_IPInfoOpen"
         Me.Button_IPInfoOpen.Size = New System.Drawing.Size(23, 23)
-        Me.Button_IPInfoOpen.TabIndex = 16
+        Me.Button_IPInfoOpen.TabIndex = 2
         Me.Button_IPInfoOpen.UseVisualStyleBackColor = True
         '
         'Button_InterfaceListReload
@@ -805,7 +774,7 @@ Partial Class MainWindow
         Me.Button_InterfaceListReload.Location = New System.Drawing.Point(414, 21)
         Me.Button_InterfaceListReload.Name = "Button_InterfaceListReload"
         Me.Button_InterfaceListReload.Size = New System.Drawing.Size(23, 23)
-        Me.Button_InterfaceListReload.TabIndex = 2
+        Me.Button_InterfaceListReload.TabIndex = 3
         Me.Button_InterfaceListReload.UseVisualStyleBackColor = True
         '
         'Value_UploadSpeedUnit
@@ -814,19 +783,9 @@ Partial Class MainWindow
         Me.Value_UploadSpeedUnit.Location = New System.Drawing.Point(399, 71)
         Me.Value_UploadSpeedUnit.Name = "Value_UploadSpeedUnit"
         Me.Value_UploadSpeedUnit.Size = New System.Drawing.Size(36, 13)
-        Me.Value_UploadSpeedUnit.TabIndex = 13
-        Me.Value_UploadSpeedUnit.Text = "MB/s"
+        Me.Value_UploadSpeedUnit.TabIndex = 14
+        Me.Value_UploadSpeedUnit.Text = "MiB/s"
         Me.Value_UploadSpeedUnit.TextAlign = System.Drawing.ContentAlignment.TopRight
-        '
-        'ComboBox_InterfaceList
-        '
-        Me.ComboBox_InterfaceList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_InterfaceList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_InterfaceList.FormattingEnabled = True
-        Me.ComboBox_InterfaceList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_InterfaceList.Name = "ComboBox_InterfaceList"
-        Me.ComboBox_InterfaceList.Size = New System.Drawing.Size(268, 21)
-        Me.ComboBox_InterfaceList.TabIndex = 1
         '
         'Value_BandwidthUnit
         '
@@ -834,7 +793,7 @@ Partial Class MainWindow
         Me.Value_BandwidthUnit.Location = New System.Drawing.Point(186, 48)
         Me.Value_BandwidthUnit.Name = "Value_BandwidthUnit"
         Me.Value_BandwidthUnit.Size = New System.Drawing.Size(36, 13)
-        Me.Value_BandwidthUnit.TabIndex = 5
+        Me.Value_BandwidthUnit.TabIndex = 6
         Me.Value_BandwidthUnit.Text = "Mbps"
         Me.Value_BandwidthUnit.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -844,8 +803,8 @@ Partial Class MainWindow
         Me.Value_DownloadSpeedUnit.Location = New System.Drawing.Point(186, 71)
         Me.Value_DownloadSpeedUnit.Name = "Value_DownloadSpeedUnit"
         Me.Value_DownloadSpeedUnit.Size = New System.Drawing.Size(36, 13)
-        Me.Value_DownloadSpeedUnit.TabIndex = 10
-        Me.Value_DownloadSpeedUnit.Text = "MB/s"
+        Me.Value_DownloadSpeedUnit.TabIndex = 11
+        Me.Value_DownloadSpeedUnit.Text = "MiB/s"
         Me.Value_DownloadSpeedUnit.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_UploadSpeed
@@ -854,7 +813,7 @@ Partial Class MainWindow
         Me.Value_UploadSpeed.Location = New System.Drawing.Point(347, 71)
         Me.Value_UploadSpeed.Name = "Value_UploadSpeed"
         Me.Value_UploadSpeed.Size = New System.Drawing.Size(54, 13)
-        Me.Value_UploadSpeed.TabIndex = 12
+        Me.Value_UploadSpeed.TabIndex = 13
         Me.Value_UploadSpeed.Text = "1.00"
         Me.Value_UploadSpeed.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -864,7 +823,7 @@ Partial Class MainWindow
         Me.Value_InterfaceUsage.Location = New System.Drawing.Point(379, 48)
         Me.Value_InterfaceUsage.Name = "Value_InterfaceUsage"
         Me.Value_InterfaceUsage.Size = New System.Drawing.Size(56, 13)
-        Me.Value_InterfaceUsage.TabIndex = 7
+        Me.Value_InterfaceUsage.TabIndex = 8
         Me.Value_InterfaceUsage.Text = "100 %"
         Me.Value_InterfaceUsage.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -874,7 +833,7 @@ Partial Class MainWindow
         Me.Value_DownloadSpeed.Location = New System.Drawing.Point(134, 71)
         Me.Value_DownloadSpeed.Name = "Value_DownloadSpeed"
         Me.Value_DownloadSpeed.Size = New System.Drawing.Size(54, 13)
-        Me.Value_DownloadSpeed.TabIndex = 9
+        Me.Value_DownloadSpeed.TabIndex = 10
         Me.Value_DownloadSpeed.Text = "1.00"
         Me.Value_DownloadSpeed.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -884,7 +843,7 @@ Partial Class MainWindow
         Me.Value_Bandwidth.Location = New System.Drawing.Point(137, 48)
         Me.Value_Bandwidth.Name = "Value_Bandwidth"
         Me.Value_Bandwidth.Size = New System.Drawing.Size(51, 13)
-        Me.Value_Bandwidth.TabIndex = 4
+        Me.Value_Bandwidth.TabIndex = 5
         Me.Value_Bandwidth.Text = "100.00"
         Me.Value_Bandwidth.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -894,19 +853,8 @@ Partial Class MainWindow
         Me.Name_UpdateUnit.Location = New System.Drawing.Point(428, 363)
         Me.Name_UpdateUnit.Name = "Name_UpdateUnit"
         Me.Name_UpdateUnit.Size = New System.Drawing.Size(11, 13)
-        Me.Name_UpdateUnit.TabIndex = 19
+        Me.Name_UpdateUnit.TabIndex = 20
         Me.Name_UpdateUnit.Text = "s"
-        '
-        'ComboBox_UpdateList
-        '
-        Me.ComboBox_UpdateList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_UpdateList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_UpdateList.DropDownWidth = 46
-        Me.ComboBox_UpdateList.FormattingEnabled = True
-        Me.ComboBox_UpdateList.Location = New System.Drawing.Point(381, 360)
-        Me.ComboBox_UpdateList.Name = "ComboBox_UpdateList"
-        Me.ComboBox_UpdateList.Size = New System.Drawing.Size(41, 21)
-        Me.ComboBox_UpdateList.TabIndex = 18
         '
         'Name_UpdateList
         '
@@ -916,7 +864,7 @@ Partial Class MainWindow
         Me.Name_UpdateList.Location = New System.Drawing.Point(275, 363)
         Me.Name_UpdateList.Name = "Name_UpdateList"
         Me.Name_UpdateList.Size = New System.Drawing.Size(98, 13)
-        Me.Name_UpdateList.TabIndex = 17
+        Me.Name_UpdateList.TabIndex = 18
         Me.Name_UpdateList.Text = "Update interval:"
         '
         'Name_ChartVisible
@@ -927,7 +875,7 @@ Partial Class MainWindow
         Me.Name_ChartVisible.Location = New System.Drawing.Point(14, 363)
         Me.Name_ChartVisible.Name = "Name_ChartVisible"
         Me.Name_ChartVisible.Size = New System.Drawing.Size(90, 13)
-        Me.Name_ChartVisible.TabIndex = 14
+        Me.Name_ChartVisible.TabIndex = 15
         Me.Name_ChartVisible.Text = "Chart visibility:"
         '
         'CheckBoxChart_UploadVisible
@@ -939,7 +887,7 @@ Partial Class MainWindow
         Me.CheckBoxChart_UploadVisible.Location = New System.Drawing.Point(206, 362)
         Me.CheckBoxChart_UploadVisible.Name = "CheckBoxChart_UploadVisible"
         Me.CheckBoxChart_UploadVisible.Size = New System.Drawing.Size(60, 17)
-        Me.CheckBoxChart_UploadVisible.TabIndex = 16
+        Me.CheckBoxChart_UploadVisible.TabIndex = 17
         Me.CheckBoxChart_UploadVisible.Text = "Upload"
         Me.CheckBoxChart_UploadVisible.UseVisualStyleBackColor = True
         '
@@ -952,7 +900,7 @@ Partial Class MainWindow
         Me.CheckBoxChart_DownloadVisible.Location = New System.Drawing.Point(121, 362)
         Me.CheckBoxChart_DownloadVisible.Name = "CheckBoxChart_DownloadVisible"
         Me.CheckBoxChart_DownloadVisible.Size = New System.Drawing.Size(74, 17)
-        Me.CheckBoxChart_DownloadVisible.TabIndex = 15
+        Me.CheckBoxChart_DownloadVisible.TabIndex = 16
         Me.CheckBoxChart_DownloadVisible.Text = "Download"
         Me.CheckBoxChart_DownloadVisible.UseVisualStyleBackColor = True
         '
@@ -964,7 +912,7 @@ Partial Class MainWindow
         Me.Name_InterfaceUsage.Location = New System.Drawing.Point(228, 48)
         Me.Name_InterfaceUsage.Name = "Name_InterfaceUsage"
         Me.Name_InterfaceUsage.Size = New System.Drawing.Size(100, 13)
-        Me.Name_InterfaceUsage.TabIndex = 6
+        Me.Name_InterfaceUsage.TabIndex = 7
         Me.Name_InterfaceUsage.Text = "Interface usage:"
         '
         'PictureBox_TrafficChart
@@ -1375,20 +1323,8 @@ Partial Class MainWindow
         Me.Value_PartInfo.Name = "Value_PartInfo"
         Me.Value_PartInfo.Size = New System.Drawing.Size(170, 13)
         Me.Value_PartInfo.TabIndex = 15
-        Me.Value_PartInfo.Text = "Unknown"
+        Me.Value_PartInfo.Text = "0 MiB"
         Me.Value_PartInfo.TextAlign = System.Drawing.ContentAlignment.TopRight
-        '
-        'ComboBox_PartList
-        '
-        Me.ComboBox_PartList.Anchor = System.Windows.Forms.AnchorStyles.Left
-        Me.ComboBox_PartList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_PartList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_PartList.FormattingEnabled = True
-        Me.ComboBox_PartList.ItemHeight = 15
-        Me.ComboBox_PartList.Location = New System.Drawing.Point(111, 91)
-        Me.ComboBox_PartList.Name = "ComboBox_PartList"
-        Me.ComboBox_PartList.Size = New System.Drawing.Size(114, 21)
-        Me.ComboBox_PartList.TabIndex = 13
         '
         'Button_DiskListReload
         '
@@ -1495,6 +1431,29 @@ Partial Class MainWindow
         Me.Name_MediaType.TabIndex = 6
         Me.Name_MediaType.Text = "Media type:"
         '
+        'Name_DiskList
+        '
+        Me.Name_DiskList.AutoSize = True
+        Me.Name_DiskList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_DiskList.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_DiskList.Location = New System.Drawing.Point(15, 25)
+        Me.Name_DiskList.Name = "Name_DiskList"
+        Me.Name_DiskList.Size = New System.Drawing.Size(68, 13)
+        Me.Name_DiskList.TabIndex = 0
+        Me.Name_DiskList.Text = "Disk drive:"
+        '
+        'ComboBox_PartList
+        '
+        Me.ComboBox_PartList.Anchor = System.Windows.Forms.AnchorStyles.Left
+        Me.ComboBox_PartList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_PartList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_PartList.FormattingEnabled = True
+        Me.ComboBox_PartList.ItemHeight = 15
+        Me.ComboBox_PartList.Location = New System.Drawing.Point(111, 91)
+        Me.ComboBox_PartList.Name = "ComboBox_PartList"
+        Me.ComboBox_PartList.Size = New System.Drawing.Size(114, 21)
+        Me.ComboBox_PartList.TabIndex = 13
+        '
         'ComboBox_DiskList
         '
         Me.ComboBox_DiskList.Anchor = System.Windows.Forms.AnchorStyles.Left
@@ -1507,17 +1466,6 @@ Partial Class MainWindow
         Me.ComboBox_DiskList.Size = New System.Drawing.Size(268, 21)
         Me.ComboBox_DiskList.TabIndex = 1
         '
-        'Name_DiskList
-        '
-        Me.Name_DiskList.AutoSize = True
-        Me.Name_DiskList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_DiskList.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskList.Location = New System.Drawing.Point(15, 25)
-        Me.Name_DiskList.Name = "Name_DiskList"
-        Me.Name_DiskList.Size = New System.Drawing.Size(68, 13)
-        Me.Name_DiskList.TabIndex = 0
-        Me.Name_DiskList.Text = "Disk drive:"
-        '
         'ComboBox_LanguageList
         '
         Me.ComboBox_LanguageList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
@@ -1528,6 +1476,58 @@ Partial Class MainWindow
         Me.ComboBox_LanguageList.Name = "ComboBox_LanguageList"
         Me.ComboBox_LanguageList.Size = New System.Drawing.Size(93, 21)
         Me.ComboBox_LanguageList.TabIndex = 3
+        '
+        'ComboBox_InterfaceList
+        '
+        Me.ComboBox_InterfaceList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_InterfaceList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_InterfaceList.FormattingEnabled = True
+        Me.ComboBox_InterfaceList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_InterfaceList.Name = "ComboBox_InterfaceList"
+        Me.ComboBox_InterfaceList.Size = New System.Drawing.Size(268, 21)
+        Me.ComboBox_InterfaceList.TabIndex = 1
+        '
+        'ComboBox_UpdateList
+        '
+        Me.ComboBox_UpdateList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_UpdateList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_UpdateList.DropDownWidth = 46
+        Me.ComboBox_UpdateList.FormattingEnabled = True
+        Me.ComboBox_UpdateList.Location = New System.Drawing.Point(381, 360)
+        Me.ComboBox_UpdateList.Name = "ComboBox_UpdateList"
+        Me.ComboBox_UpdateList.Size = New System.Drawing.Size(41, 21)
+        Me.ComboBox_UpdateList.TabIndex = 19
+        '
+        'ComboBox_VideoList
+        '
+        Me.ComboBox_VideoList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_VideoList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_VideoList.FormattingEnabled = True
+        Me.ComboBox_VideoList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_VideoList.Name = "ComboBox_VideoList"
+        Me.ComboBox_VideoList.Size = New System.Drawing.Size(297, 21)
+        Me.ComboBox_VideoList.TabIndex = 1
+        '
+        'ComboBox_CPUList
+        '
+        Me.ComboBox_CPUList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_CPUList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_CPUList.FormattingEnabled = True
+        Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_CPUList.Name = "ComboBox_CPUList"
+        Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
+        Me.ComboBox_CPUList.TabIndex = 1
+        '
+        'ComboBox_HWList
+        '
+        Me.ComboBox_HWList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_HWList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_HWList.FormattingEnabled = True
+        Me.ComboBox_HWList.Items.AddRange(New Object() {"1", "2", "3"})
+        Me.ComboBox_HWList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_HWList.Name = "ComboBox_HWList"
+        Me.ComboBox_HWList.Size = New System.Drawing.Size(326, 21)
+        Me.ComboBox_HWList.TabIndex = 1
         '
         'MainWindow
         '

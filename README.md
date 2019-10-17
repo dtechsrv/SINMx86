@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current testing version: 3.0.0 Build 5240 (2019-10-14)
+## Current stable version: 2.5.1 Build 5010 (2019-09-18)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -21,14 +21,22 @@ __License:__ GNU General Public License v2.0.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-10-14 - Version 3.0.0 BETA / Build 5240 (testing)__
+__2019-10-17 - Version 3.0.0 BETA / Build 5272 (testing)__
 
+- Celsius/Fahrenheit átszámítás a lemez hőmérsékletnél,
+- Közös függvények leválasztása főablakról (Functions.vb),
+- SI és bináris prefixum korrekció, kibi (ki): 1024/kilo (k): 1000,
+- Nagyságrend (1000-es) elválasztó hozzáadása hosszú számoknál,
+- Kód tisztítása, néhány konverziós függvény átértelmezése,
 - Hibakezelések javítása számos összetevőt illetően,
 - Nyelvi interfész teljes újraírása, külön fájlba implementálva,
-- IP információk megjelenítése a kiválasztott hálózati adatperhez,
+- Hálózati információk megjelenítése a kiválasztott adatperhez,
+- Hálózati kártyák nevének lekérdezése a NetworkAdapater helyről a PnPEntity helyett,
 - Részletes processzor információk megjelenítése,
 - S.M.A.R.T értékek lekérdezése belső IDE/SATA lemezeknél,
-- SSD/HDD felismerés hozzáadása.
+- Kiesett idő miatti timer hibák kezelése (készenlét, óraszinkron, stb.),
+- Rendszerindítás óta eltelt idő számításának újraimplementálása,
+- SSD/HDD felismerés hozzáadása (S.M.A.R.T rekord alapján).
 
 __2019-09-18 - Version 2.5.1 / Build 5010 (stable)__
 
