@@ -193,7 +193,7 @@ Public Class Functions
         Dim Str2Char() As Char                                  ' Sztring-karakter konverzió tömbje
         Dim TempString As String = Nothing                      ' Ideiglenes sztring az elemzéshez
 
-        ' Dupla szóközök eltávolítása
+        ' Dupla szóközök eltávolítása, addig amíg szerepel benne! (Ezért kell a While!)
         While (InStr(RawString, "  "))
             RawString = Replace(RawString, "  ", " ")
         End While

@@ -31,7 +31,7 @@ Public Class IPInfo
         Dim NetBIOS As Int32 = 0                                ' NetBIOS TCP/IP felett
 
         ' Értékek átvétele a főablaktól
-        Dim InterfaceName As String = MainWindow.ComboBox_InterfaceList.Items(SelectedInterface)
+        Dim TableName As String = MainWindow.ComboBox_InterfaceList.Items(SelectedInterface)
         Dim InterfaceID As String = MainWindow.InterfaceID(SelectedInterface)
 
         ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
@@ -44,7 +44,7 @@ Public Class IPInfo
         Me.KeyPreview = True
 
         ' GroupBox szövegének beállítása
-        GroupBox_Table.Text = GetLoc("IPTable") + " " + InterfaceName
+        GroupBox_Table.Text = GetLoc("IPTable") + " " + TableName
 
         ' Bezárás gomb
         Button_Close.Text = GetLoc("Button_Close")
@@ -63,10 +63,8 @@ Public Class IPInfo
         For Each Me.objMgmt In objNC.Get()
 
             ' Sorok felvitele
-            AdapterName = objMgmt("Description")
-            If InStr(AdapterName, " - Packet Scheduler Miniport") Then
-                AdapterName = Replace(AdapterName, " - Packet Scheduler Miniport", "")
-            End If
+            AdapterName = Replace(objMgmt("Description"), " - Packet Scheduler Miniport", Nothing)
+
             IPTableAddRow(GetLoc("IPAdapter"), AdapterName)
             IPTableAddRow(GetLoc("IPMACAddr"), objMgmt("MACAddress"))
 

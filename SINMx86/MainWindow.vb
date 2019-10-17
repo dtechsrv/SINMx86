@@ -775,23 +775,25 @@ Public Class MainWindow
     ' Kimenet: RawString -> formázott sztring (String)
     Public Function StatNameConv(ByVal RawString As String)
 
-        ' Zárójelek átalakítása
-        While (InStr(RawString, "("))
-            RawString = Replace(RawString, "(", "[")
-        End While
+        ' Értékek definiálása
+        Dim SearchCount As Int32                                ' Keresendő sztring sorszáma
+        Dim ModifyCount As Int32                                ' Törlendő sztring sorszáma
 
-        While (InStr(RawString, ")"))
-            RawString = Replace(RawString, ")", "]")
-        End While
+        ' Sztring cserék változói (eredeti, csere)
+        Dim SearchList() As String = {"(", ")"}
+        Dim ReplaceList() As String = {"[", "]"}
 
-        ' További karakterek átalakítása
-        Dim RepChar As String() = {"/", "\", "#", "+"}
-        Dim RepCount As Int32 = 0
+        ' Névből törlendő sztringek tömbje
+        Dim ModifyList() As String = {"/", "\", "#", "+"}
 
-        For i As Int32 = 0 To UBound(RepChar)
-            While (InStr(RawString, RepChar(i)))
-                RawString = Replace(RawString, RepChar(i), "_")
-            End While
+        ' Korrekciós sztringek keresése és cseréje
+        For SearchCount = 0 To UBound(SearchList)
+            RawString = Replace(RawString, SearchList(SearchCount), ReplaceList(SearchCount))
+        Next
+
+        ' Átírandó sztringek keresése és cseréje
+        For ModifyCount = 0 To UBound(ModifyList)
+            RawString = Replace(RawString, ModifyList(ModifyCount), "_")
         Next
 
         ' Visszatérési érték beállítása
@@ -809,6 +811,7 @@ Public Class MainWindow
         Dim TempChar As Int32                                   ' Aktuális karakter ASCII kódja (decimális)
         Dim Position As Int32                                   ' Aktuális karakter pozíciója
         Dim ConvValue As String = Nothing                       ' Visszatérési érték
+        Dim ConvCount As Int32                                  ' Konvertálandó karakter sorszáma
 
         ' Függő értékek definiálása
         Dim HexArr() As Char = Value.ToCharArray                ' Hexadecimális karakterek tömbje
@@ -837,8 +840,8 @@ Public Class MainWindow
             Next
 
             ' Konvertált sztring összefűzése
-            For i As Int32 = 0 To UBound(CharArr)
-                ConvValue = ConvValue + CharArr(i)
+            For ConvCount = 0 To UBound(CharArr)
+                ConvValue = ConvValue + CharArr(ConvCount)
             Next
 
         End If
@@ -1088,9 +1091,19 @@ Public Class MainWindow
     Private Function UpdateCPUList(ByVal ResetFlag As Boolean)
 
         ' Értékek definiálása
-        Dim CPUCount As Int32 = 0                               ' Processzor sorszáma
+        Dim CPUNumber As Int32 = 0                              ' Processzorok száma
         Dim CPUString(32) As String                             ' Processzor neve
         Dim CPUDataWidth As Int32 = 0                           ' Processzor adatbusz szélessége
+        Dim ListCount As Int32                                  ' Lista sorszám
+        Dim SearchCount As Int32                                ' Keresendő sztring sorszáma
+        Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
+
+        ' Sztring cserék változói (eredeti, csere)
+        Dim SearchList() As String = {"MHz", "GHz"}
+        Dim ReplaceList() As String = {" MHz", " GHz"}
+
+        ' Névből törlendő sztringek tömbje
+        Dim DeleteList() As String = {"CPU", "Processor", "(C)", "(R)", "(TM)"}
 
         ' Lista kiürítése
         ComboBox_CPUList.Items.Clear()
@@ -1100,27 +1113,31 @@ Public Class MainWindow
 
         ' Értékek beállítása -> Számítógép: név, adatbusz szélessége
         For Each Me.objMgmt In objPR.Get()
-            CPUString(CPUCount) = RemoveSpaces(objMgmt("Name"))
+            CPUString(CPUNumber) = objMgmt("Name")
             CPUDataWidth = objMgmt("DataWidth")
-            CPUCount += 1
+            CPUNumber += 1
         Next
 
         ' CPU nevéből a felesleges karakterek eltávolítása
-        For i As Int32 = 0 To CPUCount - 1
+        For ListCount = 0 To CPUNumber - 1
 
-            ' CPU megjelölés eltávolítása a névből
-            While (InStr(CPUString(i), " CPU"))
-                CPUString(i) = Replace(CPUString(i), " CPU", "")
-            End While
+            ' Korrekciós sztringek keresése és cseréje
+            For SearchCount = 0 To UBound(SearchList)
+                CPUString(ListCount) = Replace(CPUString(ListCount), SearchList(SearchCount), ReplaceList(SearchCount))
+            Next
+
+            ' Törlendő sztringek keresése és törlése
+            For DeleteCount = 0 To UBound(DeleteList)
+                CPUString(ListCount) = Replace(CPUString(ListCount), DeleteList(DeleteCount), Nothing)
+            Next
 
             ' Listaelem hozzáadása
-            ComboBox_CPUList.Items.Add("# " + (i + 1).ToString + "/" + CPUCount.ToString + " - " + CPUString(i) + " (" + CPUDataWidth.ToString + "-bit)")
+            ComboBox_CPUList.Items.Add("# " + (ListCount + 1).ToString + "/" + CPUNumber.ToString + " - " + RemoveSpaces(CPUString(ListCount)) + " (" + CPUDataWidth.ToString + "-bit)")
+
         Next
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
-        If ResetFlag Then
-            SelectedCPU = 0
-        End If
+        If ResetFlag Then SelectedCPU = 0
 
         ' Utoljára kiválasztott érték beállítása
         ComboBox_CPUList.SelectedIndex = SelectedCPU
@@ -1137,7 +1154,7 @@ Public Class MainWindow
 
         ' Számláló beállítása
         Dim DiskCount As Int32 = 0                              ' Lemezek sorszáma
-        Dim ListCount As Int32 = 0                              ' Lista szerinti sorszámok
+        Dim DiskIndex As Int32 = 0                                  ' Lemez index azonosítója
         Dim SortCount As Int32 = 0                              ' Sorbarendezési sorszámok
         Dim DiskPnPID(32) As String                             ' Lemez PnP azonosítója
         Dim Capacity(32) As Double                              ' Lemez kapacitása
@@ -1149,6 +1166,11 @@ Public Class MainWindow
         Dim SmartStart As Int32 = 2                             ' S.M.A.R.T rekord kezdő bájtja (az első 2-es)
         Dim SmartStep As Int32 = 12                             ' S.M.A.R.T bájtok ugrásköze (12-esével)
         Dim SmartCount As Int32 = 0                             ' S.M.A.R.T bájtok léptetése (beállítás ciklus közben)
+        Dim ListCount As Int32                                  ' Lista sorszám
+        Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
+
+        ' Névből törlendő sztringek tömbje
+        Dim DeleteList() As String = {"ATA Device", "SCSI Disk Device", "USB Device"}
 
         ' Lista kiürítése
         ComboBox_DiskList.Items.Clear()
@@ -1158,11 +1180,11 @@ Public Class MainWindow
 
         ' Értékek beállítása -> Lemezmeghajtók: index, modell, azonosító, kapacitás
         For Each Me.objMgmt In objDD.Get()
-            ListCount = ToInt32(objMgmt("Index"))
-            DiskName(ListCount) = RemoveSpaces(objMgmt("Model"))
-            DiskPnPID(ListCount) = objMgmt("PNPDeviceID")
-            Capacity(ListCount) = objMgmt("Size")
-            DiskList(DiskCount) = ListCount
+            DiskIndex = ToInt32(objMgmt("Index"))
+            DiskName(DiskIndex) = RemoveSpaces(objMgmt("Model"))
+            DiskPnPID(DiskIndex) = objMgmt("PNPDeviceID")
+            Capacity(DiskIndex) = objMgmt("Size")
+            DiskList(DiskCount) = DiskIndex
             DiskCount += 1
         Next
 
@@ -1180,23 +1202,13 @@ Public Class MainWindow
         ' Lemezek nevéből a felesleges jelölések eltávolítása
         For ListCount = 0 To DiskCount - 1
 
+            ' Törlendő sztringek keresése és törlése
+            For DeleteCount = 0 To UBound(DeleteList)
+                DiskName(DiskSort(ListCount)) = Replace(DiskName(DiskSort(ListCount)), DeleteList(DeleteCount), Nothing)
+            Next
+
             ' Felesleges szóközök eltávolítása (OEM lemezek esetén előfordul, hogy telenyomják szóközzel)
-            DiskName(DiskSort(ListCount)) = DiskName(DiskSort(ListCount))
-
-            ' USB megjelölés eltávolítása
-            While (InStr(DiskName(DiskSort(ListCount)), " USB Device"))
-                DiskName(DiskSort(ListCount)) = Replace(DiskName(DiskSort(ListCount)), " USB Device", "")
-            End While
-
-            ' SCSI megjelölés eltávolítása
-            While (InStr(DiskName(DiskSort(ListCount)), " SCSI Disk Device"))
-                DiskName(DiskSort(ListCount)) = Replace(DiskName(DiskSort(ListCount)), " SCSI Disk Device", "")
-            End While
-
-            ' ATA megjelölés eltávolítása
-            While (InStr(DiskName(DiskSort(ListCount)), " ATA Device"))
-                DiskName(DiskSort(ListCount)) = Replace(DiskName(DiskSort(ListCount)), " ATA Device", "")
-            End While
+            DiskName(DiskSort(ListCount)) = RemoveSpaces(DiskName(DiskSort(ListCount)))
 
         Next
 
@@ -1299,6 +1311,11 @@ Public Class MainWindow
 
         ' Értékek definiálása
         Dim VideoCount As Int32 = 0                             ' Kártya sorszáma
+        Dim ListCount As Int32                                  ' Lista sorszám
+        Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
+
+        ' Névből törlendő sztringek tömbje
+        Dim DeleteList() As String = {"(C)", "(R)", "(TM)"}
 
         ' Lista kiürítése
         ComboBox_VideoList.Items.Clear()
@@ -1309,12 +1326,18 @@ Public Class MainWindow
         ' Értékek beállítása -> Videokártya: név
         For Each Me.objMgmt In objVC.Get()
             VideoName(VideoCount) = RemoveSpaces(objMgmt("Name"))
+
+            ' Törlendő sztringek keresése és törlése
+            For DeleteCount = 0 To UBound(DeleteList)
+                VideoName(VideoCount) = Replace(VideoName(VideoCount), DeleteList(DeleteCount), Nothing)
+            Next
+
             VideoCount += 1
         Next
 
         ' Lista feltöltése
-        For i As Int32 = 1 To VideoCount
-            ComboBox_VideoList.Items.Add("# " + i.ToString + "/" + VideoCount.ToString + " - " + VideoName(i - 1))
+        For ListCount = 1 To VideoCount
+            ComboBox_VideoList.Items.Add("# " + ListCount.ToString + "/" + VideoCount.ToString + " - " + RemoveSpaces(VideoName(ListCount - 1)))
         Next
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
@@ -1339,6 +1362,16 @@ Public Class MainWindow
         Dim AdapterNum As Int32 = 0                         ' Listaelemek darabszáma
         Dim AdapterCount As Int32 = 0                       ' Adapterek sorszáma
         Dim InterfaceCount As Int32 = 0                     ' Interfészek sorszáma
+        Dim StatCount, ListCount As Int32                   ' Statisztikai összehasonlítás és lista sorszám
+        Dim SearchCount As Int32                            ' Keresendő sztring sorszáma
+        Dim DeleteCount As Int32                            ' Törlendő sztring sorszáma
+
+        ' Sztring cserék változói (eredeti, csere)
+        Dim SearchList() As String = {"[", "]", " _", "_100", "_AR", "PRO_", "_RTL"}
+        Dim ReplaceList() As String = {"(", ")", " #", "/100", "/AR", "PRO/", "/RTL"}
+
+        ' Névből törlendő sztringek tömbje
+        Dim DeleteList() As String = {"_", "(C)", "(R)", "(TM)"}
 
         ' WMI lekérdezés: Win32_PnPEntity -> Hálózati adapterek
         objNA = New ManagementObjectSearcher("SELECT Name, DeviceID FROM Win32_NetworkAdapter")
@@ -1371,17 +1404,23 @@ Public Class MainWindow
             ' Hibakezelés: ISATAP és virtuális ('*'-ot tartlmaz a neve, pl.: PAN) adapterek kihagyása
             If CheckStrContain(objMgmt("Name"), {"isatap", "*"}, False) = False Then
                 InterfaceList(InterfaceCount) = objMgmt("Name")
-                If InStr(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport") Then
-                    InterfaceName(InterfaceCount) = Replace(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport", "")
-                Else
-                    InterfaceName(InterfaceCount) = InterfaceList(InterfaceCount)
-                End If
+
+                ' XP név korrekció
+                InterfaceName(InterfaceCount) = Replace(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport", "")
 
                 ' Statisztikához átalakított eszköznevek keresése (Ha van egyezés, akkor az lesz a név, egyébként a gyári!)
-                For i As Int32 = 0 To (AdapterNum - 1)
-                    If (AdapterName(i) = InterfaceName(InterfaceCount)) Then
-                        InterfaceName(InterfaceCount) = AdapterList(i)
-                        InterfaceID(InterfaceCount) = AdapterID(i)
+                For StatCount = 0 To (AdapterNum - 1)
+                    If (AdapterName(StatCount) = InterfaceName(InterfaceCount)) Then
+
+                        ' Interfész azonosító és név hozzáadása
+                        InterfaceID(InterfaceCount) = AdapterID(StatCount)
+                        InterfaceName(InterfaceCount) = AdapterList(StatCount)
+
+                        ' Törlendő sztringek keresése és törlése
+                        For DeleteCount = 0 To UBound(DeleteList)
+                            InterfaceName(InterfaceCount) = Replace(InterfaceName(InterfaceCount), DeleteList(DeleteCount), Nothing)
+                        Next
+
                     End If
                 Next
 
@@ -1390,6 +1429,16 @@ Public Class MainWindow
 
                     ' Eredeti név felhasználása, ha az összehasonlítás nem járt sikerrel
                     InterfaceName(InterfaceCount) = RemoveSpaces(objMgmt("Name"))
+
+                    ' Korrekciós sztringek keresése és cseréje
+                    For SearchCount = 0 To UBound(SearchList)
+                        InterfaceName(InterfaceCount) = Replace(InterfaceName(InterfaceCount), SearchList(SearchCount), ReplaceList(SearchCount))
+                    Next
+
+                    ' Törlendő sztringek keresése és törlése
+                    For DeleteCount = 0 To UBound(DeleteList)
+                        InterfaceName(InterfaceCount) = Replace(InterfaceName(InterfaceCount), DeleteList(DeleteCount), Nothing)
+                    Next
 
                 Else
 
@@ -1409,22 +1458,25 @@ Public Class MainWindow
             End If
         Next
 
-        ' Lista feltöltése
-        For i As Int32 = 1 To InterfaceCount
-            ComboBox_InterfaceList.Items.Add("# " + i.ToString + "/" + InterfaceCount.ToString + " - " + InterfaceName(i - 1))
-        Next
-
         ' Interfész jelenlét ellenőrzése
         If InterfaceCount = 0 Then
-            InterfacePresent = False
-            ComboBox_InterfaceList.Enabled = False
 
             ' Hamis listaelem hozzáadása
+            InterfacePresent = False
+            ComboBox_InterfaceList.Enabled = False
             ComboBox_InterfaceList.Items.Add(GetLoc("NotAvailable"))
             InterfaceName(0) = GetLoc("NotAvailable")
+
         Else
+
+            ' Lista feltöltése
+            For ListCount = 1 To InterfaceCount
+                ComboBox_InterfaceList.Items.Add("# " + ListCount.ToString + "/" + InterfaceCount.ToString + " - " + RemoveSpaces(InterfaceName(ListCount - 1)))
+            Next
+
             InterfacePresent = True
             ComboBox_InterfaceList.Enabled = True
+
         End If
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
@@ -1453,6 +1505,7 @@ Public Class MainWindow
         Dim SignLine(1) As Point                                ' Rajzolási koordináták (X0, X1, Y0, Y1)
         Dim InterfaceReset As Boolean = False                   ' Hibakorrekció uint változó átbillenésére (előjelcsere)
         Dim ResetCount As Int32 = 0                             ' Hibakorrekció számlálója (lépések száma az átbillenáés után)
+        Dim TraffCount As Int32                                 ' Forgalmi adatok sorszáma
 
         ' Diagram határérték definiálása és alapértékre állítása
         Dim ChartCanvas() As Int32 = {PictureBox_TrafficChart.Size.Width, PictureBox_TrafficChart.Size.Height}
@@ -1490,47 +1543,47 @@ Public Class MainWindow
         End If
 
         ' Sebességtömb feltöltése
-        For i As Int32 = 0 To TraffResolution
-            ChartDownNumbers(i) = (TraffDownArray(i) - TraffDownArray(i + 1)) / RefreshInterval(SelectedRefresh)
-            ChartUpNumbers(i) = (TraffUpArray(i) - TraffUpArray(i + 1)) / RefreshInterval(SelectedRefresh)
+        For TraffCount = 0 To TraffResolution
+            ChartDownNumbers(TraffCount) = (TraffDownArray(TraffCount) - TraffDownArray(TraffCount + 1)) / RefreshInterval(SelectedRefresh)
+            ChartUpNumbers(TraffCount) = (TraffUpArray(TraffCount) - TraffUpArray(TraffCount + 1)) / RefreshInterval(SelectedRefresh)
 
             ' Hibakorrekció túlcsordulás ellen -> Letöltés
-            If TraffDownArray(i) - TraffDownArray(i + 1) < 0 Then
-                ChartDownNumbers(i) = (TraffDownArray(i + 1) - TraffDownArray(i + 2)) / RefreshInterval(SelectedRefresh)
+            If TraffDownArray(TraffCount) - TraffDownArray(TraffCount + 1) < 0 Then
+                ChartDownNumbers(TraffCount) = (TraffDownArray(TraffCount + 1) - TraffDownArray(TraffCount + 2)) / RefreshInterval(SelectedRefresh)
                 If CheckedDownChart Then
                     InterfaceReset = True
-                    ResetCount = (TraffResolution) - i
+                    ResetCount = (TraffResolution) - TraffCount
                 End If
             End If
 
             ' Hibakorrekció túlcsordulás ellen -> Feltöltés
-            If TraffUpArray(i) - TraffUpArray(i + 1) < 0 Then
-                ChartUpNumbers(i) = (TraffUpArray(i + 1) - TraffUpArray(i + 2)) / RefreshInterval(SelectedRefresh)
+            If TraffUpArray(TraffCount) - TraffUpArray(TraffCount + 1) < 0 Then
+                ChartUpNumbers(TraffCount) = (TraffUpArray(TraffCount + 1) - TraffUpArray(TraffCount + 2)) / RefreshInterval(SelectedRefresh)
                 If CheckedUpChart Then
                     InterfaceReset = True
-                    ResetCount = (TraffResolution) - i
+                    ResetCount = (TraffResolution) - TraffCount
                 End If
             End If
 
             ' Maximum érték keresés -> Letöltés
             If CheckedDownChart Then
-                If ChartDownNumbers(i) > DownPeak Then
-                    DownPeak = ChartDownNumbers(i)
+                If ChartDownNumbers(TraffCount) > DownPeak Then
+                    DownPeak = ChartDownNumbers(TraffCount)
                 End If
 
-                If ChartDownNumbers(i) > Amplitude Then
-                    Amplitude = ChartDownNumbers(i)
+                If ChartDownNumbers(TraffCount) > Amplitude Then
+                    Amplitude = ChartDownNumbers(TraffCount)
                 End If
             End If
 
             ' Maximum érték keresés -> Feltöltés
             If CheckedUpChart Then
-                If ChartUpNumbers(i) > UpPeak Then
-                    UpPeak = ChartUpNumbers(i)
+                If ChartUpNumbers(TraffCount) > UpPeak Then
+                    UpPeak = ChartUpNumbers(TraffCount)
                 End If
 
-                If ChartUpNumbers(i) > Amplitude Then
-                    Amplitude = ChartUpNumbers(i)
+                If ChartUpNumbers(TraffCount) > Amplitude Then
+                    Amplitude = ChartUpNumbers(TraffCount)
                 End If
             End If
         Next

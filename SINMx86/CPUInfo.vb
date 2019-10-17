@@ -13,22 +13,42 @@ Public Class CPUInfo
 
     ' CPU-infó tábla változói
     Public CPUCount As Int32 = 0                                ' Processzorok száma
-    Public L2Cache(2) As Double                                 ' L2 cache mérete
-    Public L3Cache(2) As Double                                 ' L3 cache mérete
 
     ' *** FŐ ELJÁRÁS: CPU-infó ablak betöltése (MyBase.Load -> CPUInfo) ***
     ' Eseményvezérelt: Ablak megnyitása
     Private Sub CPUInfo_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
         ' Értékek definiálása
-        Dim ArchID As Int32                                      ' CPU architektúra azonosítója
-        Dim ArchStr As String                                    ' CPU architektúra (szöveges)
+        Dim VendorCount, NameCount, ArchCount As Int32          ' Ciklusszámlálók (gyártó, név, architektúra)
+        Dim NameString As String                                ' Processzor neve
+        Dim L2Cache(2) As Double                                ' Level 2 cache mérete
+        Dim L3Cache(2) As Double                                ' Level 3 cache mérete
+
+        ' CPU gyártók rögzített sztringjeinek tömbje (keresett azonosító)
+        Dim VendorID() As String = {"AuthenticAMD", "CentaurHauls", "CyrixInstead", "HygonGenuine", "GenuineIntel",
+                                    "TransmetaCPU", "GenuineTMx86", "Geode by NSC", "NexGenDriven", "RiseRiseRise",
+                                    "SiS SiS SiS ", "UMC UMC UMC ", "VIA VIA VIA ", "Vortex86 SoC"}
+
+        ' CPU gyártók valódi neveinek tömbje (csere azonosító)
+        Dim VendorStr() As String = {"Advanced Micro Devices, Inc.", "VIA Technologies Inc.", "VIA Technologies Inc.",
+                                     "Tianjin Haiguang Advanced Technology Investment Co. Ltd.", "Intel Corporation",
+                                     "Transmeta Corporation", "Transmeta Corporation", "National Semiconductor Corporation",
+                                     "Advanced Micro Devices, Inc.", "Silicon Integrated Systems", "Silicon Integrated Systems",
+                                     "United Microelectronics Corporation", "VIA Technologies Inc.", "DM&P Electronics"}
+
+        ' Sztring cserék változói (eredeti, csere)
+        Dim NameSearch() As String = {"MHz", "GHz"}
+        Dim NameReplace() As String = {" MHz", " GHz"}
+
+        ' CPU architektúra tömbök értékei (keresett azonosító, valódi érték)
+        Dim ArchID() As Int32 = {0, 1, 2, 3, 6, 9}
+        Dim ArchStr() As String = {"x86", "MIPS", "Alpha", "PowerPC", "IA64", "x64"}
 
         ' CPU feketelistás sztringek (Dummy szövegek, amelyeket az alaplap gyártója "elfelejtett" kitölteni.)
         Dim Blacklist() As String = {"PROCESSOR", "PROCESSOR 0", "SOCKET", "SOCKET 0", "CPU", "CPU0", "CPU 0"}
 
         ' Értékek átvétele a főablaktól
-        Dim CPUName As String = MainWindow.ComboBox_CPUList.Items(SelectedCPU)
+        Dim TableName As String = MainWindow.ComboBox_CPUList.Items(SelectedCPU)
 
         ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
         Me.TopMost = MainWindow.TopMost
@@ -40,7 +60,7 @@ Public Class CPUInfo
         Me.KeyPreview = True
 
         ' GroupBox szövegének beállítása
-        GroupBox_Table.Text = GetLoc("CPUTable") + " " + CPUName
+        GroupBox_Table.Text = GetLoc("CPUTable") + " " + TableName
 
         ' Bezárás gomb
         Button_Close.Text = GetLoc("Button_Close")
@@ -59,27 +79,23 @@ Public Class CPUInfo
         For Each Me.objMgmt In objPR.Get()
             If CPUCount = SelectedCPU Then
 
-                ' Architektúra ellenőrzése
-                ArchID = objMgmt("Architecture")
-                If ArchID = 0 Then
-                    ArchStr = "x86"
-                ElseIf ArchID = 1 Then
-                    ArchStr = "MIPS"
-                ElseIf ArchID = 2 Then
-                    ArchStr = "Alpha"
-                ElseIf ArchID = 3 Then
-                    ArchStr = "PowerPC"
-                ElseIf ArchID = 6 Then
-                    ArchStr = "IA64"
-                ElseIf ArchID = 9 Then
-                    ArchStr = "x64"
-                Else
-                    ArchStr = GetLoc("Unknown")
-                End If
+                ' Gyártói sztring keresése és találat esetén a valódi név kiírása
+                For VendorCount = 0 To UBound(VendorID)
+                    If objMgmt("Manufacturer") = VendorID(VendorCount) Then
+                        CPUTableAddRow(GetLoc("CPUVendor"), VendorStr(VendorCount), Nothing)
+                    End If
+                Next
 
-                ' Sorok felvitele
-                CPUTableAddRow(GetLoc("CPUVendor"), RemoveSpaces(objMgmt("Manufacturer")), Nothing)
-                CPUTableAddRow(GetLoc("CPUName"), RemoveSpaces(objMgmt("Name")), Nothing)
+                ' Név korrekciós sztringek keresése és cseréje
+                NameString = objMgmt("Name")
+                For NameCount = 0 To UBound(NameSearch)
+                    NameString = Replace(NameString, NameSearch(NameCount), NameReplace(NameCount))
+                Next
+
+                ' Módosított név hozzáadása
+                CPUTableAddRow(GetLoc("CPUName"), RemoveSpaces(NameString), Nothing)
+
+                ' Módosítás nélküli sorok felvitele
                 CPUTableAddRow(GetLoc("CPUIdent"), RemoveSpaces(objMgmt("Description")), Nothing)
                 CPUTableAddRow(GetLoc("CPUCores"), objMgmt("NumberOfCores").ToString, Nothing)
                 CPUTableAddRow(GetLoc("CPUThreads"), objMgmt("NumberOfLogicalProcessors").ToString, Nothing)
@@ -94,8 +110,12 @@ Public Class CPUInfo
                     CPUTableAddRow(GetLoc("CPUVoltage"), FixNumberFormat(objMgmt("CurrentVoltage") / 10, 1, False), "V")
                 End If
 
-                ' Architektúra hozzáadása
-                CPUTableAddRow(GetLoc("CPUArchitect"), ArchStr, Nothing)
+                ' Architektúra keresése
+                For ArchCount = 0 To UBound(ArchID)
+                    If objMgmt("Architecture") = ArchID(ArchCount) Then
+                        CPUTableAddRow(GetLoc("CPUArchitect"), ArchStr(ArchCount), Nothing)
+                    End If
+                Next
 
                 ' Üres aktuális órajel ellenőrzése
                 If objMgmt("CurrentClockSpeed") <> 0 Then

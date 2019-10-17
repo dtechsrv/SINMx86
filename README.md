@@ -21,8 +21,10 @@ __License:__ GNU General Public License v2.0.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-10-17 - Version 3.0.0 BETA / Build 5272 (testing)__
+__2019-10-17 - Version 3.0.0 BETA / Build 5275 (testing)__
 
+- CPU-Infó: Gyártói sztringek lecserélése a valódi névre,
+- Listákban szereplő nevek rövidítése egyes feleges karakterekkel,
 - Celsius/Fahrenheit átszámítás a lemez hőmérsékletnél,
 - Közös függvények leválasztása főablakról (Functions.vb),
 - SI és bináris prefixum korrekció, kibi (ki): 1024/kilo (k): 1000,

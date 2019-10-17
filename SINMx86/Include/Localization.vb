@@ -513,32 +513,21 @@ Public Class Localization
         ' Értékek definiálása
         Dim Converted As String = GetLoc("DateFormat")
         Dim ConvCount As Int32 = 0
-        Dim SourceFormat() = {"yyyy", "MMMM", "dddd", "dd", " d", "H:mm:ss", "h:mm:ss", "tt"}
-        Dim TargetFormat() = {Format(InputDate, "yyyy"), "###", "##", Format(InputDate, "dd"), Format(InputDate, " d"),
+        Dim SourceFormat() = {"yyyy", "MMMM", "dddd", "dd", "d", "H:mm:ss", "h:mm:ss", "tt"}
+        ' Megjegyzés: A nap neve védett formátum, mivel a 'd' önmagában más formátumot takar. Ezért kell bele egy szóköz, amelyet utólag el kell távolítani!
+        Dim TargetFormat() = {Format(InputDate, "yyyy"), "###", "##", Format(InputDate, "dd"), RemoveSpaces(Format(InputDate, " d")),
                               Format(InputDate, "H:mm:ss"), Format(InputDate, "h:mm:ss"), "#"}
 
         ' Ismert formátumok lecserélése valódi értékekre
         For i As Int32 = 0 To UBound(SourceFormat)
-            While (InStr(Converted, SourceFormat(ConvCount)))
-                Converted = Replace(Converted, SourceFormat(ConvCount), TargetFormat(ConvCount))
-            End While
+            Converted = Replace(Converted, SourceFormat(ConvCount), TargetFormat(ConvCount))
             ConvCount += 1
         Next
 
-        ' Védett szöveges formátum cseréje: Hónap neve
-        While (InStr(Converted, "###"))
-            Converted = Replace(Converted, "###", LocMonthName(InputDate.Month - 1))
-        End While
-
-        ' Védett szöveges formátum cseréje: Nap neve
-        While (InStr(Converted, "##"))
-            Converted = Replace(Converted, "##", LocDayName(InputDate.DayOfWeek))
-        End While
-
-        ' Védett szöveges formátum cseréje: Napszak (AM/PM)
-        While (InStr(Converted, "#"))
-            Converted = Replace(Converted, "#", InputDate.ToString("tt", System.Globalization.CultureInfo.InvariantCulture))
-        End While
+        ' Védett szöveges formátum cseréje: Hónap neve, nap neve, napszak (AM/PM)
+        Converted = Replace(Converted, "###", LocMonthName(InputDate.Month - 1))
+        Converted = Replace(Converted, "##", LocDayName(InputDate.DayOfWeek))
+        Converted = Replace(Converted, "#", InputDate.ToString("tt", System.Globalization.CultureInfo.InvariantCulture))
 
         ' Visszatérési érték beállítása
         Return Converted

@@ -37,8 +37,8 @@ Public Class SmartWindow
         Dim ListColumn As Int32                                 ' Aktuális oszlop száma
 
         ' Értékek átvétele a főablaktól
+        Dim TableName As String = MainWindow.ComboBox_DiskList.Items(SelectedDisk)
         Dim SmartID As String = DiskSmart(SelectedDisk)
-        Dim DiskName As String = MainWindow.ComboBox_DiskList.Items(SelectedDisk)
 
         ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
         Me.TopMost = MainWindow.TopMost
@@ -50,7 +50,7 @@ Public Class SmartWindow
         Me.KeyPreview = True
 
         ' GroupBox szövegének beállítása
-        GroupBox_Table.Text = GetLoc("SmartTable") + " " + DiskName
+        GroupBox_Table.Text = GetLoc("SmartTable") + " " + TableName
 
         ' Bezárás gomb
         Button_Close.Text = GetLoc("Button_Close")
