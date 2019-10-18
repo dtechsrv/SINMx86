@@ -39,7 +39,6 @@ Public Class MainWindow
     Public DisableBalloon As Boolean = False                                        ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
     Public OpenFile As Boolean = False                                              ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
     Public SavePath As String = Nothing                                             ' Az utolsó mentett fájl elérési útja
-    Public MainWindowDone As Boolean = False                                        ' A főablak betöltődésének indikátora, néhány szükséges lekérdezés csak ezután történhet meg!
 
     ' Forgalmi diagramok (2-vel több eleműnek kell lennie, mint a kijelzett érték!)
     Public TraffDownArray(TraffResolution + 2), TraffUpArray(TraffResolution + 2) As Double
@@ -52,13 +51,22 @@ Public Class MainWindow
     ' Eseményvezérelt: Indítás
     Private Sub MainWindow_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
-        ' Debug sztring beállítása (ha a főablak betöltődik, akkor előtte ki kell üríteni!)
-        Value_Debug.Text = "LOAD_FAIL"
+        ' Főablak betöltés alatt
+        MainWindowDone = False
+
+        ' Alapértelmezett nyelv betöltése, a hiányzó nyelvi sztringek kiküszöbölése miatt!
+        LoadLocalization(0)
 
         ' ----- REGISTRY LEKÉRDEZÉSEK ÉS LISTÁK FELTÖLTÉSE -----
 
+        ' Betöltési állapot beállítása -> Registry
+        DebugLoadStage(GetLoc("LoadRegistry"))
+
         ' Registry értékek lekérdezése
         GetRegValues()
+
+        ' Betöltési állapot beállítása -> Nyelv
+        DebugLoadStage(GetLoc("LoadLanguage"))
 
         ' *** LISTAFELTÖLTÉS: Nyelv kiválasztása ***
         Dim LanguageList(UBound(Languages)) As String                               ' Nyelvlista
@@ -72,7 +80,10 @@ Public Class MainWindow
         ' Kiválasztott listaelem állapotának beállítása
         ComboBox_LanguageList.SelectedIndex = LanguageList(SelectedLanguage)
 
-        ' XP esetén Splash letiltása (Felülírja a registry beállítást, mivel XP-n hibásan jelenik meg!)
+        ' Betöltési állapot beállítása -> Alapértékek
+        DebugLoadStage(GetLoc("LoadDefaults"))
+
+        ' XP esetén Splash letiltása (Felülírja a registry beállítást, mivel XP alatt hibásan jelenik meg!)
         If OSVersion(0) < 6 Then
             CheckedSplashDisable = True
             MainContextMenuItem_DisableSplash.Enabled = False
@@ -86,7 +97,6 @@ Public Class MainWindow
         ' Splash Screen betöltése és státusz frissítése: Registry
         If Not CheckedSplashDisable Then
             LoadSplash.Visible = True
-            LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + GetLoc("SplashReg") + "..."
         End If
 
         ' *** LISTAFELTÖLTÉS: Frissítési időköz ***
@@ -132,12 +142,10 @@ Public Class MainWindow
         MainMenu_SettingsItem_DisableConfirm.Checked = CheckedNoQuitAsk
         MainContextMenuItem_DisableConfirm.Checked = CheckedNoQuitAsk
 
-        ' Splash Screen státusz frissítése: WMI
-        If Not CheckedSplashDisable Then
-            LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + GetLoc("SplashWMI") + "..."
-        End If
-
         ' ----- WMI LEKÉRDEZÉSEK -----
+
+        ' Betöltési állapot beállítása -> Uptime
+        DebugLoadStage(GetLoc("LoadHostname"))
 
         ' *** WMI LEKÉRDEZÉS: Win32_ComputerSystem -> Számítógép információi ***
         objCS = New ManagementObjectSearcher("SELECT Name FROM Win32_ComputerSystem")
@@ -150,6 +158,9 @@ Public Class MainWindow
         ' Hosztnév beálítása az állapotsorban
         StatusLabel_Host.Text = GetLoc("Hostname") + ": " + Hostname
 
+        ' Betöltési állapot beállítása -> Uptime
+        DebugLoadStage(GetLoc("LoadUptime"))
+
         ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Rendszerindítás ideje ***
         ' Megjegyés: ez a referencia a SetUpTime() függvényhez.
         objOS = New ManagementObjectSearcher("SELECT LastBootUptime FROM Win32_OperatingSystem")
@@ -160,28 +171,35 @@ Public Class MainWindow
         Next
 
         ' ----- KEZDŐÉRTÉK BEÁLLÍTÁSOK -----
+        ' Megjegyzés: a betöltési állapot beállítása innentől nincs kommentezve!
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Futásidő ***
         SetUptime()
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Memória információk ***
+        DebugLoadStage(GetLoc("LoadMemory"))
         SetMemoryInformation()
 
         ' ----- LISTÁK FELTÖLTÉSE -----
 
         ' *** LISTAFELTÖLTÉS: Hardver komponensek ***
+        DebugLoadStage(GetLoc("LoadHardware"))
         UpdateHWList(True)
 
         ' *** LISTAFELTÖLTÉS: Processzorok ***
+        DebugLoadStage(GetLoc("LoadProcessor"))
         UpdateCPUList(True)
 
         ' *** LISTAFELTÖLTÉS: Lemezmeghajtók ***
+        DebugLoadStage(GetLoc("LoadDisk"))
         UpdateDiskList(True)
 
         ' *** LISTAFELTÖLTÉS: Videokártyák ***
+        DebugLoadStage(GetLoc("LoadVideo"))
         UpdateVideoList(True)
 
         ' *** LISTAFELTÖLTÉS: Interfészek ***
+        DebugLoadStage(GetLoc("LoadNetwork"))
         UpdateInterfaceList(True)
 
         ' ----- ZÁRÓ MŰVELETEK -----
@@ -196,20 +214,15 @@ Public Class MainWindow
         ' Diagram frissítése (gyakorlatilag ez a kezdő reset, mert az óra már ketyeg, de betöltés előtt nem mér!)
         MakeChart(True)
 
-        ' Debug sztring kiürítése  (Ha nem lett más célra felhasználva!)
-        If Value_Debug.Text = "LOAD_FAIL" Then
-            Value_Debug.Text = Nothing
-        End If
+        ' Debug sztring kiürítése
+        Value_Debug.Text = Nothing
 
         ' Splash ablak bezárása
         If Not CheckedSplashDisable Then
             LoadSplash.Close()
         End If
 
-        ' Bezárás link megjelenítésének engedélyezése a Splash ablakon (Névjegy)
-        SplashDefineAsAbout = True
-
-        ' Főablak megjelenítve
+        ' Főablak betöltése kész
         MainWindowDone = True
 
     End Sub
@@ -829,7 +842,7 @@ Public Class MainWindow
             ' Konverzió indítása
             For Position = 0 To (CharNum / 2) - 1
                 TempHex = HexArr(Position * 2) + HexArr((Position * 2) + 1)
-                TempChar = Convert.ToInt32(TempHex, 16)
+                TempChar = ToInt32(TempHex, 16)
 
                 ' Bájtsorrend javítása (Páros-páratlan csere)
                 If Position Mod 2 <> 0 Then
@@ -1315,7 +1328,8 @@ Public Class MainWindow
         Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
 
         ' Névből törlendő sztringek tömbje
-        Dim DeleteList() As String = {"(C)", "(R)", "(TM)"}
+        Dim DeleteList() As String = {"(C)", "(R)", "(TM)", "(Microsoft Corporation - WDDM)", "(Microsoft Corporation - WDDM 1.0)",
+                                      "(Microsoft Corporation - WDDM 1.1)", "(Microsoft Corporation - WDDM 1.2)"}
 
         ' Lista kiürítése
         ComboBox_VideoList.Items.Clear()
@@ -1527,8 +1541,10 @@ Public Class MainWindow
         If TraffReset Then
 
             ' Időzítő újraindítása -> EventTimer
-            EventTimer.Enabled = False
-            EventTimer.Enabled = True
+            If MainWindowDone Then
+                EventTimer.Enabled = False
+                EventTimer.Enabled = True
+            End If
 
             ' Generálási intervallum újraindítása (EventTimer által)
             TraffGenCounter = RefreshInterval(SelectedRefresh) - 1

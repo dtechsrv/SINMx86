@@ -136,6 +136,8 @@ Public Class CPUInfo
                 If objMgmt("L2CacheSize") <> 0 Then
                     L2Cache = ScaleConversion(objMgmt("L2CacheSize") * 1024, 0, True)
                     CPUTableAddRow(GetLoc("CPUL2"), FixNumberFormat(L2Cache(0), 0, False), BytePrefix(L2Cache(1)) + "B")
+                Else
+                    CPUTableAddRow(GetLoc("CPUL2"), GetLoc("NotInstalled"), Nothing)
                 End If
 
                 ' XP alatt nem szereplő értékek kihagyása
@@ -145,6 +147,8 @@ Public Class CPUInfo
                     If objMgmt("L3CacheSize") <> 0 Then
                         L3Cache = ScaleConversion(objMgmt("L3CacheSize") * 1024, 0, True)
                         CPUTableAddRow(GetLoc("CPUL3"), FixNumberFormat(L3Cache(0), 0, False), BytePrefix(L3Cache(1)) + "B")
+                    Else
+                        CPUTableAddRow(GetLoc("CPUL3"), GetLoc("NotInstalled"), Nothing)
                     End If
 
                 End If

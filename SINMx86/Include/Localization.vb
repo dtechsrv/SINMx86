@@ -31,7 +31,7 @@ Public Class Localization
                 ' Napok és hónapok nevei
                 LocDayName = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
                 LocMonthName = {"January", "February", "March", "April", "May", "June", "July",
-                                 "August", "September", "October", "November", "December"}
+                                "August", "September", "October", "November", "December"}
 
                 ' Főablak nyelvi változói
                 AddLoc("Title", "System Information and Network Monitor")
@@ -77,6 +77,7 @@ Public Class Localization
                 AddLoc("NoDisk", "No disk")
                 AddLoc("NoName", "No name")
                 AddLoc("NotAvailable", "Not available")
+                AddLoc("NotInstalled", "Not installed")
                 AddLoc("Unknown", "Unknown")
                 AddLoc("None", "None")
                 AddLoc("Invalid", "Invalid")
@@ -84,10 +85,21 @@ Public Class Localization
                 AddLoc("Enabled", "Enabled")
                 AddLoc("Disabled", "Disabled")
 
+                ' Betöltési változók
+                AddLoc("LoadDebug", "Load failure")
+                AddLoc("LoadRegistry", "Registry")
+                AddLoc("LoadLanguage", "Language")
+                AddLoc("LoadDefaults", "Defaults")
+                AddLoc("LoadHostname", "Hostname")
+                AddLoc("LoadUptime", "Uptime")
+                AddLoc("LoadHardware", "Hardware")
+                AddLoc("LoadProcessor", "Processor")
+                AddLoc("LoadDisk", "Disk")
+                AddLoc("LoadVideo", "Video card")
+                AddLoc("LoadNetwork", "Network")
+
                 ' Külső nyelvi sztingek -> Splash ablak
                 AddLoc("SplashLoad", "Loading")
-                AddLoc("SplashReg", "Registry settings")
-                AddLoc("SplashWMI", "WMI database")
                 AddLoc("SplashClose", "Close")
 
                 ' Külső nyelvi sztingek -> S.M.A.R.T ablak
@@ -231,7 +243,7 @@ Public Class Localization
 
                 LocDayName = {"vasárnap", "hétfő", "kedd", "szerda", "csütörtök", "péntek", "szombat"}
                 LocMonthName = {"január", "február", "március", "április", "május", "június", "július",
-                                 "augusztus", "szeptember", "október", "november", "december"}
+                                "augusztus", "szeptember", "október", "november", "december"}
 
                 ' Főablak nyelvi változói
                 AddLoc("Title", "Rendszerinformációk és hálózatfigyelés")
@@ -277,6 +289,7 @@ Public Class Localization
                 AddLoc("NoDisk", "Nincs lemez")
                 AddLoc("NoName", "Névtelen")
                 AddLoc("NotAvailable", "Nem elérhető")
+                AddLoc("NotInstalled", "Nincs telepítve")
                 AddLoc("Unknown", "Ismeretlen")
                 AddLoc("None", "Nincs")
                 AddLoc("Invalid", "Érvénytelen")
@@ -284,10 +297,21 @@ Public Class Localization
                 AddLoc("Enabled", "Engedélyezve")
                 AddLoc("Disabled", "Letiltva")
 
+                ' Betöltési változók
+                AddLoc("LoadDebug", "Betöltési hiba")
+                AddLoc("LoadRegistry", "Registry")
+                AddLoc("LoadLanguage", "Nyelv")
+                AddLoc("LoadDefaults", "Alapértékek")
+                AddLoc("LoadHostname", "Hosztnév")
+                AddLoc("LoadUptime", "Futásidő")
+                AddLoc("LoadHardware", "Hardver")
+                AddLoc("LoadProcessor", "Processzor")
+                AddLoc("LoadDisk", "Lemez")
+                AddLoc("LoadVideo", "Videokártya")
+                AddLoc("LoadNetwork", "Hálózat")
+
                 ' Külső nyelvi sztingek -> Splash ablak
                 AddLoc("SplashLoad", "Betöltés")
-                AddLoc("SplashReg", "Registry beállítások")
-                AddLoc("SplashWMI", "WMI adatbázis")
                 AddLoc("SplashClose", "Bezárás")
 
                 ' Külső nyelvi sztingek -> S.M.A.R.T ablak
@@ -337,7 +361,6 @@ Public Class Localization
                 AddLoc("IPDomain", "DNS tartomány")
                 AddLoc("IPWINS", "WINS kiszolgáló")
                 AddLoc("IPNetBIOS", "NetBIOS TCP/IP felett")
-
 
                 ' ToolTip sztringek
                 AddLoc("Tip_Language", "Nyelv kiválasztása")

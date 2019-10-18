@@ -10,12 +10,8 @@ Public NotInheritable Class LoadSplash
     ' Eseményvezérelt: Betöltőképernyó vagy névjegy meghívása
     Public Sub LoadSplash_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
 
-        ' Mindig látható (Fontos, főleg, ha a főablak is az!)
-        Me.TopMost = True
-
-        ' Névjegy időzítője (betöltéskor nincs jelentősége)
-        SplashTimer.Enabled = True
-        SplashTimer.Interval = 10000 ' Betöltés: 10 másodperc (Érték: 10000)
+        ' Névjegy időzítője (betöltéskor nincs elindítva)
+        SplashTimer.Interval = 10000                                ' Bezárás ennyi idő múlva: 10 másodperc (Érték: ezredmásodperc)
 
         ' Alkalmazás adatai
         Dim MyVersion As String = Application.ProductVersion        ' Saját verziószám
@@ -38,12 +34,19 @@ Public NotInheritable Class LoadSplash
         Splash_Comment.Text = GetLoc("Title") + ChrW(13) + ChrW(10) + GetLoc("Version") + " " + VersionString
 
         ' Állapotellenőrzés: Névjegy vagy betöltőképernyő?
-        If SplashDefineAsAbout Then
+        If MainWindowDone Then
+
+            ' Időzítő indítása
+            SplashTimer.Enabled = True
+
+            ' Bezárás gomb és copyright üzenet
             Link_SplashClose.Text = GetLoc("SplashClose")
             Splash_Status.Text = My.Application.Info.Copyright
         Else
+
+            ' Link üzeneténe kiürítése és betöltési üzenet kitöltése
             Link_SplashClose.Text = Nothing
-            Splash_Status.Text = GetLoc("SplashLoad") + "..."       ' Ez csak kezdőérték, az aktuális műveletet a főablak állítja be.
+            Splash_Status.Text = MainWindow.Value_Debug.Text
         End If
 
     End Sub

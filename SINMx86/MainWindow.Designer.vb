@@ -197,7 +197,7 @@ Partial Class MainWindow
         Me.Value_HWIdent.Name = "Value_HWIdent"
         Me.Value_HWIdent.Size = New System.Drawing.Size(323, 13)
         Me.Value_HWIdent.TabIndex = 5
-        Me.Value_HWIdent.Text = "To Be Filled By O.E.M."
+        Me.Value_HWIdent.Text = "Unknown"
         '
         'Name_HWIdent
         '
@@ -228,7 +228,7 @@ Partial Class MainWindow
         Me.Value_HWVendor.Name = "Value_HWVendor"
         Me.Value_HWVendor.Size = New System.Drawing.Size(323, 13)
         Me.Value_HWVendor.TabIndex = 3
-        Me.Value_HWVendor.Text = "To Be Filled By O.E.M."
+        Me.Value_HWVendor.Text = "Unknown"
         '
         'Name_HWVendor
         '
@@ -298,7 +298,7 @@ Partial Class MainWindow
         Me.Value_OSVersion.Name = "Value_OSVersion"
         Me.Value_OSVersion.Size = New System.Drawing.Size(73, 13)
         Me.Value_OSVersion.TabIndex = 3
-        Me.Value_OSVersion.Text = "1.0"
+        Me.Value_OSVersion.Text = "Unknown"
         '
         'Name_OSVersion
         '
@@ -318,7 +318,7 @@ Partial Class MainWindow
         Me.Value_OSRelease.Name = "Value_OSRelease"
         Me.Value_OSRelease.Size = New System.Drawing.Size(41, 13)
         Me.Value_OSRelease.TabIndex = 5
-        Me.Value_OSRelease.Text = "32-bit"
+        Me.Value_OSRelease.Text = "N/A"
         Me.Value_OSRelease.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_OSName
@@ -328,7 +328,7 @@ Partial Class MainWindow
         Me.Value_OSName.Name = "Value_OSName"
         Me.Value_OSName.Size = New System.Drawing.Size(323, 13)
         Me.Value_OSName.TabIndex = 1
-        Me.Value_OSName.Text = "Unknown Operating System, Service Pack 99"
+        Me.Value_OSName.Text = "Unknown"
         '
         'Name_OSName
         '
@@ -377,7 +377,7 @@ Partial Class MainWindow
         Me.Value_CPUMaximum.Name = "Value_CPUMaximum"
         Me.Value_CPUMaximum.Size = New System.Drawing.Size(61, 13)
         Me.Value_CPUMaximum.TabIndex = 8
-        Me.Value_CPUMaximum.Text = "9999 MHz"
+        Me.Value_CPUMaximum.Text = "0 MHz"
         Me.Value_CPUMaximum.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_CPUMaximum
@@ -398,7 +398,7 @@ Partial Class MainWindow
         Me.Value_CPUCore.Name = "Value_CPUCore"
         Me.Value_CPUCore.Size = New System.Drawing.Size(61, 13)
         Me.Value_CPUCore.TabIndex = 4
-        Me.Value_CPUCore.Text = "99 / 99"
+        Me.Value_CPUCore.Text = "0 / 0"
         Me.Value_CPUCore.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_CPUCore
@@ -419,7 +419,7 @@ Partial Class MainWindow
         Me.Value_CPUClock.Name = "Value_CPUClock"
         Me.Value_CPUClock.Size = New System.Drawing.Size(60, 13)
         Me.Value_CPUClock.TabIndex = 6
-        Me.Value_CPUClock.Text = "9999 MHz"
+        Me.Value_CPUClock.Text = "0 MHz"
         Me.Value_CPUClock.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_CPUClock
@@ -473,7 +473,7 @@ Partial Class MainWindow
         Me.Value_PhyMemFree.Name = "Value_PhyMemFree"
         Me.Value_PhyMemFree.Size = New System.Drawing.Size(68, 13)
         Me.Value_PhyMemFree.TabIndex = 3
-        Me.Value_PhyMemFree.Text = "1000.00 MiB"
+        Me.Value_PhyMemFree.Text = "0 B"
         Me.Value_PhyMemFree.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_VirtMemFree
@@ -483,7 +483,7 @@ Partial Class MainWindow
         Me.Value_VirtMemFree.Name = "Value_VirtMemFree"
         Me.Value_VirtMemFree.Size = New System.Drawing.Size(68, 13)
         Me.Value_VirtMemFree.TabIndex = 9
-        Me.Value_VirtMemFree.Text = "1000.00 MiB"
+        Me.Value_VirtMemFree.Text = "0 B"
         Me.Value_VirtMemFree.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_VirtMemFree
@@ -557,7 +557,7 @@ Partial Class MainWindow
         Me.Value_VirtMemSize.Name = "Value_VirtMemSize"
         Me.Value_VirtMemSize.Size = New System.Drawing.Size(68, 13)
         Me.Value_VirtMemSize.TabIndex = 7
-        Me.Value_VirtMemSize.Text = "1000.00 MiB"
+        Me.Value_VirtMemSize.Text = "0 B"
         Me.Value_VirtMemSize.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_PhyMemSize
@@ -567,7 +567,7 @@ Partial Class MainWindow
         Me.Value_PhyMemSize.Name = "Value_PhyMemSize"
         Me.Value_PhyMemSize.Size = New System.Drawing.Size(68, 13)
         Me.Value_PhyMemSize.TabIndex = 1
-        Me.Value_PhyMemSize.Text = "1000.00 MiB"
+        Me.Value_PhyMemSize.Text = "0 B"
         Me.Value_PhyMemSize.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_VirtMemSize
@@ -626,7 +626,7 @@ Partial Class MainWindow
         Me.Value_VideoResolution.Name = "Value_VideoResolution"
         Me.Value_VideoResolution.Size = New System.Drawing.Size(118, 13)
         Me.Value_VideoResolution.TabIndex = 6
-        Me.Value_VideoResolution.Text = "1920 x 1080 (32 bit)"
+        Me.Value_VideoResolution.Text = "0 x 0 (0 bit)"
         Me.Value_VideoResolution.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_VideoMemory
@@ -636,7 +636,7 @@ Partial Class MainWindow
         Me.Value_VideoMemory.Name = "Value_VideoMemory"
         Me.Value_VideoMemory.Size = New System.Drawing.Size(111, 13)
         Me.Value_VideoMemory.TabIndex = 4
-        Me.Value_VideoMemory.Text = "512 MB"
+        Me.Value_VideoMemory.Text = "0 B"
         Me.Value_VideoMemory.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_VideoResolution
@@ -814,7 +814,7 @@ Partial Class MainWindow
         Me.Value_UploadSpeed.Name = "Value_UploadSpeed"
         Me.Value_UploadSpeed.Size = New System.Drawing.Size(54, 13)
         Me.Value_UploadSpeed.TabIndex = 13
-        Me.Value_UploadSpeed.Text = "1.00"
+        Me.Value_UploadSpeed.Text = "0.00"
         Me.Value_UploadSpeed.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_InterfaceUsage
@@ -834,7 +834,7 @@ Partial Class MainWindow
         Me.Value_DownloadSpeed.Name = "Value_DownloadSpeed"
         Me.Value_DownloadSpeed.Size = New System.Drawing.Size(54, 13)
         Me.Value_DownloadSpeed.TabIndex = 10
-        Me.Value_DownloadSpeed.Text = "1.00"
+        Me.Value_DownloadSpeed.Text = "0.00"
         Me.Value_DownloadSpeed.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_Bandwidth
@@ -844,7 +844,7 @@ Partial Class MainWindow
         Me.Value_Bandwidth.Name = "Value_Bandwidth"
         Me.Value_Bandwidth.Size = New System.Drawing.Size(51, 13)
         Me.Value_Bandwidth.TabIndex = 5
-        Me.Value_Bandwidth.Text = "100.00"
+        Me.Value_Bandwidth.Text = "0.00"
         Me.Value_Bandwidth.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_UpdateUnit
@@ -989,12 +989,13 @@ Partial Class MainWindow
         Me.Link_Bottom.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Link_Bottom.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline
         Me.Link_Bottom.LinkColor = System.Drawing.SystemColors.Highlight
-        Me.Link_Bottom.Location = New System.Drawing.Point(219, 518)
+        Me.Link_Bottom.Location = New System.Drawing.Point(239, 518)
         Me.Link_Bottom.Name = "Link_Bottom"
-        Me.Link_Bottom.Size = New System.Drawing.Size(507, 13)
+        Me.Link_Bottom.Size = New System.Drawing.Size(467, 13)
         Me.Link_Bottom.TabIndex = 4
         Me.Link_Bottom.TabStop = True
-        Me.Link_Bottom.Text = "BOTTOM_TEXT"
+        Me.Link_Bottom.Text = "System Information and Network Monitor - This software is open source and portabl" & _
+    "e."
         Me.Link_Bottom.TextAlign = System.Drawing.ContentAlignment.TopCenter
         Me.Link_Bottom.VisitedLinkColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(128, Byte), Integer), CType(CType(0, Byte), Integer))
         '
@@ -1114,7 +1115,7 @@ Partial Class MainWindow
         Me.StatusLabel_ChartStatus.Margin = New System.Windows.Forms.Padding(0, 3, 0, 0)
         Me.StatusLabel_ChartStatus.Name = "StatusLabel_ChartStatus"
         Me.StatusLabel_ChartStatus.Size = New System.Drawing.Size(343, 19)
-        Me.StatusLabel_ChartStatus.Text = "Status: Chart creation failed."
+        Me.StatusLabel_ChartStatus.Text = "Status: Timer is currently stopped."
         Me.StatusLabel_ChartStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'StatusLabel_TopMost
@@ -1139,12 +1140,13 @@ Partial Class MainWindow
         '
         'Value_Debug
         '
-        Me.Value_Debug.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_Debug.Location = New System.Drawing.Point(732, 518)
+        Me.Value_Debug.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Value_Debug.ForeColor = System.Drawing.Color.Red
+        Me.Value_Debug.Location = New System.Drawing.Point(712, 518)
         Me.Value_Debug.Name = "Value_Debug"
-        Me.Value_Debug.Size = New System.Drawing.Size(118, 13)
+        Me.Value_Debug.Size = New System.Drawing.Size(138, 13)
         Me.Value_Debug.TabIndex = 5
-        Me.Value_Debug.Text = "DEBUG_TEXT"
+        Me.Value_Debug.Text = "Load failure: Prepare"
         Me.Value_Debug.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'MainMenu
@@ -1297,6 +1299,7 @@ Partial Class MainWindow
         '
         'Button_SmartOpen
         '
+        Me.Button_SmartOpen.Enabled = False
         Me.Button_SmartOpen.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Button_SmartOpen.Image = Global.SINMx86.My.Resources.Resources.Control_HDD
         Me.Button_SmartOpen.Location = New System.Drawing.Point(385, 21)
@@ -1323,7 +1326,7 @@ Partial Class MainWindow
         Me.Value_PartInfo.Name = "Value_PartInfo"
         Me.Value_PartInfo.Size = New System.Drawing.Size(170, 13)
         Me.Value_PartInfo.TabIndex = 15
-        Me.Value_PartInfo.Text = "0 MiB"
+        Me.Value_PartInfo.Text = "Unknown"
         Me.Value_PartInfo.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Button_DiskListReload
@@ -1343,7 +1346,7 @@ Partial Class MainWindow
         Me.Value_DiskSerial.Name = "Value_DiskSerial"
         Me.Value_DiskSerial.Size = New System.Drawing.Size(122, 13)
         Me.Value_DiskSerial.TabIndex = 11
-        Me.Value_DiskSerial.Text = "1234567890ABCDEF"
+        Me.Value_DiskSerial.Text = "Unknown"
         Me.Value_DiskSerial.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_DiskSerial
@@ -1364,7 +1367,7 @@ Partial Class MainWindow
         Me.Value_DiskFirmware.Name = "Value_DiskFirmware"
         Me.Value_DiskFirmware.Size = New System.Drawing.Size(111, 13)
         Me.Value_DiskFirmware.TabIndex = 9
-        Me.Value_DiskFirmware.Text = "1000"
+        Me.Value_DiskFirmware.Text = "Unknown"
         Me.Value_DiskFirmware.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_PartList
@@ -1396,7 +1399,7 @@ Partial Class MainWindow
         Me.Value_DiskInterface.Name = "Value_DiskInterface"
         Me.Value_DiskInterface.Size = New System.Drawing.Size(111, 13)
         Me.Value_DiskInterface.TabIndex = 5
-        Me.Value_DiskInterface.Text = "IDE / SATA"
+        Me.Value_DiskInterface.Text = "Unknown"
         Me.Value_DiskInterface.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_MediaType
@@ -1406,7 +1409,7 @@ Partial Class MainWindow
         Me.Value_MediaType.Name = "Value_MediaType"
         Me.Value_MediaType.Size = New System.Drawing.Size(108, 13)
         Me.Value_MediaType.TabIndex = 7
-        Me.Value_MediaType.Text = "HDD"
+        Me.Value_MediaType.Text = "Unknown"
         Me.Value_MediaType.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_DiskInterface

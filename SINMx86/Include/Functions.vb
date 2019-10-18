@@ -20,7 +20,7 @@ Public Class Functions
     Public Shared SIPrefix() As String = {"", "k", "M", "G", "T", "P", "E"}                 ' SI prefixumok tömbje (nagyságrend váltás: 10^3 = 1000)
     Public Shared BytePrefix() As String = {"", "ki", "Mi", "Gi", "Ti", "Pi", "Ei"}         ' Bináris prefixumok tömbje (nagyságrend váltás: 2^10 = 1024)
     Public Shared RefreshInterval() As Int32 = {1, 2, 3, 4, 5, 10, 15, 30, 60}              ' Frissítési intervallumok
-    Public Shared SplashDefineAsAbout As Boolean = False                                    ' Splash ablak funkciójának betöltése (True: névjegy, False: betöltőképernyő)
+    Public Shared MainWindowDone As Boolean                                                 ' A főablak betöltési állapota
     Public Shared OSVersion() As Int32 = GetOSVersion()                                     ' Operációs rendszer verziószám
     Public Shared DiskSmart(32) As String                                                   ' Meghajtó S.M.A.R.T azonosítója (ha van, egyékbént üres)
 
@@ -34,6 +34,20 @@ Public Class Functions
     Public Shared SelectedRefresh, SelectedHardware, SelectedCPU, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
 
     ' ----- FÜGGVÉNYEK -----
+
+    ' *** FÜGGVÉNY: Betöltési állapot beállítása ***
+    ' Bemenet: Stage -> Betöltés állapota (String)
+    ' Kimenet: *     -> hamis érték (Boolean)
+    Public Shared Function DebugLoadStage(ByVal Stage As String)
+
+        ' Betöltési üzenet beállítása a Splash ablakon és a Debug változóban a főablakban.
+        LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + Stage + "..."
+        MainWindow.Value_Debug.Text = GetLoc("LoadDebug") + ": " + Stage
+
+        ' Visszatérési érték beállítása
+        Return False
+
+    End Function
 
     ' *** FÜGGVÉNY: Registry beállítások lekérdezése ***
     ' Bemenet: * -> üres (Void)
