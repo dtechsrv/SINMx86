@@ -607,6 +607,15 @@ Public Class MainWindow
                 Value_DiskInterface.Text = RemoveInvalidChars(Connector)
             End If
 
+            ' Lemez típus beállítása
+            If DiskType(SelectedDisk) <> Nothing Then
+                Value_DiskType.Enabled = True
+                Value_DiskType.Text = DiskType(SelectedDisk)
+            Else
+                Value_DiskType.Enabled = False
+                Value_DiskType.Text = GetLoc("Unknown")
+            End If
+
             ' Firmware revízió beállítása
             If Firmware = Nothing Then
                 Value_DiskFirmware.Enabled = False
