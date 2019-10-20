@@ -148,9 +148,9 @@ Partial Class MainWindow
         Me.Name_PartList = New System.Windows.Forms.Label()
         Me.Name_DiskFirmware = New System.Windows.Forms.Label()
         Me.Value_DiskInterface = New System.Windows.Forms.Label()
-        Me.Value_MediaType = New System.Windows.Forms.Label()
+        Me.Value_DiskType = New System.Windows.Forms.Label()
         Me.Name_DiskInterface = New System.Windows.Forms.Label()
-        Me.Name_MediaType = New System.Windows.Forms.Label()
+        Me.Name_DiskType = New System.Windows.Forms.Label()
         Me.Name_DiskList = New System.Windows.Forms.Label()
         Me.ComboBox_PartList = New SINMx86.LeftComboBox()
         Me.ComboBox_DiskList = New SINMx86.LeftComboBox()
@@ -192,6 +192,7 @@ Partial Class MainWindow
         '
         'Value_HWIdent
         '
+        Me.Value_HWIdent.Enabled = False
         Me.Value_HWIdent.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_HWIdent.Location = New System.Drawing.Point(114, 71)
         Me.Value_HWIdent.Name = "Value_HWIdent"
@@ -223,6 +224,7 @@ Partial Class MainWindow
         '
         'Value_HWVendor
         '
+        Me.Value_HWVendor.Enabled = False
         Me.Value_HWVendor.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_HWVendor.Location = New System.Drawing.Point(114, 48)
         Me.Value_HWVendor.Name = "Value_HWVendor"
@@ -1284,9 +1286,9 @@ Partial Class MainWindow
         Me.GroupBox_DiskInfo.Controls.Add(Me.Name_PartList)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskFirmware)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskInterface)
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Value_MediaType)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.Value_DiskType)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskInterface)
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Name_MediaType)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskType)
         Me.GroupBox_DiskInfo.Controls.Add(Me.ComboBox_DiskList)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Name_DiskList)
         Me.GroupBox_DiskInfo.ForeColor = System.Drawing.SystemColors.Highlight
@@ -1311,22 +1313,24 @@ Partial Class MainWindow
         'Value_PartLabel
         '
         Me.Value_PartLabel.AutoSize = True
+        Me.Value_PartLabel.Enabled = False
         Me.Value_PartLabel.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Value_PartLabel.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_PartLabel.Location = New System.Drawing.Point(231, 94)
         Me.Value_PartLabel.Name = "Value_PartLabel"
-        Me.Value_PartLabel.Size = New System.Drawing.Size(30, 13)
+        Me.Value_PartLabel.Size = New System.Drawing.Size(37, 13)
         Me.Value_PartLabel.TabIndex = 14
-        Me.Value_PartLabel.Text = "N/A"
+        Me.Value_PartLabel.Text = "None"
         '
         'Value_PartInfo
         '
+        Me.Value_PartInfo.Enabled = False
         Me.Value_PartInfo.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_PartInfo.Location = New System.Drawing.Point(267, 94)
         Me.Value_PartInfo.Name = "Value_PartInfo"
         Me.Value_PartInfo.Size = New System.Drawing.Size(170, 13)
         Me.Value_PartInfo.TabIndex = 15
-        Me.Value_PartInfo.Text = "Unknown"
+        Me.Value_PartInfo.Text = "Not available"
         Me.Value_PartInfo.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Button_DiskListReload
@@ -1341,12 +1345,13 @@ Partial Class MainWindow
         '
         'Value_DiskSerial
         '
+        Me.Value_DiskSerial.Enabled = False
         Me.Value_DiskSerial.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_DiskSerial.Location = New System.Drawing.Point(315, 71)
         Me.Value_DiskSerial.Name = "Value_DiskSerial"
         Me.Value_DiskSerial.Size = New System.Drawing.Size(122, 13)
         Me.Value_DiskSerial.TabIndex = 11
-        Me.Value_DiskSerial.Text = "Unknown"
+        Me.Value_DiskSerial.Text = "Not available"
         Me.Value_DiskSerial.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_DiskSerial
@@ -1362,6 +1367,7 @@ Partial Class MainWindow
         '
         'Value_DiskFirmware
         '
+        Me.Value_DiskFirmware.Enabled = False
         Me.Value_DiskFirmware.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_DiskFirmware.Location = New System.Drawing.Point(114, 71)
         Me.Value_DiskFirmware.Name = "Value_DiskFirmware"
@@ -1394,23 +1400,25 @@ Partial Class MainWindow
         '
         'Value_DiskInterface
         '
+        Me.Value_DiskInterface.Enabled = False
         Me.Value_DiskInterface.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_DiskInterface.Location = New System.Drawing.Point(114, 48)
         Me.Value_DiskInterface.Name = "Value_DiskInterface"
         Me.Value_DiskInterface.Size = New System.Drawing.Size(111, 13)
         Me.Value_DiskInterface.TabIndex = 5
-        Me.Value_DiskInterface.Text = "Unknown"
+        Me.Value_DiskInterface.Text = "Not available"
         Me.Value_DiskInterface.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
-        'Value_MediaType
+        'Value_DiskType
         '
-        Me.Value_MediaType.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_MediaType.Location = New System.Drawing.Point(329, 48)
-        Me.Value_MediaType.Name = "Value_MediaType"
-        Me.Value_MediaType.Size = New System.Drawing.Size(108, 13)
-        Me.Value_MediaType.TabIndex = 7
-        Me.Value_MediaType.Text = "Unknown"
-        Me.Value_MediaType.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Value_DiskType.Enabled = False
+        Me.Value_DiskType.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_DiskType.Location = New System.Drawing.Point(329, 48)
+        Me.Value_DiskType.Name = "Value_DiskType"
+        Me.Value_DiskType.Size = New System.Drawing.Size(108, 13)
+        Me.Value_DiskType.TabIndex = 7
+        Me.Value_DiskType.Text = "Unknown"
+        Me.Value_DiskType.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_DiskInterface
         '
@@ -1423,16 +1431,16 @@ Partial Class MainWindow
         Me.Name_DiskInterface.TabIndex = 4
         Me.Name_DiskInterface.Text = "Interface:"
         '
-        'Name_MediaType
+        'Name_DiskType
         '
-        Me.Name_MediaType.AutoSize = True
-        Me.Name_MediaType.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_MediaType.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_MediaType.Location = New System.Drawing.Point(231, 48)
-        Me.Name_MediaType.Name = "Name_MediaType"
-        Me.Name_MediaType.Size = New System.Drawing.Size(73, 13)
-        Me.Name_MediaType.TabIndex = 6
-        Me.Name_MediaType.Text = "Media type:"
+        Me.Name_DiskType.AutoSize = True
+        Me.Name_DiskType.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_DiskType.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_DiskType.Location = New System.Drawing.Point(231, 48)
+        Me.Name_DiskType.Name = "Name_DiskType"
+        Me.Name_DiskType.Size = New System.Drawing.Size(73, 13)
+        Me.Name_DiskType.TabIndex = 6
+        Me.Name_DiskType.Text = "Media type:"
         '
         'Name_DiskList
         '
@@ -1700,9 +1708,9 @@ Partial Class MainWindow
     Friend WithEvents Name_PartList As System.Windows.Forms.Label
     Friend WithEvents Name_DiskFirmware As System.Windows.Forms.Label
     Friend WithEvents Value_DiskInterface As System.Windows.Forms.Label
-    Friend WithEvents Value_MediaType As System.Windows.Forms.Label
+    Friend WithEvents Value_DiskType As System.Windows.Forms.Label
     Friend WithEvents Name_DiskInterface As System.Windows.Forms.Label
-    Friend WithEvents Name_MediaType As System.Windows.Forms.Label
+    Friend WithEvents Name_DiskType As System.Windows.Forms.Label
     Friend WithEvents Button_DiskListReload As System.Windows.Forms.Button
     Friend WithEvents ScreenshotToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ComboBox_VideoList As LeftComboBox

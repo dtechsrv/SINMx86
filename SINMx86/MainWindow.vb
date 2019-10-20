@@ -158,6 +158,9 @@ Public Class MainWindow
         ' Hosztnév beálítása az állapotsorban
         StatusLabel_Host.Text = GetLoc("Hostname") + ": " + Hostname
 
+        ' Diagram leképezés állapotának alaphelyzetbe állítása
+        StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
+
         ' Betöltési állapot beállítása -> Uptime
         DebugLoadStage(GetLoc("LoadUptime"))
 
@@ -224,6 +227,9 @@ Public Class MainWindow
 
         ' Főablak betöltése kész
         MainWindowDone = True
+
+        ' Előtérbe hozás
+        Me.BringToFront()
 
     End Sub
 
@@ -544,156 +550,172 @@ Public Class MainWindow
         ' Megjegyzés: Szándékosan van wildcard a lekérdezésben, mert XP alatt nem szerepel minden érték!
         objDD = New ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive WHERE Index = '" + DiskList(SelectedDisk) + "'")
 
-        ' Értékek beállítása -> Lemezmeghajtó: index, interfész, azonosító, firmware, sorozatszám
-        For Each Me.objMgmt In objDD.Get()
-            Connector = objMgmt("InterfaceType")
-            DiskIndex = objMgmt("Index")
-            DiskID = objMgmt("DeviceID")
+        ' Hiányzó lemez ellenőrzése
+        If objDD.Get().Count = 0 Then
 
-            ' Windows XP alatt nem támogatott néhány érték lekérdezése
-            If OSVersion(0) >= 6 Then
-                SerialNumber = RemoveSpaces(objMgmt("SerialNumber"))
-                Firmware = RemoveSpaces(objMgmt("FirmwareRevision"))
-            Else
-                SerialNumber = Nothing
-                Firmware = Nothing
-            End If
-        Next
-
-        ' OS Verzióellenőrzés: XP -> Ismeretlen, Vista és 7 -> Konverzió indítása
-        If OSVersion(0) < 6 Then
-            SerialNumber = Nothing
-        ElseIf OSVersion(0) = 6 And OSVersion(1) <= 1 And SerialNumber <> Nothing Then
-            SerialNumber = RemoveSpaces(DiskSerialNumberConv(SerialNumber))
-        End If
-
-        ' Érvénytelen karakterek eltávolítása
-        If SerialNumber <> Nothing Then
-            SerialNumber = RemoveInvalidChars(SerialNumber)
-        End If
-
-        If Firmware <> Nothing Then
-            Firmware = RemoveInvalidChars(Firmware)
-        End If
-
-        ' Sorozatszám beállítása
-        If SerialNumber = Nothing Then
+            ' Kiírások feltöltése üres adatokkal
+            Button_SmartOpen.Enabled = False
+            Value_DiskInterface.Enabled = False
+            Value_DiskInterface.Text = GetLoc("NotAvailable")
+            Value_DiskType.Enabled = False
+            Value_DiskType.Text = GetLoc("Unknown")
+            Value_DiskFirmware.Enabled = False
+            Value_DiskFirmware.Text = GetLoc("Unknown")
             Value_DiskSerial.Enabled = False
             Value_DiskSerial.Text = GetLoc("NotAvailable")
-        Else
-            Value_DiskSerial.Enabled = True
-            Value_DiskSerial.Text = SerialNumber
-        End If
 
-        ' Firmware revízió beállítása
-        If Firmware = Nothing Then
-            Value_DiskFirmware.Enabled = False
-            Value_DiskFirmware.Text = GetLoc("NotAvailable")
-        Else
-            Value_DiskFirmware.Enabled = True
-            Value_DiskFirmware.Text = Firmware
-        End If
-
-        ' Csatolófelület beállítása
-        If Connector = "IDE" Then
-            Value_DiskInterface.Text = "IDE / SATA"
-        ElseIf Connector = "SCSI" Then
-            Value_DiskInterface.Text = "SCSI / SAS (RAID)"
-        Else
-            Value_DiskInterface.Text = Connector
-        End If
-
-        ' Lemez típus beállítása
-        If DiskType(SelectedDisk) <> Nothing Then
-            Value_MediaType.Enabled = True
-            Value_MediaType.Text = DiskType(SelectedDisk)
-        Else
-            Value_MediaType.Enabled = False
-            Value_MediaType.Text = GetLoc("Unknown")
-        End If
-
-        ' Partícióelemzéshez használt változók
-        Dim PartNum As Int32 = 0                            ' Partíciók száma
-        Dim PartList(32) As String                          ' Partíciók listája
-        Dim PartCount As Int32 = 0                          ' Partíció sorszáma
-        Dim PartID As String = Nothing                      ' Partíció azonosítója
-        Dim PartName As String = Nothing                    ' Partíció neve
-        Dim PartSize(2) As Double                           ' Partíció mérete
-        Dim PartFS As String = Nothing                      ' Partíció fájlrendszere
-        Dim PartUnit As String = Nothing                    ' Partíció méret mértékegység előtag
-
-        ' WMI értékek összevetése: Win32_DiskDrive -> Win32_DiskDriveToDiskPartition (Referencia: DeviceID)
-        objDP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskID + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
-
-        ' Értékek beállítása -> Lemez azonosító
-        For Each Me.objMgmt In objDP.Get()
-            PartID = objMgmt("DeviceID")
-
-            ' WMI értékek összevetése: Win32_DiskPartition -> Win32_LogicalDiskToPartition (Referencia: DeviceID)
-            objLP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + PartID + "'} WHERE AssocClass = Win32_LogicalDiskToPartition")
-
-            ' Értékek beállítása -> Partíció azonosító
-            For Each Me.objRes In objLP.Get()
-                PartList(PartNum) = objRes("DeviceID")
-                PartNum += 1
-            Next
-        Next
-
-        ' Tömbök és lista kiürítése -> Partíció információk
-        Array.Clear(PartLabel, 0, UBound(PartLabel))
-        Array.Clear(PartInfo, 0, UBound(PartInfo))
-        ComboBox_PartList.Items.Clear()
-
-        ' Partíció információk lekérdezése
-        If PartNum = 0 Then
+            ' Tömbök és lista kiürítése -> Partíció információk
+            Array.Clear(PartLabel, 0, UBound(PartLabel))
+            Array.Clear(PartInfo, 0, UBound(PartInfo))
             ComboBox_PartList.Enabled = False
+            ComboBox_PartList.Items.Clear()
             ComboBox_PartList.Items.Add(GetLoc("NotAvailable"))
+            ComboBox_PartList.SelectedIndex = 0
+
+            ' Üzenet megjelenítése
+            MsgBox(GetLoc("MsgDiskText"), vbExclamation, GetLoc("MsgDiskTitle") + ": " + ComboBox_DiskList.Items(SelectedDisk))
+
+            ' Lemezlista újratöltése
+            UpdateDiskList(True)
+
         Else
-            ComboBox_PartList.Enabled = True
-            For PartCount = 0 To PartNum - 1
 
-                ' WMI értékek lekérdezése: Win32_LogicalDisk -> Partíció információk
-                objLD = New ManagementObjectSearcher("SELECT DeviceID, FileSystem, Size, VolumeName FROM Win32_LogicalDisk WHERE DeviceID = '" + PartList(PartCount) + "'")
+            ' Értékek beállítása -> Lemezmeghajtó: index, interfész, azonosító, firmware, sorozatszám
+            For Each Me.objMgmt In objDD.Get()
+                Connector = objMgmt("InterfaceType")
+                DiskIndex = objMgmt("Index")
+                DiskID = objMgmt("DeviceID")
 
-                ' Értékek beállítása -> Partíció: azonosító, fájlrendszer, méret, kötetcímke
-                For Each Me.objMgmt In objLD.Get()
+                ' Windows XP alatt nem támogatott néhány érték lekérdezése
+                If OSVersion(0) >= 6 Then
+                    SerialNumber = RemoveSpaces(objMgmt("SerialNumber"))
+                    Firmware = RemoveSpaces(objMgmt("FirmwareRevision"))
+                Else
+                    SerialNumber = Nothing
+                    Firmware = Nothing
+                End If
+            Next
 
-                    ' Meghajtó betűjel
-                    PartList(PartCount) = objMgmt("DeviceID")
+            ' Csatolófelület beállítása
+            Value_DiskInterface.Enabled = True
 
-                    If objMgmt("FileSystem") = Nothing Then
-                        PartFS = "RAW"
-                    Else
-                        PartFS = objMgmt("FileSystem")
-                    End If
+            If Connector = "IDE" Then
+                Value_DiskInterface.Text = "IDE / SATA"
+            ElseIf Connector = "SCSI" Then
+                Value_DiskInterface.Text = "SCSI / SAS (RAID)"
+            Else
+                Value_DiskInterface.Text = RemoveInvalidChars(Connector)
+            End If
 
-                    If objMgmt("VolumeName") = Nothing Then
-                        PartName = GetLoc("NoName")
-                    Else
-                        PartName = objMgmt("VolumeName")
-                    End If
+            ' Firmware revízió beállítása
+            If Firmware = Nothing Then
+                Value_DiskFirmware.Enabled = False
+                Value_DiskFirmware.Text = GetLoc("NotAvailable")
+            Else
+                Value_DiskFirmware.Enabled = True
+                Value_DiskFirmware.Text = RemoveInvalidChars(Firmware)
+            End If
 
-                    ' Kötetcímke beéllítása
-                    PartLabel(PartCount) = PartList(PartCount) + "\"
+            ' OS Verzióellenőrzés: XP -> Ismeretlen, Vista és 7 -> Konverzió indítása
+            If OSVersion(0) < 6 Then
+                SerialNumber = Nothing
+            ElseIf OSVersion(0) = 6 And OSVersion(1) <= 1 And SerialNumber <> Nothing Then
+                SerialNumber = RemoveSpaces(DiskSerialNumberConv(SerialNumber))
+            End If
 
-                    ' Listaelem hozzáadása
-                    ComboBox_PartList.Items.Add("# " + (PartCount + 1).ToString + "/" + PartNum.ToString + " (" + PartFS + ")")
+            ' Sorozatszám beállítása
+            If SerialNumber = Nothing Then
+                Value_DiskSerial.Enabled = False
+                Value_DiskSerial.Text = GetLoc("NotAvailable")
+            Else
+                Value_DiskSerial.Enabled = True
+                Value_DiskSerial.Text = RemoveInvalidChars(SerialNumber)
+            End If
 
-                    ' Partícióinformáció feltöltése
-                    If objMgmt("Size") = 0 Then
-                        PartInfo(PartCount) = Nothing
-                    Else
-                        ' Partícióméret konvertálása
-                        PartSize = ScaleConversion(objMgmt("Size"), 2, True)
-                        PartInfo(PartCount) = PartName + " (" + FixNumberFormat(PartSize(0), 2, True) + " " + BytePrefix(PartSize(1)) + "B)"
-                    End If
+            ' Partícióelemzéshez használt változók
+            Dim PartNum As Int32 = 0                            ' Partíciók száma
+            Dim PartList(32) As String                          ' Partíciók listája
+            Dim PartCount As Int32 = 0                          ' Partíció sorszáma
+            Dim PartID As String = Nothing                      ' Partíció azonosítója
+            Dim PartName As String = Nothing                    ' Partíció neve
+            Dim PartSize(2) As Double                           ' Partíció mérete
+            Dim PartFS As String = Nothing                      ' Partíció fájlrendszere
+            Dim PartUnit As String = Nothing                    ' Partíció méret mértékegység előtag
 
+            ' WMI értékek összevetése: Win32_DiskDrive -> Win32_DiskDriveToDiskPartition (Referencia: DeviceID)
+            objDP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskID + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition")
+
+            ' Értékek beállítása -> Lemez azonosító
+            For Each Me.objMgmt In objDP.Get()
+                PartID = objMgmt("DeviceID")
+
+                ' WMI értékek összevetése: Win32_DiskPartition -> Win32_LogicalDiskToPartition (Referencia: DeviceID)
+                objLP = New ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + PartID + "'} WHERE AssocClass = Win32_LogicalDiskToPartition")
+
+                ' Értékek beállítása -> Partíció azonosító
+                For Each Me.objRes In objLP.Get()
+                    PartList(PartNum) = objRes("DeviceID")
+                    PartNum += 1
                 Next
             Next
-        End If
 
-        ' Partíciólista beállítása (kiválasztott elem)
-        ComboBox_PartList.SelectedIndex = SelectedPartition
+            ' Tömbök és lista kiürítése -> Partíció információk
+            Array.Clear(PartLabel, 0, UBound(PartLabel))
+            Array.Clear(PartInfo, 0, UBound(PartInfo))
+            ComboBox_PartList.Items.Clear()
+
+            ' Partíció információk lekérdezése
+            If PartNum = 0 Then
+                ComboBox_PartList.Enabled = False
+                ComboBox_PartList.Items.Add(GetLoc("NotAvailable"))
+            Else
+                ComboBox_PartList.Enabled = True
+                For PartCount = 0 To PartNum - 1
+
+                    ' WMI értékek lekérdezése: Win32_LogicalDisk -> Partíció információk
+                    objLD = New ManagementObjectSearcher("SELECT DeviceID, FileSystem, Size, VolumeName FROM Win32_LogicalDisk WHERE DeviceID = '" + PartList(PartCount) + "'")
+
+                    ' Értékek beállítása -> Partíció: azonosító, fájlrendszer, méret, kötetcímke
+                    For Each Me.objMgmt In objLD.Get()
+
+                        ' Meghajtó betűjel
+                        PartList(PartCount) = objMgmt("DeviceID")
+
+                        If objMgmt("FileSystem") = Nothing Then
+                            PartFS = "RAW"
+                        Else
+                            PartFS = objMgmt("FileSystem")
+                        End If
+
+                        If objMgmt("VolumeName") = Nothing Then
+                            PartName = GetLoc("NoName")
+                        Else
+                            PartName = objMgmt("VolumeName")
+                        End If
+
+                        ' Kötetcímke beéllítása
+                        PartLabel(PartCount) = PartList(PartCount) + "\"
+
+                        ' Listaelem hozzáadása
+                        ComboBox_PartList.Items.Add("# " + (PartCount + 1).ToString + "/" + PartNum.ToString + " (" + PartFS + ")")
+
+                        ' Partícióinformáció feltöltése
+                        If objMgmt("Size") = 0 Then
+                            PartInfo(PartCount) = Nothing
+                        Else
+                            ' Partícióméret konvertálása
+                            PartSize = ScaleConversion(objMgmt("Size"), 2, True)
+                            PartInfo(PartCount) = PartName + " (" + FixNumberFormat(PartSize(0), 2, True) + " " + BytePrefix(PartSize(1)) + "B)"
+                        End If
+
+                    Next
+                Next
+            End If
+
+            ' Partíciólista beállítása (kiválasztott elem)
+            ComboBox_PartList.SelectedIndex = SelectedPartition
+
+        End If
 
         ' Visszatérési érték beállítása
         Return False
@@ -1554,7 +1576,9 @@ Public Class MainWindow
 
             ' Diagram rajzolásának kezdő állapotba hozása az állapotsorban
             StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
-            StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (RefreshInterval(SelectedRefresh).ToString) + " " + GetLoc("ChartCount") + "..."
+            If MainWindowDone Then
+                StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (RefreshInterval(SelectedRefresh).ToString) + " " + GetLoc("ChartCount") + "..."
+            End If
 
         End If
 
@@ -2129,7 +2153,7 @@ Public Class MainWindow
         Name_OSLang.Text = GetLoc("OSLang")
         Name_OSRelease.Text = GetLoc("OSRelease")
         Name_DiskList.Text = GetLoc("DiskList")
-        Name_MediaType.Text = GetLoc("MediaType")
+        Name_DiskType.Text = GetLoc("MediaType")
         Name_DiskInterface.Text = GetLoc("DiskInterface")
         Name_DiskFirmware.Text = GetLoc("DiskFirmware")
         Name_PartList.Text = GetLoc("PartList")
@@ -2403,7 +2427,7 @@ Public Class MainWindow
     ' Eseményvezérelt: Button_DiskListReload.Click -> Gomb megnyomása
     Private Sub DiskList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_DiskListReload.Click
 
-        ' Lemezlista újratöltése -> függvény
+        ' Lemezlista újratöltése
         UpdateDiskList(True)
 
     End Sub
@@ -2412,7 +2436,7 @@ Public Class MainWindow
     ' Eseményvezérelt: Button_VideoListReload.Click -> Gomb megnyomása
     Private Sub VideoList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_VideoListReload.Click
 
-        ' Videokártya lista újratöltése -> függvény
+        ' Videokártya lista újratöltése
         UpdateVideoList(True)
 
     End Sub
@@ -2421,7 +2445,7 @@ Public Class MainWindow
     ' Eseményvezérelt: Button_InterfaceListReload.Click -> Gomb megnyomása
     Private Sub InterfaceList_Reload(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_InterfaceListReload.Click
 
-        ' Interfész lista újratöltése -> függvény
+        ' Interfész lista újratöltése
         UpdateInterfaceList(True)
 
     End Sub
@@ -2532,7 +2556,7 @@ Public Class MainWindow
             Me.TopMost = False
 
             ' Megerősítőablak megjelenítése (Igen -> Kilépés, Nem -> Mégse)
-            e.Cancel = MsgBox(GetLoc("QuitAsk"), vbQuestion + vbYesNo + vbMsgBoxSetForeground, GetLoc("QuitTitle")) = MsgBoxResult.No
+            e.Cancel = MsgBox(GetLoc("MsgQuitText"), vbQuestion + vbYesNo + vbMsgBoxSetForeground, GetLoc("MsgQuitTitle")) = MsgBoxResult.No
 
             ' Folyamatos láthatósag visszaállítása
             Me.TopMost = CheckedTopMost

@@ -17,8 +17,15 @@ Public NotInheritable Class LoadSplash
         Dim MyVersion As String = Application.ProductVersion        ' Saját verziószám
         Dim MyName As String = My.Application.Info.Title            ' Program neve
 
-        ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
-        Me.TopMost = MainWindow.TopMost
+        ' Ablak láthatóságának beállítása (Beöltéskor felül, About ablak esetén megegyezik a főablakkal!
+        If MainWindowDone Then
+            Me.TopMost = MainWindow.TopMost
+        Else
+            Me.TopMost = True
+        End If
+
+        ' Billentyűk figyelése
+        Me.KeyPreview = True
 
         ' Háttérkép generálása
         RandomImage()
@@ -44,10 +51,12 @@ Public NotInheritable Class LoadSplash
             Splash_Status.Text = My.Application.Info.Copyright
         Else
 
-            ' Link üzeneténe kiürítése és betöltési üzenet kitöltése
-            Link_SplashClose.Text = Nothing
+            ' Betöltési állapot kitöltése
             Splash_Status.Text = MainWindow.Value_Debug.Text
         End If
+
+        ' Előtérbe hozás
+        Me.BringToFront()
 
     End Sub
 
@@ -89,6 +98,17 @@ Public NotInheritable Class LoadSplash
     End Function
 
     ' ----- ELJÁRÁSOK -----
+
+    ' *** ELJÁRÁS: Kilépési procedúra megindítása (közvetett) ***
+    ' Eseményvezérelt: Me.KeyDown -> ESC (Fizikai gomb lenyomása)
+    Private Sub KeyDown_Escape_Close(ByVal sender As System.Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
+
+        ' Ablak bezárása ESC lenyomására
+        If e.KeyCode = Keys.Escape And MainWindowDone Then
+            Me.Close()
+        End If
+
+    End Sub
 
     ' *** ELJÁRÁS: Ablak bezárása, ha az időzítő elérte a kijelölt értéket ***
     ' Eseményvezérelt: SplashTimer.Tick -> Óra ugrása

@@ -13,7 +13,7 @@ Public Class Functions
     Public Shared MyVersion As String = Application.ProductVersion                          ' Saját verziószám
     Public Shared MyName As String = My.Application.Info.Title                              ' Program neve
     Public Shared MyLink As String = My.Application.Info.Description + "/releases/latest"   ' Támogatási link
-    Public Shared ReleaseStatus As String = Nothing                                         ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
+    Public Shared ReleaseStatus As String                                                   ' Kiadás állapota ('BETA', 'RC', vagy stabil verzió esetén üres)
     Public Shared VersionString As String = SetMainVersion()                                ' Formázott verziószám
 
     ' További változók
@@ -42,6 +42,7 @@ Public Class Functions
 
         ' Betöltési üzenet beállítása a Splash ablakon és a Debug változóban a főablakban.
         LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + Stage + "..."
+        LoadSplash.Link_SplashClose.Text = Nothing
         MainWindow.Value_Debug.Text = GetLoc("LoadDebug") + ": " + Stage
 
         ' Visszatérési érték beállítása

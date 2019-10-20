@@ -58,6 +58,7 @@ Public Class Localization
                 AddLoc("ChartDown", "Download speed")
                 AddLoc("ChartUp", "Upload speed")
                 AddLoc("ChartHide", "Chart rendering disabled.")
+                AddLoc("ChartStop", "Status: The timer is currently stopped.")
                 AddLoc("ChartDone", "Status: Chart done, next is in")
                 AddLoc("ChartRedraw", "Status: Chart redraw in")
                 AddLoc("ChartCount", "seconds")
@@ -69,8 +70,6 @@ Public Class Localization
                 AddLoc("Mins", "minutes")
                 AddLoc("Secs", "seconds")
                 AddLoc("And", "and")
-                AddLoc("QuitAsk", "Do you really want to quit?")
-                AddLoc("QuitTitle", "Exit confirmation")
                 AddLoc("Note", "Notification")
                 AddLoc("Taskbar", "The process is still running in the background.")
                 AddLoc("ImageSaved", "Image saved")
@@ -84,6 +83,12 @@ Public Class Localization
                 AddLoc("Inactive", "Inactive")
                 AddLoc("Enabled", "Enabled")
                 AddLoc("Disabled", "Disabled")
+
+                ' Üzenetdoboz változók
+                AddLoc("MsgDiskTitle", "Disk is missing")
+                AddLoc("MsgDiskText", "The selected disk has been removed, the disk list will be updated!")
+                AddLoc("MSgQuitTitle", "Exit confirmation")
+                AddLoc("MsgQuitText", "Do you really want to quit?")
 
                 ' Betöltési változók
                 AddLoc("LoadDebug", "Load failure")
@@ -270,6 +275,7 @@ Public Class Localization
                 AddLoc("ChartDown", "Letöltési sebesség")
                 AddLoc("ChartUp", "Feltöltési sebesség")
                 AddLoc("ChartHide", "A diagram leképezés ki van kapcsolva.")
+                AddLoc("ChartStop", "Állapot: Az időzítő jelenleg le van állítva.")
                 AddLoc("ChartDone", "Állapot: Diagram kész, következő")
                 AddLoc("ChartRedraw", "Állapot: Diagram újrarajzolása")
                 AddLoc("ChartCount", "másodperc múlva")
@@ -281,8 +287,6 @@ Public Class Localization
                 AddLoc("Mins", "perc")
                 AddLoc("Secs", "másodperc")
                 AddLoc("And", "és")
-                AddLoc("QuitAsk", "Valóban ki szeretne lépni?")
-                AddLoc("QuitTitle", "Kilépés megerősítése")
                 AddLoc("Note", "Értesítés")
                 AddLoc("Taskbar", "A folyamat továbbra is fut a háttérben.")
                 AddLoc("ImageSaved", "Kép elmentve")
@@ -296,6 +300,12 @@ Public Class Localization
                 AddLoc("Inactive", "Inaktív")
                 AddLoc("Enabled", "Engedélyezve")
                 AddLoc("Disabled", "Letiltva")
+
+                ' Üzenetdoboz változók
+                AddLoc("MsgDiskTitle", "Hiányzó lemez")
+                AddLoc("MsgDiskText", "A kiválasztott lemezt eltávolították, a lemezlista frissítve lesz!")
+                AddLoc("MsgQuitTitle", "Kilépés megerősítése")
+                AddLoc("MsgQuitText", "Valóban ki szeretne lépni?")
 
                 ' Betöltési változók
                 AddLoc("LoadDebug", "Betöltési hiba")
