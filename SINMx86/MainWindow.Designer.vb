@@ -761,6 +761,7 @@ Partial Class MainWindow
         '
         'Button_IPInfoOpen
         '
+        Me.Button_IPInfoOpen.Enabled = False
         Me.Button_IPInfoOpen.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Button_IPInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Control_NIC
         Me.Button_IPInfoOpen.Location = New System.Drawing.Point(385, 21)

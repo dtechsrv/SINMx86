@@ -55,9 +55,6 @@ Public NotInheritable Class LoadSplash
             Splash_Status.Text = MainWindow.Value_Debug.Text
         End If
 
-        ' Előtérbe hozás
-        Me.BringToFront()
-
     End Sub
 
     ' ----- FÜGGVÉNYEK -----

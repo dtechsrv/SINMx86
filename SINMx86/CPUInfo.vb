@@ -45,7 +45,7 @@ Public Class CPUInfo
         Dim ArchStr() As String = {"x86", "MIPS", "Alpha", "PowerPC", "IA64", "x64"}
 
         ' CPU feketelistás sztringek (Dummy szövegek, amelyeket az alaplap gyártója "elfelejtett" kitölteni.)
-        Dim Blacklist() As String = {"PROCESSOR", "PROCESSOR 0", "SOCKET", "SOCKET 0", "CPU", "CPU0", "CPU 0"}
+        Dim Blacklist() As String = {"PROCESSOR", "PROCESSOR 0", "SOCKET", "SOCKET 0", "CPU", "CPU0", "CPU 0", "Intel CPU"}
 
         ' Értékek átvétele a főablaktól
         Dim TableName As String = MainWindow.ComboBox_CPUList.Items(SelectedCPU)

@@ -35,6 +35,7 @@ Public Class MainWindow
     Public SysStartTime As DateTime                                                 ' Rendszer indításának ideje
     Public TimerLastTick As DateTime                                                ' Közvetlen időzítő időbélyegzője
     Public LatestDownload, LatestUpload As Double                                   ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
+    Public ChartStop As Boolean = False                                             ' Diagram leképezés leállítva (az időzítő által)
     Public ChartCreationTime As DateTime                                            ' Az utolsó diagram elkészülésének ideje
     Public DisableBalloon As Boolean = False                                        ' A "Kis méret ikonként" mellett felbukkanú üzenet tiltása (csak először jelenik meg)
     Public OpenFile As Boolean = False                                              ' Fájl megnyitása buboréküzenetnél (csak, ha mentés történt, egyéb esetben nem)
@@ -159,7 +160,8 @@ Public Class MainWindow
         StatusLabel_Host.Text = GetLoc("Hostname") + ": " + Hostname
 
         ' Diagram leképezés állapotának alaphelyzetbe állítása
-        StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
+        StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+        StatusLabel_ChartStatus.Text = GetLoc("ChartReset")
 
         ' Betöltési állapot beállítása -> Uptime
         DebugLoadStage(GetLoc("LoadUptime"))
@@ -920,36 +922,59 @@ Public Class MainWindow
         ' Interfész jelenlétének ellenőrzése
         If InterfacePresent Then
 
-        ' WMI értékek lekérdezése: Win32_PerfRawData_Tcpip_NetworkInterface -> Forgalmi adatok
+            ' WMI értékek lekérdezése: Win32_PerfRawData_Tcpip_NetworkInterface -> Forgalmi adatok
             objNI = New ManagementObjectSearcher("SELECT CurrentBandwidth, BytesReceivedPersec, BytesSentPersec FROM Win32_PerfRawData_Tcpip_NetworkInterface WHERE Name = '" + InterfaceList(SelectedInterface) + "'")
 
-            ' Értékek beállítása -> Forgalmi adatok: fogadott és küldött bájtok
-            For Each Me.objMgmt In objNI.Get()
+            ' Interfész eltűnésének ellenőrzése
+            If objNI.Get().Count = 0 Then
 
-                ' Maximálisan felvehető sebességérték (A sávszélesség nyolcadrésze)
-                MaxRelativeSpeed = objMgmt("CurrentBandwidth") / 8
+                ' Diagram leképezés leállítása
+                ChartStop = True
 
-                ' Aktuális érték az első helyre
-                If objMgmt("BytesReceivedPersec") > (UIntCorrection - 1) Then
-                    CurrentDownload = objMgmt("BytesReceivedPersec") - (UIntCorrection)
-                Else
-                    CurrentDownload = objMgmt("BytesReceivedPersec")
-                End If
+                ' Diagram állapotkijelzés frissítése
+                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+                StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
 
-                ' Aktuális érték az első helyre
-                If objMgmt("BytesSentPersec") > (UIntCorrection - 1) Then
-                    CurrentUpload = objMgmt("BytesSentPersec") - (UIntCorrection)
-                Else
-                    CurrentUpload = objMgmt("BytesSentPersec")
-                End If
-            Next
+                ' Üzenet megjelenítése
+                MsgBox(GetLoc("MsgInterfaceText"), vbExclamation, GetLoc("MsgInterfaceTitle") + ": " + ComboBox_InterfaceList.Items(SelectedInterface))
 
-            ' Sávszélesség érték konverziója
-            MaxBandwidth = ScaleConversion(objMgmt("CurrentBandwidth"), 2, False)
+                ' Interfész lista újratöltése
+                UpdateInterfaceList(True)
 
-            ' Kiírási értékek láthatóságának beállítása
-            Value_Bandwidth.Enabled = True
-            Value_BandwidthUnit.Enabled = True
+            Else
+
+                ' Diagram leképezés indítása
+                ChartStop = False
+
+                ' Értékek beállítása -> Forgalmi adatok: fogadott és küldött bájtok
+                For Each Me.objMgmt In objNI.Get()
+
+                    ' Maximálisan felvehető sebességérték (A sávszélesség nyolcadrésze)
+                    MaxRelativeSpeed = objMgmt("CurrentBandwidth") / 8
+
+                    ' Aktuális érték az első helyre
+                    If objMgmt("BytesReceivedPersec") > (UIntCorrection - 1) Then
+                        CurrentDownload = objMgmt("BytesReceivedPersec") - (UIntCorrection)
+                    Else
+                        CurrentDownload = objMgmt("BytesReceivedPersec")
+                    End If
+
+                    ' Aktuális érték az első helyre
+                    If objMgmt("BytesSentPersec") > (UIntCorrection - 1) Then
+                        CurrentUpload = objMgmt("BytesSentPersec") - (UIntCorrection)
+                    Else
+                        CurrentUpload = objMgmt("BytesSentPersec")
+                    End If
+                Next
+
+                ' Sávszélesség érték konverziója
+                MaxBandwidth = ScaleConversion(objMgmt("CurrentBandwidth"), 2, False)
+
+                ' Kiírási értékek láthatóságának beállítása
+                Value_Bandwidth.Enabled = True
+                Value_BandwidthUnit.Enabled = True
+
+            End If
 
         Else
 
@@ -960,6 +985,13 @@ Public Class MainWindow
             ' Kiírási értékek láthatóságának beállítása
             Value_Bandwidth.Enabled = False
             Value_BandwidthUnit.Enabled = False
+
+            ' Diagram leképezés leállítása
+            ChartStop = True
+
+            ' Diagram állapotkijelzés frissítése
+            StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+            StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
 
         End If
 
@@ -998,7 +1030,6 @@ Public Class MainWindow
 
             ' Kihasználtsági érték kiszámítása (Mivel duplexitást nem lehet lekérdezni, ezért a kettő összege adja a kihasználtság mértékét -> Ez csak half-duplex kapcsolatnál igaz ebben a formában!)
             UsageValue = (CurrentDownload - LatestDownload) + (CurrentUpload - LatestUpload)
-
             CurrentUsage = Round(Abs(UsageValue / MaxRelativeSpeed) * 100)
 
             ' Kiírási értékek láthatóságának beállítása
@@ -1196,9 +1227,9 @@ Public Class MainWindow
     ' Kimenet: *         -> hamis érték (Boolean)
     Private Function UpdateDiskList(ByVal ResetFlag As Boolean)
 
-        ' Számláló beállítása
+        ' Értékek definiálása
         Dim DiskCount As Int32 = 0                              ' Lemezek sorszáma
-        Dim DiskIndex As Int32 = 0                                  ' Lemez index azonosítója
+        Dim DiskIndex As Int32 = 0                              ' Lemez index azonosítója
         Dim SortCount As Int32 = 0                              ' Sorbarendezési sorszámok
         Dim DiskPnPID(32) As String                             ' Lemez PnP azonosítója
         Dim Capacity(32) As Double                              ' Lemez kapacitása
@@ -1229,6 +1260,14 @@ Public Class MainWindow
             DiskPnPID(DiskIndex) = objMgmt("PNPDeviceID")
             Capacity(DiskIndex) = objMgmt("Size")
             DiskList(DiskCount) = DiskIndex
+
+            ' Ismeretlen lemez ellenőrzése
+            If IsNothing(objMgmt("Model")) Then
+                DiskName(DiskIndex) = GetLoc("UnknownDisk")
+            Else
+                DiskName(DiskIndex) = RemoveSpaces(objMgmt("Model"))
+            End If
+
             DiskCount += 1
         Next
 
@@ -1485,16 +1524,6 @@ Public Class MainWindow
                         InterfaceName(InterfaceCount) = Replace(InterfaceName(InterfaceCount), DeleteList(DeleteCount), Nothing)
                     Next
 
-                Else
-
-                    ' WMI lekérdezés: Win32_NetworkAdapterConfiguration -> Interfész azonosító alapján történő lekérdezés
-                    objNC = New ManagementObjectSearcher("SELECT IPEnabled FROM Win32_NetworkAdapterConfiguration WHERE Index = '" + InterfaceID(InterfaceCount) + "'")
-
-                    ' Értékek beállítása -> Interfész azonosító kiürítése, ha az IP kapcsolat nincs engedélyezve (Ez a referencia az IP-infó ablakhoz)
-                    For Each Me.objRes In objNC.Get()
-                        If Not objRes("IPEnabled") Then InterfaceID(InterfaceCount) = Nothing
-                    Next
-
                 End If
 
                 ' Interfész számláló növelése
@@ -1506,34 +1535,82 @@ Public Class MainWindow
         ' Interfész jelenlét ellenőrzése
         If InterfaceCount = 0 Then
 
-            ' Hamis listaelem hozzáadása
+            ' Függő változók beállítása
             InterfacePresent = False
+            ChartStop = True
+
+            ' Lista tiltása
             ComboBox_InterfaceList.Enabled = False
-            ComboBox_InterfaceList.Items.Add(GetLoc("NotAvailable"))
+
+            ' Hamis listaelem hozzáadása
             InterfaceName(0) = GetLoc("NotAvailable")
+            ComboBox_InterfaceList.Items.Add(InterfaceName(0))
 
         Else
+
+            ' Függő változók beállítása
+            InterfacePresent = True
+            ChartStop = False
+
+            ' Lista engedélyezése
+            ComboBox_InterfaceList.Enabled = True
 
             ' Lista feltöltése
             For ListCount = 1 To InterfaceCount
                 ComboBox_InterfaceList.Items.Add("# " + ListCount.ToString + "/" + InterfaceCount.ToString + " - " + RemoveSpaces(InterfaceName(ListCount - 1)))
             Next
 
-            InterfacePresent = True
-            ComboBox_InterfaceList.Enabled = True
-
         End If
 
         ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
-        If ResetFlag Then
-            SelectedInterface = 0
-        End If
+        If ResetFlag Then SelectedInterface = 0
 
         ' Utoljára kiválasztott érték beállítása
         ComboBox_InterfaceList.SelectedIndex = SelectedInterface
 
         ' Visszatérési érték beállítása
         Return False
+
+    End Function
+
+    ' *** FÜGGVÉNY: Interfész IP-engedélyezés ellenőrzése ***
+    ' Bemenet: InterfaceCount -> interfész sorszáma (Int32)
+    ' Kimenet: IPEnabled      -> engedélyezés értéke (Boolean)
+    Private Function CheckIPEnabled(ByVal InterfaceCount As Int32)
+
+        ' Értékek definiálása
+        Dim IPEnabled As Boolean = False                    ' IP engedélyezés
+        Dim IPAddress() As String                           ' IP címek tömbje
+
+        ' Intefész azonosító meglétének ellenőrzése
+        If Not IsNothing(InterfaceID(InterfaceCount)) Then
+
+            ' WMI lekérdezés: Win32_NetworkAdapterConfiguration -> Interfész azonosító alapján történő lekérdezés
+            objNC = New ManagementObjectSearcher("SELECT IPEnabled, IPAddress FROM Win32_NetworkAdapterConfiguration WHERE Index = '" + InterfaceID(InterfaceCount) + "'")
+
+            ' Elemszám ellenőrzése
+            If objNC.Get().Count <> 0 Then
+
+                ' Értékek beállítása
+                For Each Me.objMgmt In objNC.Get()
+                    IPEnabled = objMgmt("IPEnabled")
+
+                    ' XP ellenőrzés: az IPEnabled valós értéken marad kihúzott kábel mellett is!
+                    If Not IsNothing(objMgmt("IPAddress")) Then
+                        IPAddress = objMgmt("IPAddress")
+
+                        ' Ha az IP-cím '0.0.0.0', akkor is tiltani kell!
+                        If IPAddress(0) = "0.0.0.0" Then
+                            IPEnabled = False
+                        End If
+
+                    End If
+                Next
+            End If
+        End If
+
+        ' Visszatérési érték beállítása
+        Return IPEnabled
 
     End Function
 
@@ -1586,7 +1663,7 @@ Public Class MainWindow
             ' Diagram rajzolásának kezdő állapotba hozása az állapotsorban
             StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
             If MainWindowDone Then
-                StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (RefreshInterval(SelectedRefresh).ToString) + " " + GetLoc("ChartCount") + "..."
+                StatusLabel_ChartStatus.Text = GetLoc("ChartReset")
             End If
 
         End If
@@ -2007,27 +2084,6 @@ Public Class MainWindow
         ' Elkészült kép kirajzolása
         PictureBox_TrafficChart.Image = Picture
 
-        Return False
-
-    End Function
-
-    ' *** FÜGGVÉNY: Közvetett időzítő ***
-    ' Bemenet: * -> üres (Void)
-    ' Kimenet: * -> hamis érték (Boolean)
-    Private Function TraffRefresh()
-
-        ' Diagram ToolTip beállítása (másodpercek kiírásával)
-        EventToolTip.SetToolTip(PictureBox_TrafficChart, GetLoc("Tip_Chart") + " (" + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Tip_Average") + ")")
-
-        ' Forgalmi adatok frissítése
-        UpdateTraffArray(False)
-
-        ' Rácsfrissítés engedélyezése
-        GridUpdate = True
-
-        ' Diagram frissítése
-        MakeChart(False)
-
         ' Visszatérési érték beállítása
         Return False
 
@@ -2088,24 +2144,61 @@ Public Class MainWindow
         ' Uptime frissítése
         SetUptime()
 
-        ' Időbélyeg ellenőrzés (tolerancia: 1 másodperc)
-        If CheckTimerStamp(1) Then
+        ' Időbélyeg ellenőrzés (tolerancia: 2 másodperc)
+        If CheckTimerStamp(2) Then
 
-            ' Interfész statisztika frissítése 
-            UpdateSpeedStatistics(False)
+            ' Interfész statisztika frissítése -> Ő állítja be a ChartStop-ot is!
+            ' Megjegyzés: Az ellenőrzés azért kell, hogy ne hurokba dobálja fel az üzenetet!
+            If Not ChartStop Then UpdateSpeedStatistics(False)
 
-            ' Diagramgenerálás időközének beálltása és kiírása az állapotsorban
-            If TraffGenCounter = 0 Then
-                TraffRefresh()
-                TraffGenCounter = RefreshInterval(SelectedRefresh) - 1
-                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
-                StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (TraffGenCounter + 1).ToString + " " + GetLoc("ChartCount") + "..."
+            ' Diagram időzítő állapotának ellenőrzése
+            If Not ChartStop Then
+
+                ' IP-infó állapotának beállítása
+                Button_IPInfoOpen.Enabled = CheckIPEnabled(SelectedInterface)
+
+                ' Diagramgenerálás időközének beállítása és kiírása az állapotsorban
+                If TraffGenCounter = 0 Then
+
+                    ' Diagram ToolTip beállítása (másodpercek kiírásával)
+                    EventToolTip.SetToolTip(PictureBox_TrafficChart, GetLoc("Tip_Chart") + " (" + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Tip_Average") + ")")
+
+                    ' Forgalmi adatok frissítése
+                    UpdateTraffArray(False)
+
+                    ' Rácsfrissítés engedélyezése
+                    GridUpdate = True
+
+                    ' Diagram frissítése
+                    MakeChart(False)
+
+                    ' Számláló visszaállítása
+                    TraffGenCounter = RefreshInterval(SelectedRefresh) - 1
+
+                    ' Diagram állapotkijelzés frissítése
+                    StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+                    StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (TraffGenCounter + 1).ToString + " " + GetLoc("ChartCount") + "..."
+
+                Else
+
+                    ' Diagram állapotkijelzés frissítése
+                    StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
+                    StatusLabel_ChartStatus.Text = GetLoc("ChartRedraw") + " " + TraffGenCounter.ToString + " " + GetLoc("ChartCount") + "..."
+
+                    ' Számláló csökkentése
+                    TraffGenCounter = TraffGenCounter - 1
+
+                End If
             Else
-                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
-                StatusLabel_ChartStatus.Text = GetLoc("ChartRedraw") + " " + TraffGenCounter.ToString + " " + GetLoc("ChartCount") + "..."
-                TraffGenCounter = TraffGenCounter - 1
-            End If
 
+                ' IP-infó állapotának letiltása
+                Button_IPInfoOpen.Enabled = False
+
+                ' Diagram állapotkijelzés frissítése
+                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+                StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
+
+            End If
         Else
 
             ' Statisztika nullázása
@@ -2414,12 +2507,8 @@ Public Class MainWindow
         ' Változás beállítása
         SelectedInterface = ComboBox_InterfaceList.SelectedIndex
 
-        ' (IP engedélyezés ellenőrzése)
-        If InterfaceID(SelectedInterface) <> Nothing Then
-            Button_IPInfoOpen.Enabled = True
-        Else
-            Button_IPInfoOpen.Enabled = False
-        End If
+        ' IP-infó állotának beállítása
+        Button_IPInfoOpen.Enabled = False
 
         ' Statisztika nullázása
         UpdateSpeedStatistics(True)

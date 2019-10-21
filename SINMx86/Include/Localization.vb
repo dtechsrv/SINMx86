@@ -58,7 +58,8 @@ Public Class Localization
                 AddLoc("ChartDown", "Download speed")
                 AddLoc("ChartUp", "Upload speed")
                 AddLoc("ChartHide", "Chart rendering disabled.")
-                AddLoc("ChartStop", "Status: The timer is currently stopped.")
+                AddLoc("ChartStop", "Status: Chart creation is currently stopped.")
+                AddLoc("ChartReset", "Status: Chart has been reset.")
                 AddLoc("ChartDone", "Status: Chart done, next is in")
                 AddLoc("ChartRedraw", "Status: Chart redraw in")
                 AddLoc("ChartCount", "seconds")
@@ -73,6 +74,7 @@ Public Class Localization
                 AddLoc("Note", "Notification")
                 AddLoc("Taskbar", "The process is still running in the background.")
                 AddLoc("ImageSaved", "Image saved")
+                AddLoc("UnknownDisk", "Unknown disk drive")
                 AddLoc("NoDisk", "No disk")
                 AddLoc("NoName", "No name")
                 AddLoc("NotAvailable", "Not available")
@@ -85,6 +87,8 @@ Public Class Localization
                 AddLoc("Disabled", "Disabled")
 
                 ' Üzenetdoboz változók
+                AddLoc("MsgInterfaceTitle", "Interface is missing")
+                AddLoc("MsgInterfaceText", "The selected interface has been removed or disabled, the interface list will be updated!")
                 AddLoc("MsgDiskTitle", "Disk is missing")
                 AddLoc("MsgDiskText", "The selected disk has been removed, the disk list will be updated!")
                 AddLoc("MSgQuitTitle", "Exit confirmation")
@@ -275,7 +279,8 @@ Public Class Localization
                 AddLoc("ChartDown", "Letöltési sebesség")
                 AddLoc("ChartUp", "Feltöltési sebesség")
                 AddLoc("ChartHide", "A diagram leképezés ki van kapcsolva.")
-                AddLoc("ChartStop", "Állapot: Az időzítő jelenleg le van állítva.")
+                AddLoc("ChartStop", "Állapot: A diagram leképezés jelenleg le van állítva.")
+                AddLoc("ChartReset", "Állapot: A diagram alaphelyzetbe lett állítva.")
                 AddLoc("ChartDone", "Állapot: Diagram kész, következő")
                 AddLoc("ChartRedraw", "Állapot: Diagram újrarajzolása")
                 AddLoc("ChartCount", "másodperc múlva")
@@ -290,6 +295,7 @@ Public Class Localization
                 AddLoc("Note", "Értesítés")
                 AddLoc("Taskbar", "A folyamat továbbra is fut a háttérben.")
                 AddLoc("ImageSaved", "Kép elmentve")
+                AddLoc("UnknownDisk", "Ismeretlen lemezmeghajtó")
                 AddLoc("NoDisk", "Nincs lemez")
                 AddLoc("NoName", "Névtelen")
                 AddLoc("NotAvailable", "Nem elérhető")
@@ -302,6 +308,8 @@ Public Class Localization
                 AddLoc("Disabled", "Letiltva")
 
                 ' Üzenetdoboz változók
+                AddLoc("MsgInterfaceTitle", "Hiányzó interfész")
+                AddLoc("MsgInterfaceText", "A kiválasztott interfészt eltávolították vagy le lett tiltva, az interfész lista frissítve lesz!")
                 AddLoc("MsgDiskTitle", "Hiányzó lemez")
                 AddLoc("MsgDiskText", "A kiválasztott lemezt eltávolították, a lemezlista frissítve lesz!")
                 AddLoc("MsgQuitTitle", "Kilépés megerősítése")

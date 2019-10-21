@@ -21,8 +21,10 @@ __License:__ GNU General Public License v2.0.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-10-20 - Version 3.0.0 BETA / Build 5286 (testing)__
+__2019-10-21 - Version 3.0.0 BETA / Build 5290 (testing)__
 
+- Hálózati információs gomb: folyamatos csatlakozás ellenőrzése,
+- Letiltott vagy eltávolított hálózati interfész lekezelése,
 - Menet közben eltávolított meghajtó hibájának lekezelése lekéréskor,
 - Hiba- és állapotkezelő rendszer létrehozása betöltődéskor,
 - Szelektív S.M.A.R.T rekord kezelés, adathordozó típus függvényében,

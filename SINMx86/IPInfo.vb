@@ -291,17 +291,17 @@ Public Class IPInfo
                                       "255.255.255.254",
                                       "255.255.255.255"}
 
-
         ' A tömb végnézése
         For MaskIdentifier = 0 To UBound(NetMaskRaw)
 
-            ' Ha van egyezés, akkor beállítja az értéket
+            ' Ha van egyezés, akkor beállítja az értéket (IPv4)
             If Raw = NetMaskRaw(MaskIdentifier) Then
                 Value = MaskIdentifier.ToString + " (IPv4)"
             End If
+
         Next
 
-        ' Ha nem szerepel a tömbben, akkor az eredeti érték visszaadása
+        ' Ha nem szerepel a tömbben, akkor az eredeti érték visszaadása (IPv6)
         If Value = Nothing Then
             Value = Raw + " (IPv6)"
         End If
