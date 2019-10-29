@@ -113,6 +113,13 @@ Public Class Localization
 
                 ' Külső nyelvi sztingek -> S.M.A.R.T ablak
                 AddLoc("SmartTitle", "S.M.A.R.T information")
+                AddLoc("SmartStatus", "Status")
+                AddLoc("SmartNumber", "#")
+                AddLoc("SmartRaw", "Raw data")
+                AddLoc("SmartConvert", "Converted")
+                AddLoc("SmartOK", "OK")
+                AddLoc("SmartWarning", "Warning")
+                AddLoc("SmartCritical", "Critical")
                 AddLoc("SmartTable", "Disk")
                 AddLoc("SmartRecord", "Record")
                 AddLoc("SmartTreshold", "Treshold")
@@ -134,7 +141,7 @@ Public Class Localization
                 AddLoc("CPUVoltage", "Core voltage")
                 AddLoc("CPUArchitect", "Architecture")
                 AddLoc("CPUCurrentSpeed", "Current clock")
-                AddLoc("CPUMaxSpeed", "Native clock")
+                AddLoc("CPUMaxSpeed", "Maximum clock")
                 AddLoc("CPUBusClock", "Bus clock")
                 AddLoc("CPUL2", "Size of L2 cache")
                 AddLoc("CPUL3", "Size of L3 cache")
@@ -186,7 +193,7 @@ Public Class Localization
                 AddLoc("CPUList", "Processor:")
                 AddLoc("CPUCore", "Cores / Threads:")
                 AddLoc("CPUClock", "Clock:")
-                AddLoc("CPUMaximum", "Native:")
+                AddLoc("CPUMaximum", "Maximum:")
                 AddLoc("PhyMemSize", "Physical memory:")
                 AddLoc("PhyMemUsed", "Usage:")
                 AddLoc("PhyMemFree", "Free:")
@@ -334,6 +341,13 @@ Public Class Localization
 
                 ' Külső nyelvi sztingek -> S.M.A.R.T ablak
                 AddLoc("SmartTitle", "S.M.A.R.T információk")
+                AddLoc("SmartStatus", "Állapot")
+                AddLoc("SmartNumber", "#")
+                AddLoc("SmartRaw", "Nyers adat")
+                AddLoc("SmartConvert", "Konvertálva")
+                AddLoc("SmartOK", "Rendben")
+                AddLoc("SmartWarning", "Figyelmeztetés")
+                AddLoc("SmartCritical", "Kritikus")
                 AddLoc("SmartTable", "Lemez")
                 AddLoc("SmartRecord", "Rekord")
                 AddLoc("SmartTreshold", "Küszöb")
@@ -356,7 +370,7 @@ Public Class Localization
                 AddLoc("CPUVoltage", "Magfeszültség")
                 AddLoc("CPUArchitect", "Architectúra")
                 AddLoc("CPUCurrentSpeed", "Jelenlegi órajel")
-                AddLoc("CPUMaxSpeed", "Gyári órajel")
+                AddLoc("CPUMaxSpeed", "Maximális órajel")
                 AddLoc("CPUBusClock", "Busz órajel")
                 AddLoc("CPUL2", "L2 gyorsítótár mérete")
                 AddLoc("CPUL3", "L3 gyorsítótár mérete")
@@ -407,7 +421,7 @@ Public Class Localization
                 AddLoc("CPUList", "Processzor:")
                 AddLoc("CPUCore", "Magok / Szálak:")
                 AddLoc("CPUClock", "Órajel:")
-                AddLoc("CPUMaximum", "Eredeti:")
+                AddLoc("CPUMaximum", "Maximum:")
                 AddLoc("PhyMemSize", "Fizikai memória:")
                 AddLoc("PhyMemUsed", "Foglaltság:")
                 AddLoc("PhyMemFree", "Szabad:")
@@ -553,16 +567,15 @@ Public Class Localization
 
         ' Értékek definiálása
         Dim Converted As String = GetLoc("DateFormat")
-        Dim ConvCount As Int32 = 0
+        Dim ConvCount As Int32
         Dim SourceFormat() = {"yyyy", "MMMM", "dddd", "dd", "d", "H:mm:ss", "h:mm:ss", "tt"}
         ' Megjegyzés: A nap neve védett formátum, mivel a 'd' önmagában más formátumot takar. Ezért kell bele egy szóköz, amelyet utólag el kell távolítani!
         Dim TargetFormat() = {Format(InputDate, "yyyy"), "###", "##", Format(InputDate, "dd"), RemoveSpaces(Format(InputDate, " d")),
                               Format(InputDate, "H:mm:ss"), Format(InputDate, "h:mm:ss"), "#"}
 
         ' Ismert formátumok lecserélése valódi értékekre
-        For i As Int32 = 0 To UBound(SourceFormat)
+        For ConvCount = 0 To UBound(SourceFormat)
             Converted = Replace(Converted, SourceFormat(ConvCount), TargetFormat(ConvCount))
-            ConvCount += 1
         Next
 
         ' Védett szöveges formátum cseréje: Hónap neve, nap neve, napszak (AM/PM)

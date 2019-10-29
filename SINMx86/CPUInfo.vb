@@ -21,6 +21,7 @@ Public Class CPUInfo
         ' Értékek definiálása
         Dim VendorCount, NameCount, ArchCount As Int32          ' Ciklusszámlálók (gyártó, név, architektúra)
         Dim NameString As String                                ' Processzor neve
+        Dim DeviceID As String = Nothing                        ' Processzor azonosítója
         Dim L2Cache(2) As Double                                ' Level 2 cache mérete
         Dim L3Cache(2) As Double                                ' Level 3 cache mérete
 
@@ -72,12 +73,17 @@ Public Class CPUInfo
         ' Sorok törlése
         CPU_Table.Items.Clear()
 
-        ' WMI érték definiálása
-        objPR = New ManagementObjectSearcher("SELECT * FROM Win32_Processor")
+        ' WMI értékek lekérdezése: Win32_Processor -> CPU-információk
+        ' Megjegyzés: Ha wildcard lenne, akkor túl lassú lenne a lekérdezés, ezért ilyen hosszú!
+        objPR = New ManagementObjectSearcher("SELECT DeviceID, Manufacturer, Name, Description, NumberOfCores, NumberOfLogicalProcessors, SocketDesignation, " +
+                                             "CurrentVoltage, Architecture, CurrentClockSpeed, MaxClockSpeed, ExtClock, L2CacheSize FROM Win32_Processor")
 
-        ' Értékek kinyerése a WMI-ből
+        ' Értékek beállítása -> Processzor
         For Each Me.objMgmt In objPR.Get()
             If CPUCount = SelectedCPU Then
+
+                ' Eszközazonosító beállítása
+                DeviceID = objMgmt("DeviceID")
 
                 ' Gyártói sztring keresése és találat esetén a valódi név kiírása
                 For VendorCount = 0 To UBound(VendorID)
@@ -140,23 +146,32 @@ Public Class CPUInfo
                     CPUTableAddRow(GetLoc("CPUL2"), GetLoc("NotInstalled"), Nothing)
                 End If
 
-                ' XP alatt nem szereplő értékek kihagyása
-                If OSVersion(0) >= 6 Then
-
-                    ' L3 Cache méretének konvertálása
-                    If objMgmt("L3CacheSize") <> 0 Then
-                        L3Cache = ScaleConversion(objMgmt("L3CacheSize") * 1024, 0, True)
-                        CPUTableAddRow(GetLoc("CPUL3"), FixNumberFormat(L3Cache(0), 0, False), BytePrefix(L3Cache(1)) + "B")
-                    Else
-                        CPUTableAddRow(GetLoc("CPUL3"), GetLoc("NotInstalled"), Nothing)
-                    End If
-
-                End If
             End If
 
             ' Számláló növelése
             CPUCount += 1
+
         Next
+
+        ' XP alatt nem szereplő értékek lekérdezése
+        If OSVersion(0) >= 6 Then
+
+            ' WMI értékek lekérdezése: Win32_Processor -> Azonosító alapján
+            objPR = New ManagementObjectSearcher("SELECT L3CacheSize FROM Win32_Processor WHERE DeviceID='" + DeviceID + "'")
+
+            ' Értékek beállítása -> L3 cache mérete
+            For Each Me.objMgmt In objPR.Get()
+
+                ' L3 Cache méretének konvertálása
+                If objMgmt("L3CacheSize") <> 0 Then
+                    L3Cache = ScaleConversion(objMgmt("L3CacheSize") * 1024, 0, True)
+                    CPUTableAddRow(GetLoc("CPUL3"), FixNumberFormat(L3Cache(0), 0, False), BytePrefix(L3Cache(1)) + "B")
+                Else
+                    CPUTableAddRow(GetLoc("CPUL3"), GetLoc("NotInstalled"), Nothing)
+                End If
+
+            Next
+        End If
 
     End Sub
 

@@ -37,6 +37,7 @@ Partial Class IPInfo
         Me.IP_Table.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.Dummy, Me.Description, Me.Value})
         Me.IP_Table.FullRowSelect = True
         Me.IP_Table.GridLines = True
+        Me.IP_Table.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable
         Me.IP_Table.Location = New System.Drawing.Point(10, 23)
         Me.IP_Table.Name = "IP_Table"
         Me.IP_Table.ShowGroups = False

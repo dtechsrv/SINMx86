@@ -37,6 +37,7 @@ Partial Class CPUInfo
         Me.CPU_Table.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.Dummy, Me.Description, Me.Value})
         Me.CPU_Table.FullRowSelect = True
         Me.CPU_Table.GridLines = True
+        Me.CPU_Table.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable
         Me.CPU_Table.Location = New System.Drawing.Point(10, 23)
         Me.CPU_Table.Name = "CPU_Table"
         Me.CPU_Table.ShowGroups = False

@@ -40,10 +40,12 @@ Public Class Functions
     ' Kimenet: *     -> hamis érték (Boolean)
     Public Shared Function DebugLoadStage(ByVal Stage As String)
 
-        ' Betöltési üzenet beállítása a Splash ablakon és a Debug változóban a főablakban.
+        ' Betöltési üzenet beállítása a Splash ablakon, a taskbar ikonon és a Debug változóban a főablakban.
         LoadSplash.Splash_Status.Text = GetLoc("SplashLoad") + ": " + Stage + "..."
-        LoadSplash.Link_SplashClose.Text = Nothing
         MainWindow.Value_Debug.Text = GetLoc("LoadDebug") + ": " + Stage
+
+        ' Bezárás link kiürítése
+        LoadSplash.Link_SplashClose.Text = Nothing
 
         ' Visszatérési érték beállítása
         Return False
@@ -167,7 +169,7 @@ Public Class Functions
     ' Kimenet: OSVerArray() -> formázott érték (In32): Főverzió, Alverzió, Build
     Public Shared Function GetOSVersion()
 
-        ' Értékek definiálása
+        ' WMI feldolgozási objektumok
         Dim objOS As ManagementObjectSearcher
         Dim objMgmt As ManagementObject
 
@@ -187,7 +189,7 @@ Public Class Functions
         ReDim Preserve VersionString(0 To 2)
 
         ' Függő változók definiálása
-        Dim OSVerArray(UBound(VersionString)) As Int32                               ' Verziószám tagolt tömbje
+        Dim OSVerArray(UBound(VersionString)) As Int32                              ' Verziószám tagolt tömbje
 
         ' Konvertálás integerré
         For VersionCount = 0 To UBound(VersionString)
@@ -207,6 +209,7 @@ Public Class Functions
         ' Értékek definiálása
         Dim Str2Char() As Char                                  ' Sztring-karakter konverzió tömbje
         Dim TempString As String = Nothing                      ' Ideiglenes sztring az elemzéshez
+        Dim Position As Int32                                   ' Pozíció számláló
 
         ' Dupla szóközök eltávolítása, addig amíg szerepel benne! (Ezért kell a While!)
         While (InStr(RawString, "  "))
@@ -221,8 +224,8 @@ Public Class Functions
 
             ' Kezdőszóköz eltávolítása
             If Str2Char(0) = " " Then
-                For i As Int32 = 1 To UBound(Str2Char)
-                    TempString += Str2Char(i)
+                For Position = 1 To UBound(Str2Char)
+                    TempString += Str2Char(Position)
                 Next
                 RawString = TempString
             End If
@@ -235,12 +238,10 @@ Public Class Functions
 
                 ' Karaktertömbre bontás (újra)
                 Str2Char = RawString.ToCharArray()
-
-                For i As Int32 = 0 To (UBound(Str2Char) - 1)
-                    TempString += Str2Char(i)
+                For Position = 0 To (UBound(Str2Char) - 1)
+                    TempString += Str2Char(Position)
                 Next
                 RawString = TempString
-
             End If
         End If
 
@@ -257,6 +258,7 @@ Public Class Functions
         ' Értékek definiálása
         Dim Str2Char() As Char                                  ' Sztring-karakter konverzió tömbje
         Dim TempString As String = Nothing                      ' Ideiglenes sztring az összefűzéshez
+        Dim Position As Int32                                   ' Pozíció számláló
 
         ' Bemeneti érték formázása
         If RawString <> Nothing Then
@@ -265,8 +267,8 @@ Public Class Functions
             Str2Char = RawString.ToCharArray()
 
             ' Elemzés: az ismert és elfogadható karakterek kivételével minden egyéb eltávolítása
-            For i As Int32 = 0 To UBound(Str2Char)
-                TempString += Regex.Replace(Str2Char(i), "[^a-zA-Z0-9 \(\)\[\]\\/\-_~\*?$#&'%+=!|<>{},.:;@]", "")
+            For Position = 0 To UBound(Str2Char)
+                TempString += Regex.Replace(Str2Char(Position), "[^a-zA-Z0-9 \(\)\[\]\\/\-_~\*?$#&'%+=!|<>{},.:;@]", "")
             Next
 
             RawString = TempString
@@ -286,17 +288,18 @@ Public Class Functions
 
         ' Értékek definiálása
         Dim Match As Boolean = False                            ' Egyezés állapota
+        Dim Position As Int32                                   ' Pozíció számláló
 
         ' Egyezés keresés a tömb elemei között
-        For i As Int32 = 0 To UBound(ChkArr)
+        For Position = 0 To UBound(ChkArr)
 
             ' Case insensitive átalakítás
             If CSense = False Then
-                If LCase(RawString) = LCase(ChkArr(i)) And Match = False Then
+                If LCase(RawString) = LCase(ChkArr(Position)) And Match = False Then
                     Match = True
                 End If
             Else
-                If RawString = ChkArr(i) And Match = False Then
+                If RawString = ChkArr(Position) And Match = False Then
                     Match = True
                 End If
             End If
@@ -316,17 +319,18 @@ Public Class Functions
 
         ' Értékek definiálása
         Dim Contain As Boolean = False                          ' Egyezés állapota
+        Dim Position As Int32                                   ' Pozíció számláló
 
         ' Egyezés keresés a tömb elemei között
-        For i As Int32 = 0 To UBound(ChkArr)
+        For Position = 0 To UBound(ChkArr)
 
             ' Case insensitive átalakítás
             If CSense = False Then
-                If LCase(InStr(RawString, ChkArr(i))) And Contain = False Then
+                If LCase(InStr(RawString, ChkArr(Position))) And Contain = False Then
                     Contain = True
                 End If
             Else
-                If InStr(RawString, ChkArr(i)) And Contain = False Then
+                If InStr(RawString, ChkArr(Position)) And Contain = False Then
                     Contain = True
                 End If
             End If

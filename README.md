@@ -23,6 +23,11 @@ __License:__ GNU General Public License v2.0.
 
 __2019-10-21 - Version 3.0.0 BETA / Build 5290 (testing)__
 
+- Wildcard lekérdezések megszűntetése, OS függő lekérdezések függetlenítése,
+- CPU magok és szálak frissítésének tiltása (terhelés csökkentés),
+- Kiválasztott lemezmeghajtó meglétének ellenőrzése külön függvény által,
+- CPU-Infó lekérés gyorsítása: wildcard helyett a lekért paraméterekkel,
+- S.M.A.R.T értékek kiértékelése, kritikus értékek kiemelése,
 - Hálózati információs gomb: folyamatos csatlakozás ellenőrzése,
 - Letiltott vagy eltávolított hálózati interfész lekezelése,
 - Menet közben eltávolított meghajtó hibájának lekezelése lekéréskor,

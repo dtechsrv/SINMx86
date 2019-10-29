@@ -389,9 +389,9 @@ Partial Class MainWindow
         Me.Name_CPUMaximum.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Name_CPUMaximum.Location = New System.Drawing.Point(316, 48)
         Me.Name_CPUMaximum.Name = "Name_CPUMaximum"
-        Me.Name_CPUMaximum.Size = New System.Drawing.Size(48, 13)
+        Me.Name_CPUMaximum.Size = New System.Drawing.Size(62, 13)
         Me.Name_CPUMaximum.TabIndex = 7
-        Me.Name_CPUMaximum.Text = "Native:"
+        Me.Name_CPUMaximum.Text = "Maximum:"
         '
         'Value_CPUCore
         '

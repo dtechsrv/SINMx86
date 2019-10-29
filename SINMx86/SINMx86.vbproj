@@ -249,6 +249,9 @@
     <None Include="Resources\Controls\hdd.gif" />
     <None Include="Resources\Controls\cpu.gif" />
     <None Include="Resources\Controls\nic.gif" />
+    <None Include="Resources\Controls\smart_error.gif" />
+    <None Include="Resources\Controls\smart_ok.gif" />
+    <None Include="Resources\Controls\smart_warning.gif" />
     <Content Include="Resources\Icon\main.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
