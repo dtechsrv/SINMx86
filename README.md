@@ -21,7 +21,7 @@ __License:__ GNU General Public License v2.0.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-10-21 - Version 3.0.0 BETA / Build 5290 (testing)__
+__2019-10-29 - Version 3.0.0 RC / Build 5300 (testing)__
 
 - Wildcard lekérdezések megszűntetése, OS függő lekérdezések függetlenítése,
 - CPU magok és szálak frissítésének tiltása (terhelés csökkentés),
