@@ -837,7 +837,7 @@ Public Class MainWindow
         Dim SearchList() As String = {"(", ")"}
         Dim ReplaceList() As String = {"[", "]"}
 
-        ' Névből törlendő sztringek tömbje
+        ' Névben átírandó sztringek tömbje
         Dim ModifyList() As String = {"/", "\", "#", "+"}
 
         ' Korrekciós sztringek keresése és cseréje
@@ -1463,10 +1463,10 @@ Public Class MainWindow
         Dim ReplaceList() As String = {"(", ")", " #", "/100", "/AR", "PRO/", "/RTL"}
 
         ' Névből törlendő sztringek tömbje
-        Dim DeleteList() As String = {"_", "(C)", "(R)", "(TM)"}
+        Dim DeleteList() As String = {"_", "(C)", "(R)", "(TM)", " - Packet Scheduler Miniport"}
 
-        ' WMI lekérdezés: Win32_PnPEntity -> Hálózati adapterek
-        objNA = New ManagementObjectSearcher("SELECT Name, DeviceID FROM Win32_NetworkAdapter")
+        ' WMI lekérdezés: Win32_NetworkAdapterConfiguration -> Hálózati adapterek beállításai
+        objNA = New ManagementObjectSearcher("SELECT Description, Index FROM Win32_NetworkAdapterConfiguration")
 
         ' Eszközszám meghatározása
         AdapterNum = objNA.Get().Count
@@ -1476,12 +1476,21 @@ Public Class MainWindow
         Dim AdapterName(AdapterNum - 1) As String           ' Előformázott eszköznevek tömbje (összehasonlításhoz)
         Dim AdapterID(AdapterNum - 1) As String             ' Hálózati adapter azonosítója
 
-        ' Értékek beállítása ->  Hálózati adapterek neveinek kártya nevek lekérdezése 
+        ' Értékek beállítása -> Hálózati adapterek neveinek lekérdezése 
         For Each Me.objMgmt In objNA.Get()
-            AdapterList(AdapterCount) = objMgmt("Name")
-            AdapterName(AdapterCount) = StatNameConv(objMgmt("Name"))
-            AdapterID(AdapterCount) = objMgmt("DeviceID")
+
+            ' Eredeti adapternév felvitele az adapterlistába (lekérdezéshez)
+            AdapterList(AdapterCount) = objMgmt("Description")
+
+            ' Konvertált név felitele a névlistába (összehasonlításhoz)
+            AdapterName(AdapterCount) = StatNameConv(objMgmt("Description"))
+
+            ' Adapter azonosítója (IP-infó lekérdezéshez)
+            AdapterID(AdapterCount) = objMgmt("Index")
+
+            ' Adapter számláló növelése
             AdapterCount += 1
+
         Next
 
         ' Lista kiürítése
@@ -1495,14 +1504,15 @@ Public Class MainWindow
 
             ' Hibakezelés: ISATAP és virtuális ('*'-ot tartlmaz a neve, pl.: PAN) adapterek kihagyása
             If CheckStrContain(objMgmt("Name"), {"isatap", "*"}, False) = False Then
-                InterfaceList(InterfaceCount) = objMgmt("Name")
 
-                ' XP név korrekció
-                InterfaceName(InterfaceCount) = Replace(InterfaceList(InterfaceCount), " - Packet Scheduler Miniport", "")
+                ' Eredeti interfésznév felvitele az interfészlistába (lekérdezéshez)
+                InterfaceList(InterfaceCount) = objMgmt("Name")
 
                 ' Statisztikához átalakított eszköznevek keresése (Ha van egyezés, akkor az lesz a név, egyébként a gyári!)
                 For StatCount = 0 To (AdapterNum - 1)
-                    If (AdapterName(StatCount) = InterfaceName(InterfaceCount)) Then
+
+                    ' Konvertált adapter név és Interfésznév összehasonlítása (XP-s névkorrekcióval!)
+                    If AdapterName(StatCount) = InterfaceList(InterfaceCount) Then
 
                         ' Interfész azonosító és név hozzáadása
                         InterfaceID(InterfaceCount) = AdapterID(StatCount)
@@ -1516,11 +1526,11 @@ Public Class MainWindow
                     End If
                 Next
 
-                ' Beállított név keresése
+                ' Konvertált név keresése -> Ha üres, akkor a kiolvasott név lesz átalakítva!
                 If InterfaceName(InterfaceCount) = Nothing Then
 
                     ' Eredeti név felhasználása, ha az összehasonlítás nem járt sikerrel
-                    InterfaceName(InterfaceCount) = RemoveSpaces(objMgmt("Name"))
+                    InterfaceName(InterfaceCount) = InterfaceList(InterfaceCount)
 
                     ' Korrekciós sztringek keresése és cseréje
                     For SearchCount = 0 To UBound(SearchList)

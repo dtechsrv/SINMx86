@@ -7,7 +7,7 @@ Imports SINMx86.Localization
 Public Class IPInfo
 
     ' WMI feldolgozási objektumok
-    Public objNC As ManagementObjectSearcher
+    Public objNA, objNC As ManagementObjectSearcher
     Public objMgmt As ManagementObject
 
     ' *** FŐ ELJÁRÁS: IP-infó ablak betöltése (MyBase.Load -> IPInfo) ***
@@ -56,20 +56,29 @@ Public Class IPInfo
         ' Sorok törlése
         IP_Table.Items.Clear()
 
-        ' WMI érték definiálása
+        ' WMI lekérdezés: Win32_NetworkAdapter -> Hálózati adapter
+        objNA = New ManagementObjectSearcher("SELECT Description FROM Win32_NetworkAdapter WHERE DeviceID = '" + InterfaceID + "'")
+
+        ' Értékek beállítása -> Hálózati adapter nevének lekérdezése 
+        For Each Me.objMgmt In objNA.Get()
+
+            ' Adapter nevének felvitele
+            AdapterName = objMgmt("Description")
+            IPTableAddRow(GetLoc("IPAdapter"), AdapterName)
+
+        Next
+
+        ' WMI lekérdezés: Win32_NetworkAdapterConfiguration -> Hálózati adapter beállításai
         objNC = New ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapterConfiguration WHERE Index = '" + InterfaceID + "'")
 
-        ' Értékek kinyerése a WMI-ből
+        ' Értékek beállítása -> Hálózati adapter információi
         For Each Me.objMgmt In objNC.Get()
-
-            ' Sorok felvitele
-            AdapterName = Replace(objMgmt("Description"), " - Packet Scheduler Miniport", Nothing)
-
-            IPTableAddRow(GetLoc("IPAdapter"), AdapterName)
-            IPTableAddRow(GetLoc("IPMACAddr"), objMgmt("MACAddress"))
 
             ' IP kapcsolat elérhetőségének ellenőrzése
             If objMgmt("IPEnabled") Then
+
+                ' Fizikai cím hozzáadása
+                IPTableAddRow(GetLoc("IPMACAddr"), objMgmt("MACAddress"))
 
                 ' DHCP kliens ellenőrzése
                 DHCPClient = objMgmt("DHCPEnabled")
