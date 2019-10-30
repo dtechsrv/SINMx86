@@ -1465,8 +1465,23 @@ Public Class MainWindow
         ' Névből törlendő sztringek tömbje
         Dim DeleteList() As String = {"_", "(C)", "(R)", "(TM)", " - Packet Scheduler Miniport"}
 
-        ' WMI lekérdezés: Win32_NetworkAdapterConfiguration -> Hálózati adapterek beállításai
-        objNA = New ManagementObjectSearcher("SELECT Description, Index FROM Win32_NetworkAdapterConfiguration")
+        ' Operációs rendszer függő változók definiálása
+        Dim NameRecord, IndexRecord, SourceTable As String
+
+        ' Név és index rekord, valamint a forrás tábla beállítása
+        ' Megjegyzés: az adapter sorszáma is itt van feltűntetve a névben, ha több van ugyanabból a kártyatípusból!
+        If OSVersion(0) >= 6 Then
+            NameRecord = "Name"
+            IndexRecord = "DeviceID"
+            SourceTable = "Win32_NetworkAdapter"
+        Else
+            NameRecord = "Description"
+            IndexRecord = "Index"
+            SourceTable = "Win32_NetworkAdapterConfiguration"
+        End If
+
+        ' WMI lekérdezés: OS-függő -> Hálózati adapterek neve és sorszáma
+        objNA = New ManagementObjectSearcher("SELECT " + NameRecord + ", " + IndexRecord + " FROM " + SourceTable)
 
         ' Eszközszám meghatározása
         AdapterNum = objNA.Get().Count
@@ -1480,13 +1495,13 @@ Public Class MainWindow
         For Each Me.objMgmt In objNA.Get()
 
             ' Eredeti adapternév felvitele az adapterlistába (lekérdezéshez)
-            AdapterList(AdapterCount) = objMgmt("Description")
+            AdapterList(AdapterCount) = objMgmt(NameRecord)
 
             ' Konvertált név felitele a névlistába (összehasonlításhoz)
-            AdapterName(AdapterCount) = StatNameConv(objMgmt("Description"))
+            AdapterName(AdapterCount) = StatNameConv(objMgmt(NameRecord))
 
             ' Adapter azonosítója (IP-infó lekérdezéshez)
-            AdapterID(AdapterCount) = objMgmt("Index")
+            AdapterID(AdapterCount) = objMgmt(IndexRecord)
 
             ' Adapter számláló növelése
             AdapterCount += 1
