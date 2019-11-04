@@ -164,8 +164,8 @@ Public Class IPInfo
                         IPTableAddRow(GetLoc("IPDHCPServer"), GetLoc("NotAvailable"))
                     Else
                         IPTableAddRow(GetLoc("IPDHCPServer"), objMgmt("DHCPServer"))
-                        LeaseStart = DateTimeConv(objMgmt("DHCPLeaseObtained"))
-                        LeaseEnd = DateTimeConv(objMgmt("DHCPLeaseExpires"))
+                        LeaseStart = ManagementDateTimeConverter.ToDateTime(objMgmt("DHCPLeaseObtained"))
+                        LeaseEnd = ManagementDateTimeConverter.ToDateTime(objMgmt("DHCPLeaseExpires"))
 
                         ' Bérleti idő ellenőrzése (Win10 hiba miatt!)
                         If DateDiff("s", LeaseStart, DateTime.Now) > 0 And DateDiff("s", LeaseEnd, DateTime.Now) < 0 Then

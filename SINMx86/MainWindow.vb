@@ -32,7 +32,6 @@ Public Class MainWindow
     Public VerticalGrids As Int32 = 1                                               ' Fuggőleges osztóvonalak száma (másodpercre vetítve)
     Public GridSlip As Int32                                                        ' Függőleges rács eltolás
     Public GridUpdate As Boolean = False                                            ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
-    Public SysStartTime As DateTime                                                 ' Rendszer indításának ideje
     Public TimerLastTick As DateTime                                                ' Közvetlen időzítő időbélyegzője
     Public LatestDownload, LatestUpload As Double                                   ' Utolsó kiolvasott le- és feltöltési bájtok száma (az aktuális sebességszámításhoz kell)
     Public ChartStop As Boolean = False                                             ' Diagram leképezés leállítva (az időzítő által)
@@ -169,22 +168,11 @@ Public Class MainWindow
         StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
         StatusLabel_ChartStatus.Text = GetLoc("ChartReset")
 
-        ' Betöltési állapot beállítása -> Uptime
-        DebugLoadStage(GetLoc("LoadUptime"))
-
-        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Rendszerindítás ideje ***
-        ' Megjegyés: ez a referencia a SetUpTime() függvényhez.
-        objOS = New ManagementObjectSearcher("SELECT LastBootUptime FROM Win32_OperatingSystem")
-
-        ' Értékek beállítása -> Indítás ideje
-        For Each Me.objMgmt In objOS.Get()
-            SysStartTime = DateTimeConv(objMgmt("LastBootUptime"))
-        Next
-
         ' ----- KEZDŐÉRTÉK BEÁLLÍTÁSOK -----
         ' Megjegyzés: a betöltési állapot beállítása innentől nincs kommentezve!
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Futásidő ***
+        DebugLoadStage(GetLoc("LoadUptime"))
         SetUptime()
 
         ' *** KEZDŐÉRTÉK BEÁLLÍTÁS: Memória információk ***
@@ -325,7 +313,7 @@ Public Class MainWindow
         For Each Me.objMgmt In objBS.Get()
             Vendor = RemoveSpaces(objMgmt("Manufacturer"))
             Model = RemoveSpaces(objMgmt("SMBIOSBIOSVersion"))
-            Identifier = Format(DateTimeConv(objMgmt("ReleaseDate").ToString), "yyyy-MM-dd")
+            Identifier = Format(ManagementDateTimeConverter.ToDateTime(objMgmt("ReleaseDate").ToString), "yyyy-MM-dd")
         Next
 
         ' Értéktároló tömb frissítése -> BIOS
@@ -800,24 +788,44 @@ Public Class MainWindow
 
         ' Értékek definiálása
         Dim UptimeSeconds As Int32                              ' Indítás óta eltelt másodpercek száma
+        Dim SysStartTime, CurrentTime As DateTime               ' Indításkori és jelenlegi rendszeridő
         Dim Days, Hours, Minutes, Seconds As Int32              ' Időváltozók (nap, óra, perc, másodperc)
         Dim UptimeString As String = Nothing                    ' Futásidő sztring
 
+        ' *** WMI LEKÉRDEZÉS: Win32_OperatingSystem -> Indításkori és jelenlegi rendszeridő ***
+        ' Megjegyés: eltérő értéket mutat, ezért ez a referencia az uptime-hoz.
+        objOS = New ManagementObjectSearcher("SELECT LastBootUpTime, LocalDateTime FROM Win32_OperatingSystem")
+
+        ' Értékek beállítása -> Indítási és jelenlegi idő
+        For Each Me.objMgmt In objOS.Get()
+            SysStartTime = ManagementDateTimeConverter.ToDateTime(objMgmt("LastBootUpTime"))
+            CurrentTime = ManagementDateTimeConverter.ToDateTime(objMgmt("LocalDateTime"))
+        Next
+
         ' Futásidő érték számítása (másodperc)
-        UptimeSeconds = DateDiff("s", SysStartTime, DateTime.Now)
+        UptimeSeconds = DateDiff("s", SysStartTime, CurrentTime)
 
-        ' Egységekre bontás (napok, órák, percek, másodpercek)
-        Days = Int(UptimeSeconds / (24 * 3600))
-        UptimeSeconds = UptimeSeconds - (Days * 24 * 3600)
-        Hours = Int(UptimeSeconds / 3600)
-        UptimeSeconds = UptimeSeconds - (Hours * 3600)
-        Minutes = Int(UptimeSeconds / 60)
-        UptimeSeconds = UptimeSeconds - (Minutes * 60)
-        Seconds = Int(UptimeSeconds)
+        ' Érvénytelen időintervallum keresése
+        If UptimeSeconds < 0 Then
 
-        ' Kiírás frissítése
-        StatusLabel_Uptime.Text = GetLoc("Uptime") + ": " + Days.ToString + " " + GetLoc("Days") + ", " + Hours.ToString + " " + GetLoc("Hours") + ", " +
-                                  Minutes.ToString + " " + GetLoc("Mins") + " " + GetLoc("And") + " " + Seconds.ToString + " " + GetLoc("Secs") + "."
+            ' Érvénytelen idő (A jelenlegi idő korábban van, mint az indításkori idő!)
+            StatusLabel_Uptime.Text = GetLoc("Uptime") + ": " + GetLoc("Invalid")
+
+        Else
+
+            ' Egységekre bontás (napok, órák, percek, másodpercek)
+            Days = Int(UptimeSeconds / (24 * 3600))
+            UptimeSeconds = UptimeSeconds - (Days * 24 * 3600)
+            Hours = Int(UptimeSeconds / 3600)
+            UptimeSeconds = UptimeSeconds - (Hours * 3600)
+            Minutes = Int(UptimeSeconds / 60)
+            UptimeSeconds = UptimeSeconds - (Minutes * 60)
+            Seconds = Int(UptimeSeconds)
+
+            ' Kiírás frissítése
+            StatusLabel_Uptime.Text = GetLoc("Uptime") + ": " + Days.ToString + " " + GetLoc("Days") + ", " + Hours.ToString + " " + GetLoc("Hours") + ", " +
+                                      Minutes.ToString + " " + GetLoc("Mins") + " " + GetLoc("And") + " " + Seconds.ToString + " " + GetLoc("Secs") + "."
+        End If
 
         ' Visszatérési érték beállítása
         Return False
@@ -2232,8 +2240,8 @@ Public Class MainWindow
         ' Uptime frissítése
         SetUptime()
 
-        ' Időbélyeg ellenőrzés (tolerancia: 2 másodperc)
-        If CheckTimerStamp(2) Then
+        ' Időbélyeg ellenőrzés (tolerancia: 3 másodperc)
+        If CheckTimerStamp(3) Then
 
             ' Interfész statisztika frissítése -> Ő állítja be a ChartStop-ot is!
             ' Megjegyzés: Az ellenőrzés azért kell, hogy ne hurokba dobálja fel az üzenetet!

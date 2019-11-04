@@ -341,31 +341,6 @@ Public Class Functions
 
     End Function
 
-    ' *** FÜGGVÉNY: WMI alapú DateTime változó konverzió ***
-    ' Bemenet: WMIDateTime -> WMI datetime formátumú változó (String)
-    ' Kimenet: Converted   -> hagyományos DateTime változó (DateTime)
-    Public Shared Function DateTimeConv(ByVal WMIDateTime As String)
-
-        ' Értékek definiálása
-        Dim Converted As DateTime                               ' DateTime változó
-        Dim Year, Month, Day, Hour, Minute, Second As Int32     ' Időváltozók (év, hónap, nap, óra, perc, másodperc)
-
-        ' Értékek részekre bontása
-        Year = Mid(WMIDateTime, 1, 4)
-        Month = Mid(WMIDateTime, 5, 2)
-        Day = Mid(WMIDateTime, 7, 2)
-        Hour = Mid(WMIDateTime, 9, 2)
-        Minute = Mid(WMIDateTime, 11, 2)
-        Second = Mid(WMIDateTime, 13, 2)
-
-        ' Kimenet beállítása
-        Converted = New DateTime(Year, Month, Day, Hour, Minute, Second)
-
-        ' Visszatérési érték beállítása
-        Return Converted
-
-    End Function
-
     ' *** FÜGGVÉNY: Dinamikus nagyságrendi konverzió ***
     ' Bemenet: Value       -> bájt (Double)
     '          Digit       -> elválasztó utáni helyiértékek száma (Int32)
