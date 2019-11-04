@@ -1,4 +1,4 @@
-﻿# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
+# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
 ### System Information and Network Monitor
 
 A simple system information and real-time network monitoring utility.\
@@ -13,7 +13,8 @@ This utility reads all system information directly from WMI database.
 __Supported languages:__ English, Hungarian,\
 __Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5),\
 __Source author:__ Gábor Deé (dtech),\
-__License:__ GNU General Public License v2.0.
+__License:__ GNU General Public License v2.0.\
+__Supported operating systems:__ Microsoft Windows XP / 7 / 8 / 8.1 / 10 *(It is not tested under Vista.)*
 
 ## Screenshot
 
