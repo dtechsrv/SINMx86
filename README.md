@@ -21,8 +21,9 @@ __License:__ GNU General Public License v2.0.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-11-04 - Version 3.0.0 RC / Build 5305 (testing)__
+__2019-11-04 - Version 3.0.0 RC / Build 5306 (testing)__
 
+- Újbóli indítási kísérlétnél üzenet megjelenítése (csak egy példány futhat),
 - Negatív futásidő hiba kiküszöbölése, DateTime konverziós függvény eltávolítása,
 - Operációs rendszer függő hálózati kártya nevek és indexek kezelése,
 - Wildcard lekérdezések megszűntetése, OS függő lekérdezések függetlenítése,

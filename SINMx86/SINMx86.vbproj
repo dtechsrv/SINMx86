@@ -123,6 +123,7 @@
     <Import Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationEvents.vb" />
     <Compile Include="Include\Functions.vb" />
     <Compile Include="IPInfo.Designer.vb">
       <DependentUpon>IPInfo.vb</DependentUpon>
