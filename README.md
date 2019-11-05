@@ -13,8 +13,9 @@ This utility reads all system information directly from WMI database.
 __Supported languages:__ English, Hungarian,\
 __Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5),\
 __Source author:__ Gábor Deé (dtech),\
-__License:__ GNU General Public License v2.0.\
-__Supported operating systems:__ Microsoft Windows XP / 7 / 8 / 8.1 / 10 *(It is not tested under Vista.)*
+__License:__ GNU General Public License v2.0,\
+__Supported operating systems:__ Microsoft Windows XP / Vista / 7 / 8 / 8.1 / 10,\
+__Requirements:__ Microsoft .NET Framework 3.5.
 
 ## Screenshot
 
@@ -22,7 +23,7 @@ __Supported operating systems:__ Microsoft Windows XP / 7 / 8 / 8.1 / 10 *(It is
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-11-04 - Version 3.0.0 RC / Build 5306 (testing)__
+__2019-11-05 - Version 3.0.0 RC / Build 5307 (testing)__
 
 - Újbóli indítási kísérlétnél üzenet megjelenítése (csak egy példány futhat),
 - Negatív futásidő hiba kiküszöbölése, DateTime konverziós függvény eltávolítása,
