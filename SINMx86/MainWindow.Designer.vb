@@ -365,7 +365,7 @@ Partial Class MainWindow
         'Button_CPUInfoOpen
         '
         Me.Button_CPUInfoOpen.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_CPUInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Control_CPU
+        Me.Button_CPUInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Button_CPU
         Me.Button_CPUInfoOpen.Location = New System.Drawing.Point(414, 21)
         Me.Button_CPUInfoOpen.Name = "Button_CPUInfoOpen"
         Me.Button_CPUInfoOpen.Size = New System.Drawing.Size(23, 23)
@@ -614,7 +614,7 @@ Partial Class MainWindow
         'Button_VideoListReload
         '
         Me.Button_VideoListReload.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_VideoListReload.Image = Global.SINMx86.My.Resources.Resources.Control_Refresh
+        Me.Button_VideoListReload.Image = Global.SINMx86.My.Resources.Resources.Button_Refresh
         Me.Button_VideoListReload.Location = New System.Drawing.Point(414, 21)
         Me.Button_VideoListReload.Name = "Button_VideoListReload"
         Me.Button_VideoListReload.Size = New System.Drawing.Size(23, 23)
@@ -763,7 +763,7 @@ Partial Class MainWindow
         '
         Me.Button_IPInfoOpen.Enabled = False
         Me.Button_IPInfoOpen.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_IPInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Control_NIC
+        Me.Button_IPInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Button_NIC
         Me.Button_IPInfoOpen.Location = New System.Drawing.Point(385, 21)
         Me.Button_IPInfoOpen.Name = "Button_IPInfoOpen"
         Me.Button_IPInfoOpen.Size = New System.Drawing.Size(23, 23)
@@ -773,7 +773,7 @@ Partial Class MainWindow
         'Button_InterfaceListReload
         '
         Me.Button_InterfaceListReload.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_InterfaceListReload.Image = Global.SINMx86.My.Resources.Resources.Control_Refresh
+        Me.Button_InterfaceListReload.Image = Global.SINMx86.My.Resources.Resources.Button_Refresh
         Me.Button_InterfaceListReload.Location = New System.Drawing.Point(414, 21)
         Me.Button_InterfaceListReload.Name = "Button_InterfaceListReload"
         Me.Button_InterfaceListReload.Size = New System.Drawing.Size(23, 23)
@@ -1083,7 +1083,7 @@ Partial Class MainWindow
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
         Me.StatusLabel_Host.BorderStyle = System.Windows.Forms.Border3DStyle.SunkenOuter
-        Me.StatusLabel_Host.Image = Global.SINMx86.My.Resources.Resources.Control_Info
+        Me.StatusLabel_Host.Image = Global.SINMx86.My.Resources.Resources.Status_Info
         Me.StatusLabel_Host.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.StatusLabel_Host.Margin = New System.Windows.Forms.Padding(0, 3, 0, 0)
         Me.StatusLabel_Host.Name = "StatusLabel_Host"
@@ -1098,7 +1098,7 @@ Partial Class MainWindow
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
         Me.StatusLabel_Uptime.BorderStyle = System.Windows.Forms.Border3DStyle.SunkenOuter
-        Me.StatusLabel_Uptime.Image = Global.SINMx86.My.Resources.Resources.Control_Uptime
+        Me.StatusLabel_Uptime.Image = Global.SINMx86.My.Resources.Resources.Status_Lamp
         Me.StatusLabel_Uptime.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.StatusLabel_Uptime.Margin = New System.Windows.Forms.Padding(0, 3, 0, 0)
         Me.StatusLabel_Uptime.Name = "StatusLabel_Uptime"
@@ -1113,7 +1113,7 @@ Partial Class MainWindow
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
         Me.StatusLabel_ChartStatus.BorderStyle = System.Windows.Forms.Border3DStyle.SunkenOuter
-        Me.StatusLabel_ChartStatus.Image = Global.SINMx86.My.Resources.Resources.Control_Check
+        Me.StatusLabel_ChartStatus.Image = Global.SINMx86.My.Resources.Resources.Status_Check
         Me.StatusLabel_ChartStatus.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
         Me.StatusLabel_ChartStatus.Margin = New System.Windows.Forms.Padding(0, 3, 0, 0)
         Me.StatusLabel_ChartStatus.Name = "StatusLabel_ChartStatus"
@@ -1128,7 +1128,7 @@ Partial Class MainWindow
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) _
             Or System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom), System.Windows.Forms.ToolStripStatusLabelBorderSides)
         Me.StatusLabel_TopMost.BorderStyle = System.Windows.Forms.Border3DStyle.SunkenOuter
-        Me.StatusLabel_TopMost.Image = Global.SINMx86.My.Resources.Resources.Control_RedPin
+        Me.StatusLabel_TopMost.Image = Global.SINMx86.My.Resources.Resources.Status_Pin_Red
         Me.StatusLabel_TopMost.Margin = New System.Windows.Forms.Padding(0, 3, 0, 0)
         Me.StatusLabel_TopMost.Name = "StatusLabel_TopMost"
         Me.StatusLabel_TopMost.Size = New System.Drawing.Size(19, 19)
@@ -1270,7 +1270,7 @@ Partial Class MainWindow
         'ScreenshotToolStripMenuItem
         '
         Me.ScreenshotToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
-        Me.ScreenshotToolStripMenuItem.Image = Global.SINMx86.My.Resources.Resources.Control_Screenshot
+        Me.ScreenshotToolStripMenuItem.Image = Global.SINMx86.My.Resources.Resources.Menu_Camera
         Me.ScreenshotToolStripMenuItem.Name = "ScreenshotToolStripMenuItem"
         Me.ScreenshotToolStripMenuItem.Size = New System.Drawing.Size(28, 20)
         '
@@ -1304,7 +1304,7 @@ Partial Class MainWindow
         '
         Me.Button_SmartOpen.Enabled = False
         Me.Button_SmartOpen.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_SmartOpen.Image = Global.SINMx86.My.Resources.Resources.Control_HDD
+        Me.Button_SmartOpen.Image = Global.SINMx86.My.Resources.Resources.Button_HDD
         Me.Button_SmartOpen.Location = New System.Drawing.Point(385, 21)
         Me.Button_SmartOpen.Name = "Button_SmartOpen"
         Me.Button_SmartOpen.Size = New System.Drawing.Size(23, 23)
@@ -1337,7 +1337,7 @@ Partial Class MainWindow
         'Button_DiskListReload
         '
         Me.Button_DiskListReload.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_DiskListReload.Image = Global.SINMx86.My.Resources.Resources.Control_Refresh
+        Me.Button_DiskListReload.Image = Global.SINMx86.My.Resources.Resources.Button_Refresh
         Me.Button_DiskListReload.Location = New System.Drawing.Point(414, 21)
         Me.Button_DiskListReload.Name = "Button_DiskListReload"
         Me.Button_DiskListReload.Size = New System.Drawing.Size(23, 23)

@@ -118,32 +118,38 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Control_Load" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\load.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Menu_Camera" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\menu_camera.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_GreenPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\pin_green.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Status_Load" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\status_load.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_RedPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\pin_red.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Status_Check" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\status_check.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_Check" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\check.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Status_Pin_Green" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\status_pin_green.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_Uptime" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\uptime.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Status_Pin_Red" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\status_pin_red.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_Refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\refresh.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Status_Lamp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\status_lamp.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_Info" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\info.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Status_Info" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\status_info.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_Screenshot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\camera.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Button_Refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\button_refresh.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_HDD" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\hdd.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Button_CPU" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\button_cpu.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_HDD" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\button_hdd.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_NIC" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\button_nic.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Splash_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Splash\yumi.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -160,19 +166,13 @@
   <data name="Splash_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Splash\montana.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Control_CPU" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\cpu.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Control_NIC" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\nic.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="SMART_Critical" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Controls\smart_error.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="SMART_OK" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Controls\smart_ok.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SMART_Warning" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Controls\smart_warning.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SMART_Critical" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\smart_error.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

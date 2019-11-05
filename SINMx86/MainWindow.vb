@@ -131,9 +131,9 @@ Public Class MainWindow
 
         ' Jelző kép lecserélése
         If CheckedTopMost Then
-            StatusLabel_TopMost.Image = My.Resources.Resources.Control_GreenPin
+            StatusLabel_TopMost.Image = My.Resources.Resources.Status_Pin_Green
         Else
-            StatusLabel_TopMost.Image = My.Resources.Resources.Control_RedPin
+            StatusLabel_TopMost.Image = My.Resources.Resources.Status_Pin_Red
         End If
 
         ' Menüelemek állapotának beállítása
@@ -165,7 +165,7 @@ Public Class MainWindow
         StatusLabel_Host.Text = GetLoc("Hostname") + ": " + Hostname
 
         ' Diagram leképezés állapotának alaphelyzetbe állítása
-        StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+        StatusLabel_ChartStatus.Image = My.Resources.Resources.Status_Check
         StatusLabel_ChartStatus.Text = GetLoc("ChartReset")
 
         ' ----- KEZDŐÉRTÉK BEÁLLÍTÁSOK -----
@@ -948,7 +948,7 @@ Public Class MainWindow
                 ChartStop = True
 
                 ' Diagram állapotkijelzés frissítése
-                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+                StatusLabel_ChartStatus.Image = My.Resources.Resources.Status_Check
                 StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
 
                 ' Üzenet megjelenítése
@@ -1006,7 +1006,7 @@ Public Class MainWindow
             ChartStop = True
 
             ' Diagram állapotkijelzés frissítése
-            StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+            StatusLabel_ChartStatus.Image = My.Resources.Resources.Status_Check
             StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
 
         End If
@@ -1219,7 +1219,7 @@ Public Class MainWindow
 
             ' Törlendő sztringek keresése és törlése
             For DeleteCount = 0 To UBound(DeleteList)
-                CPUString(ListCount) = Replace(CPUString(ListCount), DeleteList(DeleteCount), Nothing)
+                CPUString(ListCount) = Replace(CPUString(ListCount), DeleteList(DeleteCount), " ")
             Next
 
             ' Listaelem hozzáadása
@@ -1760,7 +1760,7 @@ Public Class MainWindow
             UpdateTraffArray(True)
 
             ' Diagram rajzolásának kezdő állapotba hozása az állapotsorban
-            StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+            StatusLabel_ChartStatus.Image = My.Resources.Resources.Status_Check
             If MainWindowDone Then
                 StatusLabel_ChartStatus.Text = GetLoc("ChartReset")
             End If
@@ -2272,13 +2272,13 @@ Public Class MainWindow
                     TraffGenCounter = RefreshInterval(SelectedRefresh) - 1
 
                     ' Diagram állapotkijelzés frissítése
-                    StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+                    StatusLabel_ChartStatus.Image = My.Resources.Resources.Status_Check
                     StatusLabel_ChartStatus.Text = GetLoc("ChartDone") + " " + (TraffGenCounter + 1).ToString + " " + GetLoc("ChartCount") + "..."
 
                 Else
 
                     ' Diagram állapotkijelzés frissítése
-                    StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Load
+                    StatusLabel_ChartStatus.Image = My.Resources.Resources.Status_Load
                     StatusLabel_ChartStatus.Text = GetLoc("ChartRedraw") + " " + TraffGenCounter.ToString + " " + GetLoc("ChartCount") + "..."
 
                     ' Számláló csökkentése
@@ -2291,7 +2291,7 @@ Public Class MainWindow
                 Button_IPInfoOpen.Enabled = False
 
                 ' Diagram állapotkijelzés frissítése
-                StatusLabel_ChartStatus.Image = My.Resources.Resources.Control_Check
+                StatusLabel_ChartStatus.Image = My.Resources.Resources.Status_Check
                 StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
 
             End If
@@ -2845,10 +2845,10 @@ Public Class MainWindow
         ' Változás ellenőrzése és állapot invertálása
         If Me.TopMost Then
             CheckedTopMost = False
-            StatusLabel_TopMost.Image = My.Resources.Resources.Control_RedPin
+            StatusLabel_TopMost.Image = My.Resources.Resources.Status_Pin_Red
         Else
             CheckedTopMost = True
-            StatusLabel_TopMost.Image = My.Resources.Resources.Control_GreenPin
+            StatusLabel_TopMost.Image = My.Resources.Resources.Status_Pin_Green
         End If
 
         ' Láthatóság beállítása
