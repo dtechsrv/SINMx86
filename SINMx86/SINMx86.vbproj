@@ -124,6 +124,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationEvents.vb" />
+    <Compile Include="RAMInfo.Designer.vb">
+      <DependentUpon>RAMInfo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="RAMInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Include\Functions.vb" />
     <Compile Include="IPInfo.Designer.vb">
       <DependentUpon>IPInfo.vb</DependentUpon>
@@ -166,14 +172,17 @@
     <Compile Include="CPUInfo.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SmartWindow.Designer.vb">
-      <DependentUpon>SmartWindow.vb</DependentUpon>
+    <Compile Include="SMARTInfo.Designer.vb">
+      <DependentUpon>SMARTInfo.vb</DependentUpon>
     </Compile>
-    <Compile Include="SmartWindow.vb">
+    <Compile Include="SMARTInfo.vb">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="RAMInfo.resx">
+      <DependentUpon>RAMInfo.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="IPInfo.resx">
       <DependentUpon>IPInfo.vb</DependentUpon>
     </EmbeddedResource>
@@ -192,8 +201,8 @@
     <EmbeddedResource Include="CPUInfo.resx">
       <DependentUpon>CPUInfo.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SmartWindow.resx">
-      <DependentUpon>SmartWindow.vb</DependentUpon>
+    <EmbeddedResource Include="SMARTInfo.resx">
+      <DependentUpon>SMARTInfo.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -230,25 +239,26 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Splash\yumi.png" />
-    <None Include="Resources\Splash\montana.png" />
-    <None Include="Resources\Splash\yuzuki.png" />
-    <None Include="Resources\Splash\hikari.png" />
-    <None Include="Resources\Splash\midori.png" />
-    <None Include="Resources\Controls\button_refresh.gif" />
-    <None Include="Resources\Controls\status_info.gif" />
-    <None Include="Resources\Controls\status_lamp.gif" />
+    <None Include="Resources\Controls\menu_camera.gif" />
     <None Include="Resources\Controls\status_load.gif" />
+    <None Include="Resources\Controls\status_check.gif" />
     <None Include="Resources\Controls\status_pin_green.gif" />
     <None Include="Resources\Controls\status_pin_red.gif" />
-    <None Include="Resources\Controls\status_check.gif" />
-    <None Include="Resources\Controls\menu_camera.gif" />
-    <None Include="Resources\Controls\button_hdd.gif" />
+    <None Include="Resources\Controls\status_lamp.gif" />
+    <None Include="Resources\Controls\status_info.gif" />
+    <None Include="Resources\Controls\button_refresh.gif" />
     <None Include="Resources\Controls\button_cpu.gif" />
+    <None Include="Resources\Controls\button_ram.gif" />
+    <None Include="Resources\Controls\button_hdd.gif" />
     <None Include="Resources\Controls\button_nic.gif" />
-    <None Include="Resources\Controls\smart_error.gif" />
+    <None Include="Resources\Splash\yumi.png" />
+    <None Include="Resources\Splash\midori.png" />
+    <None Include="Resources\Splash\yuzuki.png" />
+    <None Include="Resources\Splash\hikari.png" />
+    <None Include="Resources\Splash\montana.png" />
     <None Include="Resources\Controls\smart_ok.gif" />
     <None Include="Resources\Controls\smart_warning.gif" />
+    <None Include="Resources\Controls\smart_error.gif" />
     <Content Include="Resources\Icon\main.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

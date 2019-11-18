@@ -49,18 +49,16 @@ Partial Class MainWindow
         Me.Name_CPUClock = New System.Windows.Forms.Label()
         Me.Name_CPUList = New System.Windows.Forms.Label()
         Me.GroupBox_MemoryInfo = New System.Windows.Forms.GroupBox()
-        Me.Value_PhyMemFree = New System.Windows.Forms.Label()
-        Me.Value_VirtMemFree = New System.Windows.Forms.Label()
-        Me.Name_VirtMemFree = New System.Windows.Forms.Label()
-        Me.Name_PhyMemUsed = New System.Windows.Forms.Label()
-        Me.Name_PhyMemFree = New System.Windows.Forms.Label()
-        Me.Value_VirtMemUsed = New System.Windows.Forms.Label()
-        Me.Value_PhyMemUsed = New System.Windows.Forms.Label()
-        Me.Name_VirtMemUsed = New System.Windows.Forms.Label()
-        Me.Value_VirtMemSize = New System.Windows.Forms.Label()
-        Me.Value_PhyMemSize = New System.Windows.Forms.Label()
-        Me.Name_VirtMemSize = New System.Windows.Forms.Label()
-        Me.Name_PhyMemSize = New System.Windows.Forms.Label()
+        Me.Button_RAMInfoOpen = New System.Windows.Forms.Button()
+        Me.Value_MemVisible = New System.Windows.Forms.Label()
+        Me.Name_MemVisible = New System.Windows.Forms.Label()
+        Me.Value_MemClock = New System.Windows.Forms.Label()
+        Me.Name_MemType = New System.Windows.Forms.Label()
+        Me.Name_MemClock = New System.Windows.Forms.Label()
+        Me.Value_MemType = New System.Windows.Forms.Label()
+        Me.Value_MemSize = New System.Windows.Forms.Label()
+        Me.Name_RAMList = New System.Windows.Forms.Label()
+        Me.Name_MemSize = New System.Windows.Forms.Label()
         Me.GroupBox_VideoInfo = New System.Windows.Forms.GroupBox()
         Me.Button_VideoListReload = New System.Windows.Forms.Button()
         Me.Value_VideoResolution = New System.Windows.Forms.Label()
@@ -138,7 +136,7 @@ Partial Class MainWindow
         Me.MainMenu_ActionItem_Exit = New System.Windows.Forms.ToolStripMenuItem()
         Me.ScreenshotToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GroupBox_DiskInfo = New System.Windows.Forms.GroupBox()
-        Me.Button_SmartOpen = New System.Windows.Forms.Button()
+        Me.Button_SMARTInfoOpen = New System.Windows.Forms.Button()
         Me.Value_PartLabel = New System.Windows.Forms.Label()
         Me.Value_PartInfo = New System.Windows.Forms.Label()
         Me.Button_DiskListReload = New System.Windows.Forms.Button()
@@ -158,6 +156,7 @@ Partial Class MainWindow
         Me.ComboBox_InterfaceList = New SINMx86.LeftComboBox()
         Me.ComboBox_UpdateList = New SINMx86.RightComboBox()
         Me.ComboBox_VideoList = New SINMx86.LeftComboBox()
+        Me.ComboBox_RAMList = New SINMx86.LeftComboBox()
         Me.ComboBox_CPUList = New SINMx86.LeftComboBox()
         Me.ComboBox_HWList = New SINMx86.LeftComboBox()
         Me.GroupBox_HWInfo.SuspendLayout()
@@ -254,10 +253,10 @@ Partial Class MainWindow
         Me.GroupBox_OSInfo.Controls.Add(Me.Value_OSName)
         Me.GroupBox_OSInfo.Controls.Add(Me.Name_OSName)
         Me.GroupBox_OSInfo.ForeColor = System.Drawing.SystemColors.Highlight
-        Me.GroupBox_OSInfo.Location = New System.Drawing.Point(12, 299)
+        Me.GroupBox_OSInfo.Location = New System.Drawing.Point(477, 30)
         Me.GroupBox_OSInfo.Name = "GroupBox_OSInfo"
         Me.GroupBox_OSInfo.Size = New System.Drawing.Size(455, 76)
-        Me.GroupBox_OSInfo.TabIndex = 8
+        Me.GroupBox_OSInfo.TabIndex = 11
         Me.GroupBox_OSInfo.TabStop = False
         Me.GroupBox_OSInfo.Text = "Operating system information"
         '
@@ -298,7 +297,7 @@ Partial Class MainWindow
         Me.Value_OSVersion.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Value_OSVersion.Location = New System.Drawing.Point(114, 48)
         Me.Value_OSVersion.Name = "Value_OSVersion"
-        Me.Value_OSVersion.Size = New System.Drawing.Size(73, 13)
+        Me.Value_OSVersion.Size = New System.Drawing.Size(75, 13)
         Me.Value_OSVersion.TabIndex = 3
         Me.Value_OSVersion.Text = "Unknown"
         '
@@ -316,12 +315,11 @@ Partial Class MainWindow
         'Value_OSRelease
         '
         Me.Value_OSRelease.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_OSRelease.Location = New System.Drawing.Point(267, 48)
+        Me.Value_OSRelease.Location = New System.Drawing.Point(254, 48)
         Me.Value_OSRelease.Name = "Value_OSRelease"
-        Me.Value_OSRelease.Size = New System.Drawing.Size(41, 13)
+        Me.Value_OSRelease.Size = New System.Drawing.Size(60, 13)
         Me.Value_OSRelease.TabIndex = 5
         Me.Value_OSRelease.Text = "N/A"
-        Me.Value_OSRelease.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_OSName
         '
@@ -396,12 +394,11 @@ Partial Class MainWindow
         'Value_CPUCore
         '
         Me.Value_CPUCore.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUCore.Location = New System.Drawing.Point(128, 48)
+        Me.Value_CPUCore.Location = New System.Drawing.Point(114, 48)
         Me.Value_CPUCore.Name = "Value_CPUCore"
-        Me.Value_CPUCore.Size = New System.Drawing.Size(61, 13)
+        Me.Value_CPUCore.Size = New System.Drawing.Size(75, 13)
         Me.Value_CPUCore.TabIndex = 4
         Me.Value_CPUCore.Text = "0 / 0"
-        Me.Value_CPUCore.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_CPUCore
         '
@@ -410,19 +407,18 @@ Partial Class MainWindow
         Me.Name_CPUCore.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Name_CPUCore.Location = New System.Drawing.Point(15, 48)
         Me.Name_CPUCore.Name = "Name_CPUCore"
-        Me.Name_CPUCore.Size = New System.Drawing.Size(103, 13)
+        Me.Name_CPUCore.Size = New System.Drawing.Size(91, 13)
         Me.Name_CPUCore.TabIndex = 3
-        Me.Name_CPUCore.Text = "Cores / Threads:"
+        Me.Name_CPUCore.Text = "Core / Thread:"
         '
         'Value_CPUClock
         '
         Me.Value_CPUClock.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_CPUClock.Location = New System.Drawing.Point(252, 48)
+        Me.Value_CPUClock.Location = New System.Drawing.Point(254, 48)
         Me.Value_CPUClock.Name = "Value_CPUClock"
         Me.Value_CPUClock.Size = New System.Drawing.Size(60, 13)
         Me.Value_CPUClock.TabIndex = 6
         Me.Value_CPUClock.Text = "0 MHz"
-        Me.Value_CPUClock.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_CPUClock
         '
@@ -448,151 +444,127 @@ Partial Class MainWindow
         '
         'GroupBox_MemoryInfo
         '
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_PhyMemFree)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_VirtMemFree)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_VirtMemFree)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_PhyMemUsed)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_PhyMemFree)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_VirtMemUsed)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_PhyMemUsed)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_VirtMemUsed)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_VirtMemSize)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_PhyMemSize)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_VirtMemSize)
-        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_PhyMemSize)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Button_RAMInfoOpen)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_MemVisible)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.ComboBox_RAMList)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_MemVisible)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_MemClock)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_MemType)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_MemClock)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_MemType)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Value_MemSize)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_RAMList)
+        Me.GroupBox_MemoryInfo.Controls.Add(Me.Name_MemSize)
         Me.GroupBox_MemoryInfo.ForeColor = System.Drawing.SystemColors.Highlight
         Me.GroupBox_MemoryInfo.Location = New System.Drawing.Point(12, 217)
         Me.GroupBox_MemoryInfo.Name = "GroupBox_MemoryInfo"
         Me.GroupBox_MemoryInfo.Size = New System.Drawing.Size(455, 76)
-        Me.GroupBox_MemoryInfo.TabIndex = 3
+        Me.GroupBox_MemoryInfo.TabIndex = 8
         Me.GroupBox_MemoryInfo.TabStop = False
         Me.GroupBox_MemoryInfo.Text = "Memory information"
         '
-        'Value_PhyMemFree
+        'Button_RAMInfoOpen
         '
-        Me.Value_PhyMemFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_PhyMemFree.Location = New System.Drawing.Point(244, 25)
-        Me.Value_PhyMemFree.Name = "Value_PhyMemFree"
-        Me.Value_PhyMemFree.Size = New System.Drawing.Size(68, 13)
-        Me.Value_PhyMemFree.TabIndex = 3
-        Me.Value_PhyMemFree.Text = "0 B"
-        Me.Value_PhyMemFree.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Button_RAMInfoOpen.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Button_RAMInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Button_RAM
+        Me.Button_RAMInfoOpen.Location = New System.Drawing.Point(414, 44)
+        Me.Button_RAMInfoOpen.Name = "Button_RAMInfoOpen"
+        Me.Button_RAMInfoOpen.Size = New System.Drawing.Size(23, 23)
+        Me.Button_RAMInfoOpen.TabIndex = 10
+        Me.Button_RAMInfoOpen.UseVisualStyleBackColor = True
         '
-        'Value_VirtMemFree
+        'Value_MemVisible
         '
-        Me.Value_VirtMemFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VirtMemFree.Location = New System.Drawing.Point(244, 48)
-        Me.Value_VirtMemFree.Name = "Value_VirtMemFree"
-        Me.Value_VirtMemFree.Size = New System.Drawing.Size(68, 13)
-        Me.Value_VirtMemFree.TabIndex = 9
-        Me.Value_VirtMemFree.Text = "0 B"
-        Me.Value_VirtMemFree.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Value_MemVisible.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_MemVisible.Location = New System.Drawing.Point(114, 48)
+        Me.Value_MemVisible.Name = "Value_MemVisible"
+        Me.Value_MemVisible.Size = New System.Drawing.Size(75, 13)
+        Me.Value_MemVisible.TabIndex = 7
+        Me.Value_MemVisible.Text = "0.00 MiB"
         '
-        'Name_VirtMemFree
+        'Name_MemVisible
         '
-        Me.Name_VirtMemFree.AutoSize = True
-        Me.Name_VirtMemFree.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_VirtMemFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_VirtMemFree.Location = New System.Drawing.Point(193, 48)
-        Me.Name_VirtMemFree.Name = "Name_VirtMemFree"
-        Me.Name_VirtMemFree.Size = New System.Drawing.Size(36, 13)
-        Me.Name_VirtMemFree.TabIndex = 8
-        Me.Name_VirtMemFree.Text = "Free:"
+        Me.Name_MemVisible.AutoSize = True
+        Me.Name_MemVisible.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_MemVisible.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_MemVisible.Location = New System.Drawing.Point(15, 48)
+        Me.Name_MemVisible.Name = "Name_MemVisible"
+        Me.Name_MemVisible.Size = New System.Drawing.Size(50, 13)
+        Me.Name_MemVisible.TabIndex = 6
+        Me.Name_MemVisible.Text = "Usable:"
         '
-        'Name_PhyMemUsed
+        'Value_MemClock
         '
-        Me.Name_PhyMemUsed.AutoSize = True
-        Me.Name_PhyMemUsed.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_PhyMemUsed.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_PhyMemUsed.Location = New System.Drawing.Point(316, 25)
-        Me.Name_PhyMemUsed.Name = "Name_PhyMemUsed"
-        Me.Name_PhyMemUsed.Size = New System.Drawing.Size(47, 13)
-        Me.Name_PhyMemUsed.TabIndex = 4
-        Me.Name_PhyMemUsed.Text = "Usage:"
+        Me.Value_MemClock.Enabled = False
+        Me.Value_MemClock.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_MemClock.Location = New System.Drawing.Point(370, 25)
+        Me.Value_MemClock.Name = "Value_MemClock"
+        Me.Value_MemClock.Size = New System.Drawing.Size(67, 13)
+        Me.Value_MemClock.TabIndex = 5
+        Me.Value_MemClock.Text = "0 MHz"
+        Me.Value_MemClock.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
-        'Name_PhyMemFree
+        'Name_MemType
         '
-        Me.Name_PhyMemFree.AutoSize = True
-        Me.Name_PhyMemFree.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_PhyMemFree.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_PhyMemFree.Location = New System.Drawing.Point(193, 25)
-        Me.Name_PhyMemFree.Name = "Name_PhyMemFree"
-        Me.Name_PhyMemFree.Size = New System.Drawing.Size(36, 13)
-        Me.Name_PhyMemFree.TabIndex = 2
-        Me.Name_PhyMemFree.Text = "Free:"
+        Me.Name_MemType.AutoSize = True
+        Me.Name_MemType.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_MemType.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_MemType.Location = New System.Drawing.Point(193, 25)
+        Me.Name_MemType.Name = "Name_MemType"
+        Me.Name_MemType.Size = New System.Drawing.Size(39, 13)
+        Me.Name_MemType.TabIndex = 2
+        Me.Name_MemType.Text = "Type:"
         '
-        'Value_VirtMemUsed
+        'Name_MemClock
         '
-        Me.Value_VirtMemUsed.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VirtMemUsed.Location = New System.Drawing.Point(393, 48)
-        Me.Value_VirtMemUsed.Name = "Value_VirtMemUsed"
-        Me.Value_VirtMemUsed.Size = New System.Drawing.Size(44, 13)
-        Me.Value_VirtMemUsed.TabIndex = 11
-        Me.Value_VirtMemUsed.Text = "100 %"
-        Me.Value_VirtMemUsed.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Name_MemClock.AutoSize = True
+        Me.Name_MemClock.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_MemClock.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_MemClock.Location = New System.Drawing.Point(318, 25)
+        Me.Name_MemClock.Name = "Name_MemClock"
+        Me.Name_MemClock.Size = New System.Drawing.Size(43, 13)
+        Me.Name_MemClock.TabIndex = 4
+        Me.Name_MemClock.Text = "Clock:"
         '
-        'Value_PhyMemUsed
+        'Value_MemType
         '
-        Me.Value_PhyMemUsed.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_PhyMemUsed.Location = New System.Drawing.Point(393, 25)
-        Me.Value_PhyMemUsed.Name = "Value_PhyMemUsed"
-        Me.Value_PhyMemUsed.Size = New System.Drawing.Size(44, 13)
-        Me.Value_PhyMemUsed.TabIndex = 5
-        Me.Value_PhyMemUsed.Text = "100 %"
-        Me.Value_PhyMemUsed.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Value_MemType.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_MemType.Location = New System.Drawing.Point(254, 25)
+        Me.Value_MemType.Name = "Value_MemType"
+        Me.Value_MemType.Size = New System.Drawing.Size(60, 13)
+        Me.Value_MemType.TabIndex = 3
+        Me.Value_MemType.Text = "RAM"
         '
-        'Name_VirtMemUsed
+        'Value_MemSize
         '
-        Me.Name_VirtMemUsed.AutoSize = True
-        Me.Name_VirtMemUsed.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_VirtMemUsed.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_VirtMemUsed.Location = New System.Drawing.Point(316, 48)
-        Me.Name_VirtMemUsed.Name = "Name_VirtMemUsed"
-        Me.Name_VirtMemUsed.Size = New System.Drawing.Size(47, 13)
-        Me.Name_VirtMemUsed.TabIndex = 10
-        Me.Name_VirtMemUsed.Text = "Usage:"
+        Me.Value_MemSize.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Value_MemSize.Location = New System.Drawing.Point(114, 25)
+        Me.Value_MemSize.Name = "Value_MemSize"
+        Me.Value_MemSize.Size = New System.Drawing.Size(75, 13)
+        Me.Value_MemSize.TabIndex = 1
+        Me.Value_MemSize.Text = "0.00 MiB"
         '
-        'Value_VirtMemSize
+        'Name_RAMList
         '
-        Me.Value_VirtMemSize.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VirtMemSize.Location = New System.Drawing.Point(124, 48)
-        Me.Value_VirtMemSize.Name = "Value_VirtMemSize"
-        Me.Value_VirtMemSize.Size = New System.Drawing.Size(68, 13)
-        Me.Value_VirtMemSize.TabIndex = 7
-        Me.Value_VirtMemSize.Text = "0 B"
-        Me.Value_VirtMemSize.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.Name_RAMList.AutoSize = True
+        Me.Name_RAMList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_RAMList.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_RAMList.Location = New System.Drawing.Point(193, 48)
+        Me.Name_RAMList.Name = "Name_RAMList"
+        Me.Name_RAMList.Size = New System.Drawing.Size(52, 13)
+        Me.Name_RAMList.TabIndex = 8
+        Me.Name_RAMList.Text = "Module:"
         '
-        'Value_PhyMemSize
+        'Name_MemSize
         '
-        Me.Value_PhyMemSize.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_PhyMemSize.Location = New System.Drawing.Point(124, 25)
-        Me.Value_PhyMemSize.Name = "Value_PhyMemSize"
-        Me.Value_PhyMemSize.Size = New System.Drawing.Size(68, 13)
-        Me.Value_PhyMemSize.TabIndex = 1
-        Me.Value_PhyMemSize.Text = "0 B"
-        Me.Value_PhyMemSize.TextAlign = System.Drawing.ContentAlignment.TopRight
-        '
-        'Name_VirtMemSize
-        '
-        Me.Name_VirtMemSize.AutoSize = True
-        Me.Name_VirtMemSize.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_VirtMemSize.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_VirtMemSize.Location = New System.Drawing.Point(15, 48)
-        Me.Name_VirtMemSize.Name = "Name_VirtMemSize"
-        Me.Name_VirtMemSize.Size = New System.Drawing.Size(93, 13)
-        Me.Name_VirtMemSize.TabIndex = 6
-        Me.Name_VirtMemSize.Text = "Virtual memory:"
-        '
-        'Name_PhyMemSize
-        '
-        Me.Name_PhyMemSize.AutoSize = True
-        Me.Name_PhyMemSize.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_PhyMemSize.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_PhyMemSize.Location = New System.Drawing.Point(15, 25)
-        Me.Name_PhyMemSize.Name = "Name_PhyMemSize"
-        Me.Name_PhyMemSize.Size = New System.Drawing.Size(104, 13)
-        Me.Name_PhyMemSize.TabIndex = 0
-        Me.Name_PhyMemSize.Text = "Physical memory:"
+        Me.Name_MemSize.AutoSize = True
+        Me.Name_MemSize.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_MemSize.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_MemSize.Location = New System.Drawing.Point(15, 25)
+        Me.Name_MemSize.Name = "Name_MemSize"
+        Me.Name_MemSize.Size = New System.Drawing.Size(59, 13)
+        Me.Name_MemSize.TabIndex = 0
+        Me.Name_MemSize.Text = "Installed:"
         '
         'GroupBox_VideoInfo
         '
@@ -604,10 +576,10 @@ Partial Class MainWindow
         Me.GroupBox_VideoInfo.Controls.Add(Me.Name_VideoMemory)
         Me.GroupBox_VideoInfo.Controls.Add(Me.Name_VideoList)
         Me.GroupBox_VideoInfo.ForeColor = System.Drawing.SystemColors.Highlight
-        Me.GroupBox_VideoInfo.Location = New System.Drawing.Point(477, 30)
+        Me.GroupBox_VideoInfo.Location = New System.Drawing.Point(12, 299)
         Me.GroupBox_VideoInfo.Name = "GroupBox_VideoInfo"
         Me.GroupBox_VideoInfo.Size = New System.Drawing.Size(455, 76)
-        Me.GroupBox_VideoInfo.TabIndex = 10
+        Me.GroupBox_VideoInfo.TabIndex = 9
         Me.GroupBox_VideoInfo.TabStop = False
         Me.GroupBox_VideoInfo.Text = "Display controller information"
         '
@@ -624,9 +596,9 @@ Partial Class MainWindow
         'Value_VideoResolution
         '
         Me.Value_VideoResolution.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VideoResolution.Location = New System.Drawing.Point(317, 48)
+        Me.Value_VideoResolution.Location = New System.Drawing.Point(308, 48)
         Me.Value_VideoResolution.Name = "Value_VideoResolution"
-        Me.Value_VideoResolution.Size = New System.Drawing.Size(118, 13)
+        Me.Value_VideoResolution.Size = New System.Drawing.Size(129, 13)
         Me.Value_VideoResolution.TabIndex = 6
         Me.Value_VideoResolution.Text = "0 x 0 (0 bit)"
         Me.Value_VideoResolution.TextAlign = System.Drawing.ContentAlignment.TopRight
@@ -634,19 +606,18 @@ Partial Class MainWindow
         'Value_VideoMemory
         '
         Me.Value_VideoMemory.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Value_VideoMemory.Location = New System.Drawing.Point(111, 48)
+        Me.Value_VideoMemory.Location = New System.Drawing.Point(114, 48)
         Me.Value_VideoMemory.Name = "Value_VideoMemory"
         Me.Value_VideoMemory.Size = New System.Drawing.Size(111, 13)
         Me.Value_VideoMemory.TabIndex = 4
         Me.Value_VideoMemory.Text = "0 B"
-        Me.Value_VideoMemory.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_VideoResolution
         '
         Me.Name_VideoResolution.AutoSize = True
         Me.Name_VideoResolution.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
         Me.Name_VideoResolution.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_VideoResolution.Location = New System.Drawing.Point(228, 48)
+        Me.Name_VideoResolution.Location = New System.Drawing.Point(231, 48)
         Me.Name_VideoResolution.Name = "Name_VideoResolution"
         Me.Name_VideoResolution.Size = New System.Drawing.Size(71, 13)
         Me.Name_VideoResolution.TabIndex = 5
@@ -755,7 +726,7 @@ Partial Class MainWindow
         Me.GroupBox_Network.Location = New System.Drawing.Point(477, 112)
         Me.GroupBox_Network.Name = "GroupBox_Network"
         Me.GroupBox_Network.Size = New System.Drawing.Size(455, 391)
-        Me.GroupBox_Network.TabIndex = 11
+        Me.GroupBox_Network.TabIndex = 12
         Me.GroupBox_Network.TabStop = False
         Me.GroupBox_Network.Text = "Network interface statistics"
         '
@@ -1276,7 +1247,7 @@ Partial Class MainWindow
         '
         'GroupBox_DiskInfo
         '
-        Me.GroupBox_DiskInfo.Controls.Add(Me.Button_SmartOpen)
+        Me.GroupBox_DiskInfo.Controls.Add(Me.Button_SMARTInfoOpen)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_PartLabel)
         Me.GroupBox_DiskInfo.Controls.Add(Me.Value_PartInfo)
         Me.GroupBox_DiskInfo.Controls.Add(Me.ComboBox_PartList)
@@ -1296,20 +1267,20 @@ Partial Class MainWindow
         Me.GroupBox_DiskInfo.Location = New System.Drawing.Point(12, 381)
         Me.GroupBox_DiskInfo.Name = "GroupBox_DiskInfo"
         Me.GroupBox_DiskInfo.Size = New System.Drawing.Size(455, 122)
-        Me.GroupBox_DiskInfo.TabIndex = 9
+        Me.GroupBox_DiskInfo.TabIndex = 10
         Me.GroupBox_DiskInfo.TabStop = False
         Me.GroupBox_DiskInfo.Text = "Disk information"
         '
-        'Button_SmartOpen
+        'Button_SMARTInfoOpen
         '
-        Me.Button_SmartOpen.Enabled = False
-        Me.Button_SmartOpen.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Button_SmartOpen.Image = Global.SINMx86.My.Resources.Resources.Button_HDD
-        Me.Button_SmartOpen.Location = New System.Drawing.Point(385, 21)
-        Me.Button_SmartOpen.Name = "Button_SmartOpen"
-        Me.Button_SmartOpen.Size = New System.Drawing.Size(23, 23)
-        Me.Button_SmartOpen.TabIndex = 2
-        Me.Button_SmartOpen.UseVisualStyleBackColor = True
+        Me.Button_SMARTInfoOpen.Enabled = False
+        Me.Button_SMARTInfoOpen.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Button_SMARTInfoOpen.Image = Global.SINMx86.My.Resources.Resources.Button_HDD
+        Me.Button_SMARTInfoOpen.Location = New System.Drawing.Point(385, 21)
+        Me.Button_SMARTInfoOpen.Name = "Button_SMARTInfoOpen"
+        Me.Button_SMARTInfoOpen.Size = New System.Drawing.Size(23, 23)
+        Me.Button_SMARTInfoOpen.TabIndex = 2
+        Me.Button_SMARTInfoOpen.UseVisualStyleBackColor = True
         '
         'Value_PartLabel
         '
@@ -1375,7 +1346,6 @@ Partial Class MainWindow
         Me.Value_DiskFirmware.Size = New System.Drawing.Size(111, 13)
         Me.Value_DiskFirmware.TabIndex = 9
         Me.Value_DiskFirmware.Text = "Unknown"
-        Me.Value_DiskFirmware.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Name_PartList
         '
@@ -1408,7 +1378,6 @@ Partial Class MainWindow
         Me.Value_DiskInterface.Size = New System.Drawing.Size(111, 13)
         Me.Value_DiskInterface.TabIndex = 5
         Me.Value_DiskInterface.Text = "Not available"
-        Me.Value_DiskInterface.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
         'Value_DiskType
         '
@@ -1520,6 +1489,16 @@ Partial Class MainWindow
         Me.ComboBox_VideoList.Size = New System.Drawing.Size(297, 21)
         Me.ComboBox_VideoList.TabIndex = 1
         '
+        'ComboBox_RAMList
+        '
+        Me.ComboBox_RAMList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_RAMList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_RAMList.FormattingEnabled = True
+        Me.ComboBox_RAMList.Location = New System.Drawing.Point(251, 45)
+        Me.ComboBox_RAMList.Name = "ComboBox_RAMList"
+        Me.ComboBox_RAMList.Size = New System.Drawing.Size(157, 21)
+        Me.ComboBox_RAMList.TabIndex = 9
+        '
         'ComboBox_CPUList
         '
         Me.ComboBox_CPUList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
@@ -1535,7 +1514,6 @@ Partial Class MainWindow
         Me.ComboBox_HWList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
         Me.ComboBox_HWList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox_HWList.FormattingEnabled = True
-        Me.ComboBox_HWList.Items.AddRange(New Object() {"1", "2", "3"})
         Me.ComboBox_HWList.Location = New System.Drawing.Point(111, 22)
         Me.ComboBox_HWList.Name = "ComboBox_HWList"
         Me.ComboBox_HWList.Size = New System.Drawing.Size(326, 21)
@@ -1604,10 +1582,9 @@ Partial Class MainWindow
     Friend WithEvents Name_CPUClock As System.Windows.Forms.Label
     Friend WithEvents Name_CPUList As System.Windows.Forms.Label
     Friend WithEvents GroupBox_MemoryInfo As System.Windows.Forms.GroupBox
-    Friend WithEvents Value_VirtMemSize As System.Windows.Forms.Label
-    Friend WithEvents Value_PhyMemSize As System.Windows.Forms.Label
-    Friend WithEvents Name_VirtMemSize As System.Windows.Forms.Label
-    Friend WithEvents Name_PhyMemSize As System.Windows.Forms.Label
+    Friend WithEvents Value_MemSize As System.Windows.Forms.Label
+    Friend WithEvents Name_RAMList As System.Windows.Forms.Label
+    Friend WithEvents Name_MemSize As System.Windows.Forms.Label
     Friend WithEvents GroupBox_VideoInfo As System.Windows.Forms.GroupBox
     Friend WithEvents Button_Exit As System.Windows.Forms.Button
     Friend WithEvents Name_InterfaceList As System.Windows.Forms.Label
@@ -1654,22 +1631,18 @@ Partial Class MainWindow
     Friend WithEvents Name_CPUCore As System.Windows.Forms.Label
     Friend WithEvents MainContextMenuItem_Exit As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents Value_Debug As System.Windows.Forms.Label
-    Friend WithEvents Value_VirtMemUsed As System.Windows.Forms.Label
-    Friend WithEvents Value_PhyMemUsed As System.Windows.Forms.Label
-    Friend WithEvents Name_VirtMemUsed As System.Windows.Forms.Label
-    Friend WithEvents Name_PhyMemUsed As System.Windows.Forms.Label
+    Friend WithEvents Value_MemType As System.Windows.Forms.Label
+    Friend WithEvents Name_MemType As System.Windows.Forms.Label
     Friend WithEvents Name_UpdateUnit As System.Windows.Forms.Label
     Friend WithEvents ComboBox_UpdateList As RightComboBox
     Friend WithEvents MainContextMenuItem_TaskbarMinimize As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainContextMenuItem_DisableSplash As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents MainContextMenuItem_Separator2 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents MainContextMenuItem_About As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents Name_VirtMemFree As System.Windows.Forms.Label
-    Friend WithEvents Name_PhyMemFree As System.Windows.Forms.Label
+    Friend WithEvents Name_MemClock As System.Windows.Forms.Label
     Friend WithEvents Name_OSLang As System.Windows.Forms.Label
     Friend WithEvents Value_OSLang As System.Windows.Forms.Label
-    Friend WithEvents Value_PhyMemFree As System.Windows.Forms.Label
-    Friend WithEvents Value_VirtMemFree As System.Windows.Forms.Label
+    Friend WithEvents Value_MemClock As System.Windows.Forms.Label
     Friend WithEvents Value_CPUMaximum As System.Windows.Forms.Label
     Friend WithEvents Name_CPUMaximum As System.Windows.Forms.Label
     Friend WithEvents Value_DownloadSpeed As System.Windows.Forms.Label
@@ -1726,9 +1699,13 @@ Partial Class MainWindow
     Friend WithEvents ComboBox_PartList As SINMx86.LeftComboBox
     Friend WithEvents Value_PartInfo As System.Windows.Forms.Label
     Friend WithEvents Value_PartLabel As System.Windows.Forms.Label
-    Friend WithEvents Button_SmartOpen As System.Windows.Forms.Button
+    Friend WithEvents Button_SMARTInfoOpen As System.Windows.Forms.Button
     Friend WithEvents Button_CPUInfoOpen As System.Windows.Forms.Button
     Friend WithEvents Button_IPInfoOpen As System.Windows.Forms.Button
+    Friend WithEvents ComboBox_RAMList As SINMx86.LeftComboBox
+    Friend WithEvents Name_MemVisible As System.Windows.Forms.Label
+    Friend WithEvents Value_MemVisible As System.Windows.Forms.Label
+    Friend WithEvents Button_RAMInfoOpen As System.Windows.Forms.Button
 
 End Class
 

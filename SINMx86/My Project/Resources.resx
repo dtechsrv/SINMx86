@@ -145,6 +145,9 @@
   <data name="Button_CPU" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Controls\button_cpu.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Button_RAM" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Controls\button_ram.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Button_HDD" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Controls\button_hdd.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

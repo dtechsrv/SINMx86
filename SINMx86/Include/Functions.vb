@@ -17,12 +17,39 @@ Public Class Functions
     Public Shared VersionString As String = SetMainVersion()                                ' Formázott verziószám
 
     ' További változók
+    Public Shared MainWindowDone As Boolean                                                 ' A főablak betöltési állapota
+    Public Shared OSVersion() As Int32 = GetOSVersion()                                     ' Operációs rendszer verziószám
+
+    ' Globális tömbök
     Public Shared SIPrefix() As String = {"", "k", "M", "G", "T", "P", "E"}                 ' SI prefixumok tömbje (nagyságrend váltás: 10^3 = 1000)
     Public Shared BytePrefix() As String = {"", "ki", "Mi", "Gi", "Ti", "Pi", "Ei"}         ' Bináris prefixumok tömbje (nagyságrend váltás: 2^10 = 1024)
     Public Shared RefreshInterval() As Int32 = {1, 2, 3, 4, 5, 10, 15, 30, 60}              ' Frissítési intervallumok
-    Public Shared MainWindowDone As Boolean                                                 ' A főablak betöltési állapota
-    Public Shared OSVersion() As Int32 = GetOSVersion()                                     ' Operációs rendszer verziószám
-    Public Shared DiskSmart(32) As String                                                   ' Meghajtó S.M.A.R.T azonosítója (ha van, egyékbént üres)
+
+    ' WMI alapú memória típustömb
+    Public Shared WMIMemoryType() As String = {Nothing, Nothing, "DRAM", "Sync DRAM", "Cache DRAM", "EDO", "EDRAM", "VRAM", "SRAM",
+                                               "RAM", "ROM", "Flash", "EEPROM", "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM",
+                                               "SGRAM", "RDRAM", "DDR", "DDR2", "DDR2-FB", Nothing, "DDR3", "FBD2"}
+
+    ' SMBIOS alapú memória típustömb
+    Public Shared SMBIOSMemoryType() As String = {Nothing, Nothing, Nothing, "DRAM", "EDRAM", "VRAM", "SRAM", "RAM", "ROM", "FLASH", "EEPROM",
+                                                  "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM", "SGRAM", "RDRAM", "DDR", "DDR2", "DDR2-FB",
+                                                  Nothing, Nothing, Nothing, "DDR3", "FBD2", "DDR4", "LPDDR", "LPDDR2", "LPDDR3", "LPDDR4"}
+
+    ' Memória tokozás típusa
+    Public Shared MemorySocketType() As String = {Nothing, Nothing, "SIP", "DIP", "ZIP", "SOJ", Nothing, "SIMM", "DIMM", "TSOP", "PGA", "RIMM",
+                                                  "SODIMM", "SRIMM", "SMD", "SSMP", "QFP", "TQFP", "SOIC", "LCC", "PLCC", "BGA", "FPBGA", "LGA"}
+
+    ' CPU gyártók rögzített sztringjeinek tömbje (keresett azonosító)
+    Public Shared CPUVendorID() As String = {"AuthenticAMD", "CentaurHauls", "CyrixInstead", "HygonGenuine", "GenuineIntel",
+                                             "TransmetaCPU", "GenuineTMx86", "Geode by NSC", "NexGenDriven", "RiseRiseRise",
+                                             "SiS SiS SiS ", "UMC UMC UMC ", "VIA VIA VIA ", "Vortex86 SoC"}
+
+    ' CPU gyártók valódi neveinek tömbje (csere azonosító)
+    Public Shared CPUVendorStr() As String = {"Advanced Micro Devices, Inc.", "VIA Technologies Inc.", "VIA Technologies Inc.",
+                                              "Tianjin Haiguang Advanced Technology Investment Co. Ltd.", "Intel Corporation",
+                                              "Transmeta Corporation", "Transmeta Corporation", "National Semiconductor Corporation",
+                                              "Advanced Micro Devices, Inc.", "Silicon Integrated Systems", "Silicon Integrated Systems",
+                                              "United Microelectronics Corporation", "VIA Technologies Inc.", "DM&P Electronics"}
 
     ' Beállításjegyzék változói
     Public Shared RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\\" + MyName, True)
@@ -31,7 +58,7 @@ Public Class Functions
     Public Shared CheckedSplashDisable, CheckedTopMost, CheckedNoQuitAsk, CheckedMinToTray As Boolean
 
     ' Listák kiválasztott elemeinek sorszáma
-    Public Shared SelectedRefresh, SelectedHardware, SelectedCPU, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
+    Public Shared SelectedRefresh, SelectedHardware, SelectedCPU, SelectedMemory, SelectedDisk, SelectedPartition, SelectedVideo, SelectedInterface As Int32
 
     ' ----- FÜGGVÉNYEK -----
 
@@ -326,11 +353,11 @@ Public Class Functions
 
             ' Case insensitive átalakítás
             If CSense = False Then
-                If LCase(InStr(RawString, ChkArr(Position))) And Contain = False Then
+                If InStr(LCase(RawString), LCase(ChkArr(Position))) <> 0 And Contain = False Then
                     Contain = True
                 End If
             Else
-                If InStr(RawString, ChkArr(Position)) And Contain = False Then
+                If InStr(RawString, ChkArr(Position)) <> 0 And Contain = False Then
                     Contain = True
                 End If
             End If

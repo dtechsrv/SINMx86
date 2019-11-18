@@ -25,18 +25,6 @@ Public Class CPUInfo
         Dim L2Cache(2) As Double                                ' Level 2 cache mérete
         Dim L3Cache(2) As Double                                ' Level 3 cache mérete
 
-        ' CPU gyártók rögzített sztringjeinek tömbje (keresett azonosító)
-        Dim VendorID() As String = {"AuthenticAMD", "CentaurHauls", "CyrixInstead", "HygonGenuine", "GenuineIntel",
-                                    "TransmetaCPU", "GenuineTMx86", "Geode by NSC", "NexGenDriven", "RiseRiseRise",
-                                    "SiS SiS SiS ", "UMC UMC UMC ", "VIA VIA VIA ", "Vortex86 SoC"}
-
-        ' CPU gyártók valódi neveinek tömbje (csere azonosító)
-        Dim VendorStr() As String = {"Advanced Micro Devices, Inc.", "VIA Technologies Inc.", "VIA Technologies Inc.",
-                                     "Tianjin Haiguang Advanced Technology Investment Co. Ltd.", "Intel Corporation",
-                                     "Transmeta Corporation", "Transmeta Corporation", "National Semiconductor Corporation",
-                                     "Advanced Micro Devices, Inc.", "Silicon Integrated Systems", "Silicon Integrated Systems",
-                                     "United Microelectronics Corporation", "VIA Technologies Inc.", "DM&P Electronics"}
-
         ' Sztring cserék változói (eredeti, csere)
         Dim NameSearch() As String = {"MHz", "GHz"}
         Dim NameReplace() As String = {" MHz", " GHz"}
@@ -55,7 +43,7 @@ Public Class CPUInfo
         Me.TopMost = MainWindow.TopMost
 
         ' Ablak nevének beállítása
-        Me.Text = GetLoc("CPUTitle")
+        Me.Text = MyName + " - " + GetLoc("CPUTitle")
 
         ' Billentyűk figyelése
         Me.KeyPreview = True
@@ -66,7 +54,7 @@ Public Class CPUInfo
         ' Bezárás gomb
         Button_Close.Text = GetLoc("Button_Close")
 
-        ' Tábla fejléc szövegek átvétele a főablakból
+        ' Tábla fejléc szövegek beállítása
         CPU_Table.Columns(1).Text = GetLoc("CPUDescription")
         CPU_Table.Columns(2).Text = GetLoc("CPUValue")
 
@@ -86,9 +74,9 @@ Public Class CPUInfo
                 DeviceID = objMgmt("DeviceID")
 
                 ' Gyártói sztring keresése és találat esetén a valódi név kiírása
-                For VendorCount = 0 To UBound(VendorID)
-                    If objMgmt("Manufacturer") = VendorID(VendorCount) Then
-                        CPUTableAddRow(GetLoc("CPUVendor"), VendorStr(VendorCount), Nothing)
+                For VendorCount = 0 To UBound(CPUVendorID)
+                    If objMgmt("Manufacturer") = CPUVendorID(VendorCount) Then
+                        CPUTableAddRow(GetLoc("CPUVendor"), CPUVendorStr(VendorCount), Nothing)
                     End If
                 Next
 

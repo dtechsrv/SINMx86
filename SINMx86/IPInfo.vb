@@ -38,7 +38,7 @@ Public Class IPInfo
         Me.TopMost = MainWindow.TopMost
 
         ' Ablak nevének beállítása
-        Me.Text = GetLoc("IPTitle")
+        Me.Text = MyName + " - " + GetLoc("IPTitle")
 
         ' Billentyűk figyelése
         Me.KeyPreview = True
@@ -49,7 +49,7 @@ Public Class IPInfo
         ' Bezárás gomb
         Button_Close.Text = GetLoc("Button_Close")
 
-        ' Tábla fejléc szövegek átvétele a főablakból
+        ' Tábla fejléc szövegek beállítása
         IP_Table.Columns(1).Text = GetLoc("IPDescription")
         IP_Table.Columns(2).Text = GetLoc("IPValue")
 

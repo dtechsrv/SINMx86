@@ -6,7 +6,7 @@ Imports SINMx86.Functions
 Imports SINMx86.Localization
 
 ' S.M.A.R.T ablak osztálya
-Public Class SmartWindow
+Public Class SMARTInfo
 
     ' WMI feldolgozási objektumok
     Public objSM, objST As ManagementObjectSearcher
@@ -34,6 +34,7 @@ Public Class SmartWindow
 
         ' Rekordok változói (szám, küszöb, érték, legrosszabb)
         Dim RecordNumber, RecordTreshold, RecordValue, RecordWorst As Int32
+        Dim RecordName As String                                ' Rekord neve
         Dim RecordRawValue As Int64 = 0                         ' Nyers érték
         Dim RecordStatus As Int32 = 0                           ' Rekord állapota: 0 = OK, 1 = figyelmeztetés, 2 = kritikus (hiba)
 
@@ -48,32 +49,32 @@ Public Class SmartWindow
         ' Értékek átvétele a főablaktól
         Dim TableName As String = MainWindow.ComboBox_DiskList.Items(SelectedDisk)
         Dim DiskType As String = MainWindow.DiskType(SelectedDisk)
-        Dim SmartID As String = DiskSmart(SelectedDisk)
+        Dim SmartID As String = MainWindow.DiskSmart(SelectedDisk)
 
         ' Ablak láthatóságának átvétele -> Megegyezik a főablakkal!
         Me.TopMost = MainWindow.TopMost
 
         ' Ablak nevének beállítása
-        Me.Text = GetLoc("SmartTitle")
+        Me.Text = MyName + " - " + GetLoc("SMARTTitle")
 
         ' Billentyűk figyelése
         Me.KeyPreview = True
 
         ' GroupBox szövegének beállítása
-        GroupBox_Table.Text = GetLoc("SmartTable") + " " + TableName
+        GroupBox_Table.Text = GetLoc("SMARTTable") + " " + TableName
 
         ' Bezárás gomb
         Button_Close.Text = GetLoc("Button_Close")
 
-        ' Tábla fejléc szövegek átvétele a főablakból
+        ' Tábla fejléc szövegek beállítása
         SMART_Table.Columns(0).Text = Nothing
-        SMART_Table.Columns(1).Text = GetLoc("SmartNumber")
-        SMART_Table.Columns(2).Text = GetLoc("SmartRecord")
-        SMART_Table.Columns(3).Text = GetLoc("SmartTreshold")
-        SMART_Table.Columns(4).Text = GetLoc("SmartValue")
-        SMART_Table.Columns(5).Text = GetLoc("SmartWorst")
-        SMART_Table.Columns(6).Text = GetLoc("SmartStatus")
-        SMART_Table.Columns(7).Text = GetLoc("SmartData")
+        SMART_Table.Columns(1).Text = GetLoc("SMARTNumber")
+        SMART_Table.Columns(2).Text = GetLoc("SMARTRecord")
+        SMART_Table.Columns(3).Text = GetLoc("SMARTTreshold")
+        SMART_Table.Columns(4).Text = GetLoc("SMARTValue")
+        SMART_Table.Columns(5).Text = GetLoc("SMARTWorst")
+        SMART_Table.Columns(6).Text = GetLoc("SMARTStatus")
+        SMART_Table.Columns(7).Text = GetLoc("SMARTData")
 
         ' Képek feltöltése az állapotokat jelző képlistába
         SMART_Status.Images.Add(0, My.Resources.SMART_OK)
@@ -111,13 +112,18 @@ Public Class SmartWindow
 
             ' Rekord változóinak beállítása
             RecordNumber = ToInt32(SmartData(SmartCount + SmartColunms(0)))
+            RecordName = SmartRecord(RecordNumber)
             RecordTreshold = ToInt32(SmartTreshold(SmartCount + SmartColunms(1)))
             RecordValue = ToInt32(SmartData(SmartCount + SmartColunms(2)))
             RecordWorst = ToInt32(SmartData(SmartCount + SmartColunms(3)))
 
+            ' Rekord nevének formázása (nyers és formázott értékek)
+            RecordName = Replace(RecordName, "RAW", GetLoc("SMARTRaw"))
+            RecordName = Replace(RecordName, "Converted", GetLoc("SMARTConvert"))
+
             ' Lista feltöltése
             ListFields(1) = RecordNumber.ToString
-            ListFields(2) = SmartRecord(RecordNumber)
+            ListFields(2) = RecordName
             ListFields(3) = RecordTreshold.ToString
             ListFields(4) = RecordValue.ToString
             ListFields(5) = RecordWorst.ToString
@@ -196,29 +202,29 @@ Public Class SmartWindow
                 ' Nyers érték 0-tól való eltérésének keresése
                 If RecordRawValue = 0 Then
                     RecordStatus = 0
-                    ListFields(6) = GetLoc("SmartOK")
+                    ListFields(6) = GetLoc("SMARTOK")
                 Else
                     RecordStatus = 1
-                    ListFields(6) = GetLoc("SmartWarning")
+                    ListFields(6) = GetLoc("SMARTWarning")
                 End If
 
                 ' Jelenlegi és köszübérték összehasonlítása -> Felülírja az első ellenőrzést!
                 ' Megjegyzés: A gyártói küszöböt figyelmen kívül hagyva, ha az érték eléri a 100-as nagyságrendet, akkor kritikussá lesz nyilvánítva!
                 If RecordRawValue >= 100 Then
                     RecordStatus = 2
-                    ListFields(6) = GetLoc("SmartCritical")
+                    ListFields(6) = GetLoc("SMARTCritical")
                 End If
             Else
 
                 ' Alapérték beállítása nem kritikus rekordoknál
                 RecordStatus = 0
-                ListFields(6) = GetLoc("SmartOK")
+                ListFields(6) = GetLoc("SMARTOK")
             End If
 
             ' Köszüb és jelenlegi érték összehasonlítása -> Minden rekordnál érvényes és felülírja az első ellenőrzést!
             If RecordTreshold > RecordValue Then
                 RecordStatus = 2
-                ListFields(6) = GetLoc("SmartCritical")
+                ListFields(6) = GetLoc("SMARTCritical")
             End If
 
             ' Új sor definiálása
@@ -289,8 +295,9 @@ Public Class SmartWindow
         Dim RecordCount As Int32                                ' Rekord számláló
         Dim ArrayCount As Int32                                 ' Tömb számláló
 
-        ' Kritikus rekordok -> Ezeknek rendszerint 0 értéket kell miutatniuk, ha minden rendben!
-        Dim CriticalRecords() As Int32 = {5, 10, 184, 187, 188, 196, 197, 198}
+        ' Kritikus rekordok -> Ezeknek rendszerint 0 értéket kell mutatniuk, ha minden rendben!
+        ' Megjegyzés: Reallocated Sectors, Spin Retry, End-to-End Errors, Reallocation Events, Current Pending Sectors, Off-Line Uncorrectable Sectors
+        Dim CriticalRecords() As Int32 = {5, 10, 184, 196, 197, 198}
 
         ' Alapértelmezett érték (A '0'-ás rekord nincs definiálva!)
         SmartRecord(0) = "Vendor Specific Record"
@@ -301,11 +308,11 @@ Public Class SmartWindow
         SmartRecord(2) = "Throughput Performance"
         SmartRecord(3) = "Spin-Up Time"
         SmartRecord(4) = "Start/Stop Count"
-        SmartRecord(5) = "Reallocated Sectors Count"
+        SmartRecord(5) = "Reallocated Sector Count"
         SmartRecord(6) = "Read Channel Margin"
         SmartRecord(7) = "Seek Error Rate"
         SmartRecord(8) = "Seek Time Performance"
-        SmartRecord(9) = "Power-On Hours (" + GetLoc("SmartConvert") + ")"
+        SmartRecord(9) = "Power-On Hours (Converted)"
         SmartRecord(10) = "Spin Retry Count"
         SmartRecord(11) = "Calibration Retry Count"
         SmartRecord(12) = "Power Cycle Count"
@@ -320,11 +327,11 @@ Public Class SmartWindow
         SmartRecord(187) = "Reported Uncorrectable Errors"
         SmartRecord(188) = "Command Timeout"
         SmartRecord(189) = "High Fly Writes"
-        SmartRecord(190) = "Airflow Temperature (" + GetLoc("SmartConvert") + ")"
+        SmartRecord(190) = "Airflow Temperature (Converted)"
         SmartRecord(191) = "G-sense Error Rate"
         SmartRecord(192) = "Power off Retract Count"
         SmartRecord(193) = "Load/Unload Cycle Count"
-        SmartRecord(194) = "Disk Temperature (" + GetLoc("SmartConvert") + ")"
+        SmartRecord(194) = "Disk Temperature (Converted)"
         SmartRecord(195) = "Hardware ECC Recovered"
         SmartRecord(196) = "Reallocation Event Count"
         SmartRecord(197) = "Current Pending Sector Count"
@@ -353,11 +360,11 @@ Public Class SmartWindow
         SmartRecord(227) = "Torque Amplification Count"
         SmartRecord(228) = "Power-off Retract Count"
         SmartRecord(230) = "GMR Head Amplitude"
-        SmartRecord(231) = "Temperature (" + GetLoc("SmartRaw") + ")"
-        SmartRecord(233) = "Power-On Hours (" + GetLoc("SmartRaw") + ")"
-        SmartRecord(240) = "Head Flying Hours (" + GetLoc("SmartConvert") + ")"
-        SmartRecord(241) = "Total LBAs Written (" + GetLoc("SmartRaw") + ")"
-        SmartRecord(242) = "Total LBAs Read (" + GetLoc("SmartRaw") + ")"
+        SmartRecord(231) = "Temperature (RAW)"
+        SmartRecord(233) = "Power-On Hours (RAW)"
+        SmartRecord(240) = "Head Flying Hours (Converted)"
+        SmartRecord(241) = "Total LBAs Written (RAW)"
+        SmartRecord(242) = "Total LBAs Read (RAW)"
         SmartRecord(250) = "Read Error Retry Rate"
         SmartRecord(251) = "Minimum Spares Remaining"
         SmartRecord(254) = "Free Fall Event Count"
@@ -378,13 +385,13 @@ Public Class SmartWindow
             SmartRecord(180) = "Unused Reserved Block Count"
             SmartRecord(181) = "Program Fail Count"
             SmartRecord(182) = "Erase Fail Count"
-            SmartRecord(189) = "Temperature (" + GetLoc("SmartRaw") + ")"
+            SmartRecord(189) = "Temperature (RAW)"
             SmartRecord(230) = "Drive Life Protection Status"
             SmartRecord(231) = "Life Left"
             SmartRecord(232) = "Available Reserved Space"
             SmartRecord(233) = "Media Wearout Indicator"
-            SmartRecord(241) = "Total LBAs or GBs Written (" + GetLoc("SmartRaw") + ")"
-            SmartRecord(242) = "Total LBAs os GBs Read (" + GetLoc("SmartRaw") + ")"
+            SmartRecord(241) = "Total LBAs or GBs Written (RAW)"
+            SmartRecord(242) = "Total LBAs os GBs Read (RAW)"
             SmartRecord(249) = "NAND Writes"
             SmartRecord(252) = "Newly Added Bad Flash Block"
         End If

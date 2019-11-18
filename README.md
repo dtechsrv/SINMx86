@@ -1,4 +1,4 @@
-# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
+﻿# SINMx86 ![](Screenshots/SINMx86_Icon.gif)
 ### System Information and Network Monitor
 
 A simple system information and real-time network monitoring utility.\
@@ -23,8 +23,11 @@ __Requirements:__ Microsoft .NET Framework 3.5.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-11-05 - Version 3.0.0 RC / Build 5307 (testing)__
+__2019-11-18 - Version 3.0.0 RC / Build 5315 (testing)__
 
+- Ténylegesen kritikus S.M.A.R.T rekordok beállítása figyelmeztetésre,
+- Memória infó blokk újraírása, memória infó ablak hozzáadása,
+- Főablak blokkok átrendezése: minden hardver információ bal oldalra került,
 - Újbóli indítási kísérlétnél üzenet megjelenítése (csak egy példány futhat),
 - Negatív futásidő hiba kiküszöbölése, DateTime konverziós függvény eltávolítása,
 - Operációs rendszer függő hálózati kártya nevek és indexek kezelése,

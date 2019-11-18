@@ -9,7 +9,7 @@ Imports SINMx86.Localization
 Public Class MainWindow
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objBT, objPR, objNA, objNI, objNC, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objBT, objPR, objPM, objNA, objNI, objNC, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
     ' Főablak változói
@@ -24,6 +24,7 @@ Public Class MainWindow
     Public DiskList(32) As String                                                   ' Meghajtóindexek tömbje (lekérdezésekhez)
     Public DiskName(32) As String                                                   ' Meghajtók neve (kiírásokhoz)
     Public DiskType(32) As String                                                   ' Meghajtó típusa: SSD/HDD (Ha nincs S.M.A.R.T, akkor üres)
+    Public DiskSmart(32) As String                                                  ' Meghajtó S.M.A.R.T azonosítója (ha van, egyékbént üres)
     Public SmartException As Boolean = False                                        ' Hibakezelés S.M.A.R.T tábla lekérése esetén
     Public PartLabel(32) As String                                                  ' Partíció betűjele (kiírásokhoz)
     Public PartInfo(32) As String                                                   ' Partíció információk (kiírásokhoz)
@@ -181,6 +182,9 @@ Public Class MainWindow
 
         ' ----- LISTÁK FELTÖLTÉSE -----
 
+        ' *** LISTAFELTÖLTÉS: Memóriamodulok ***
+        UpdateMemList(True)
+
         ' *** LISTAFELTÖLTÉS: Hardver komponensek ***
         DebugLoadStage(GetLoc("LoadHardware"))
         UpdateHWList(True)
@@ -189,13 +193,13 @@ Public Class MainWindow
         DebugLoadStage(GetLoc("LoadProcessor"))
         UpdateCPUList(True)
 
-        ' *** LISTAFELTÖLTÉS: Lemezmeghajtók ***
-        DebugLoadStage(GetLoc("LoadDisk"))
-        UpdateDiskList(True)
-
         ' *** LISTAFELTÖLTÉS: Videokártyák ***
         DebugLoadStage(GetLoc("LoadVideo"))
         UpdateVideoList(True)
+
+        ' *** LISTAFELTÖLTÉS: Lemezmeghajtók ***
+        DebugLoadStage(GetLoc("LoadDisk"))
+        UpdateDiskList(True)
 
         ' *** LISTAFELTÖLTÉS: Interfészek ***
         DebugLoadStage(GetLoc("LoadNetwork"))
@@ -509,49 +513,113 @@ Public Class MainWindow
     Private Function SetMemoryInformation()
 
         ' Értékek definiálása
-        Dim PMemSize, PMemFree, VMemSize, VMemFree As String
-        Dim PMemPerc, VMemPerc As Int32
-        Dim PMemSizeConv(2), PMemFreeConv(2), VMemSizeConv(2), VMemFreeConv(2) As Double
+        Dim ModuleSum As Int64                                  ' Memória modulok összmérete (rekurzívan összeadódik)
+        Dim MemorySize(1), MemoryUsable(1) As Double            ' Formázott modul összméret és a rendszer által felhasználható memória
+        Dim MemoryCount = 0                                     ' Memória modul számláló
+        Dim MemoryClock, TypeValue As Int32                     ' Órajel és típus azonosító
+        Dim MemoryType As String                                ' Memória modulok típusa
 
-        ' WMI értékek lekérdezése: Win32_OperatingSystem -> Memória információk (kiB-ban vannak az értékek!)
-        objOS = New ManagementObjectSearcher("SELECT TotalVisibleMemorySize, FreePhysicalMemory, TotalVirtualMemorySize, FreeVirtualMemory FROM Win32_OperatingSystem")
+        ' WMI értékek lekérdezése: Win32_PhysicalMemory -> Memória információk
+        objPM = New ManagementObjectSearcher("SELECT Capacity, Speed, MemoryType FROM Win32_PhysicalMemory")
 
-        ' Értékek beállítása -> Számítógép: fizikai és virtuális memória, valamint a szabad memória mérete
-        For Each Me.objMgmt In objOS.Get()
+        ' Értékek beállítása -> memória modulok tulajdonságai
+        For Each Me.objMgmt In objPM.Get()
 
-            ' Fizikai memória mérete
-            PMemSize = objMgmt("TotalVisibleMemorySize")
-            PMemSizeConv = ScaleConversion(PMemSize * 1024, 2, True)
+            ' Összméret növelése a jelenlegi modullal
+            ModuleSum += objMgmt("Capacity")
 
-            ' Szabad fizikai memória mérete
-            PMemFree = objMgmt("FreePhysicalMemory")
-            PMemFreeConv = ScaleConversion(PMemFree * 1024, 2, True)
+            ' Órajel és memória típus beállítása (Csak egyszer!)
+            If MemoryCount = 0 Then
+                MemoryClock = objMgmt("Speed")
+                TypeValue = objMgmt("MemoryType")
+            End If
 
-            ' Fizikai memória kihasználtsága
-            PMemPerc = Round(((PMemSize - PMemFree) / PMemSize) * 100)
-            If PMemPerc > 100 Then PMemPerc = 100
-
-            ' Virtuális memória mérete
-            VMemSize = objMgmt("TotalVirtualMemorySize")
-            VMemSizeConv = ScaleConversion(VMemSize * 1024, 2, True)
-
-            ' Szabad virtuális memória mérete
-            VMemFree = objMgmt("FreeVirtualMemory")
-            VMemFreeConv = ScaleConversion(VMemFree * 1024, 2, True)
-
-            ' Virtuális memória kihasználtsága
-            VMemPerc = Round(((VMemSize - VMemFree) / VMemSize) * 100)
-            If PMemPerc > 100 Then PMemPerc = 100
+            ' Modul számának növelése
+            MemoryCount += 1
 
         Next
 
-        ' Kiírások formázása
-        Value_PhyMemSize.Text = FixNumberFormat(PMemSizeConv(0), 2, True) + " " + BytePrefix(PMemSizeConv(1)) + "B"
-        Value_PhyMemFree.Text = FixNumberFormat(PMemFreeConv(0), 2, True) + " " + BytePrefix(PMemFreeConv(1)) + "B"
-        Value_PhyMemUsed.Text = PMemPerc.ToString + " %"
-        Value_VirtMemSize.Text = FixNumberFormat(VMemSizeConv(0), 2, True) + " " + BytePrefix(VMemSizeConv(1)) + "B"
-        Value_VirtMemFree.Text = FixNumberFormat(VMemFreeConv(0), 2, True) + " " + BytePrefix(VMemFreeConv(1)) + "B"
-        Value_VirtMemUsed.Text = VMemPerc.ToString + " %"
+        ' Memória összméret konvertálása és formázása
+        MemorySize = ScaleConversion(ModuleSum, 0, True)
+        Value_MemSize.Text = FixNumberFormat(MemorySize(0), 2, False) + " " + BytePrefix(MemorySize(1)) + "B"
+
+        ' WMI értékek lekérdezése: Win32_OperatingSystem -> Memória információk (kiB-ban vannak az értékek!)
+        objOS = New ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem")
+
+        ' Értékek beállítása -> Számítógép: felhasználható memória mérete
+        For Each Me.objMgmt In objOS.Get()
+            MemoryUsable = ScaleConversion(objMgmt("TotalVisibleMemorySize") * 1024, 2, True)
+        Next
+
+        ' Felhasználható memória formázása és kiírása
+        Value_MemVisible.Text = FixNumberFormat(MemoryUsable(0), 2, False) + " " + BytePrefix(MemoryUsable(1)) + "B"
+
+        ' Memória órajel beállítása
+        If MemoryClock = 0 Then
+            Value_MemClock.Enabled = False
+            Value_MemClock.Text = GetLoc("Unknown")
+        Else
+            Value_MemClock.Enabled = True
+            Value_MemClock.Text = FixNumberFormat(MemoryClock, 0, False) + " MHz"
+        End If
+
+        ' Win10 SMBIOS memória típus lekérdezése
+        If OSVersion(0) >= 10 Then
+
+            ' WMI értékek lekérdezése: Win32_PhysicalMemory -> Memória információk
+            objPM = New ManagementObjectSearcher("SELECT SMBIOSMemoryType FROM Win32_PhysicalMemory")
+
+            ' Értékek beállítása -> SMBIOS memória típus
+            For Each Me.objMgmt In objPM.Get()
+                TypeValue = objMgmt("SMBIOSMemoryType")
+            Next
+
+            ' Ismeretlen típus beállítása (Újabb, mint ami az SMBIOS listában szerepel!)
+            If TypeValue > UBound(SMBIOSMemoryType) Then
+                Value_MemType.Enabled = False
+                MemoryType = GetLoc("Unknown")
+            Else
+                MemoryType = SMBIOSMemoryType(TypeValue)
+            End If
+
+        ElseIf TypeValue > UBound(WMIMemoryType) Then
+
+            ' Ismeretlen típus beállítása (Újabb, mint ami a WMI listában szerepel!)
+            Value_MemType.Enabled = False
+            MemoryType = GetLoc("Unknown")
+
+        Else
+
+            ' Valós kiolvasott érték kiírása
+            MemoryType = WMIMemoryType(TypeValue)
+
+        End If
+
+        ' SDRAM korrekció (Néhány alaplap hibásan jelzi!)
+        If MemoryType = "SDRAM" And MemoryClock >= 200 Then
+            MemoryType = Nothing
+        End If
+
+        ' Memóriatípus megtippelése órajel alapján (Némi OC-val számolva!)
+        If MemoryType = Nothing Then
+            If MemoryClock < 66 Then
+                Value_MemType.Enabled = False
+                MemoryType = GetLoc("Unknown")
+            ElseIf MemoryClock <= 175 Then
+                MemoryType = "SDRAM"
+            ElseIf MemoryClock <= 500 Then
+                MemoryType = "DDR"
+            ElseIf MemoryClock <= 950 Then
+                MemoryType = "DDR2"
+            ElseIf MemoryClock <= 1750 Then
+                MemoryType = "DDR3"
+            Else
+                MemoryType = "DDR4"
+            End If
+        End If
+
+        ' Memóriatípus érékének beállítása
+        Value_MemType.Text = MemoryType
 
         ' Visszatérési érték beállítása
         Return False
@@ -602,7 +670,7 @@ Public Class MainWindow
         If Connector = "IDE" Then
             Value_DiskInterface.Text = "IDE / SATA"
         ElseIf Connector = "SCSI" Then
-            Value_DiskInterface.Text = "SCSI / SAS (RAID)"
+            Value_DiskInterface.Text = "SCSI / SAS"
         Else
             Value_DiskInterface.Text = RemoveInvalidChars(Connector)
         End If
@@ -612,8 +680,17 @@ Public Class MainWindow
             Value_DiskType.Enabled = True
             Value_DiskType.Text = DiskType(SelectedDisk)
         Else
-            Value_DiskType.Enabled = False
-            Value_DiskType.Text = GetLoc("Unknown")
+            ' Hiányzó információk feltöltése (SCSI -> RAID tömb, USB -> USB lemez)
+            If Connector = "SCSI" Then
+                Value_DiskType.Enabled = True
+                Value_DiskType.Text = GetLoc("RAIDDisk")
+            ElseIf Connector = "USB" Then
+                Value_DiskType.Enabled = True
+                Value_DiskType.Text = GetLoc("USBDisk")
+            Else
+                Value_DiskType.Enabled = False
+                Value_DiskType.Text = GetLoc("Unknown")
+            End If
         End If
 
         ' Firmware revízió beállítása
@@ -1238,6 +1315,69 @@ Public Class MainWindow
 
     End Function
 
+    ' *** FÜGGVÉNY: Memóriamodul lista újratöltése ***
+    ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
+    ' Kimenet: *         -> hamis érték (Boolean)
+    Private Function UpdateMemList(ByVal ResetFlag As Boolean)
+
+        ' Értékek definiálása
+        Dim ModuleNum As Int32 = 0                              ' Memória modulok száma
+        Dim ModuleCount As Int32 = 0                            ' Memória modul sorszáma
+        Dim ModuleSize(1) As Double                             ' Memória modul mérete (formázott)
+        Dim ModuleSocket As Int32 = Nothing                     ' Memória foglalat típusának azonosítója
+        Dim ModuleString As String = Nothing                    ' Memória foglalat típusa
+
+        ' WMI értékek lekérdezése: Win32_PhysicalMemory -> Memória információk
+        objPM = New ManagementObjectSearcher("SELECT Capacity, FormFactor FROM Win32_PhysicalMemory")
+
+        ModuleNum = objPM.Get().Count
+
+        ' Lista kiürítése -> Memória modulok
+        ComboBox_RAMList.Items.Clear()
+
+        ' Értékek beállítása -> Modul információk
+        For Each Me.objMgmt In objPM.Get()
+
+            ' Modul mérete
+            ModuleSocket = objMgmt("FormFactor")
+            ModuleSize = ScaleConversion(objMgmt("Capacity"), 0, True)
+
+            ' Memória modul típusának beállítása (Ha tartományon belül van, és nem üres!)
+            If ModuleSocket <= UBound(MemorySocketType) Then
+                If MemorySocketType(ModuleSocket) <> Nothing Then
+                    ModuleString = " (" + MemorySocketType(ModuleSocket) + ")"
+                End If
+            End If
+
+            ' Listaelem hozzáadása
+            ComboBox_RAMList.Items.Add("# " + (ModuleCount + 1).ToString + "/" + ModuleNum.ToString + " - " + FixNumberFormat(ModuleSize(0), 2, True) + " " + BytePrefix(ModuleSize(1)) + "B" + ModuleString)
+
+            ' Modul számának növelése
+            ModuleCount += 1
+
+        Next
+
+        ' Üres lista, ha nincs elérhető memóriamodul információ
+        If ModuleCount = 0 Then
+            ComboBox_RAMList.Enabled = False
+            ComboBox_RAMList.Items.Add(GetLoc("NotAvailable"))
+        Else
+            ComboBox_RAMList.Enabled = True
+        End If
+
+        ' Alapértelmezett érték visszaállítása (a lista legelső eleme)
+        If ResetFlag Then
+            SelectedMemory = 0
+        End If
+
+        ' Utoljára kiválasztott érték beállítása
+        ComboBox_RAMList.SelectedIndex = SelectedMemory
+
+        ' Visszatérési érték beállítása
+        Return False
+
+    End Function
+
     ' *** FÜGGVÉNY: Lemezlista újratöltése ***
     ' Bemenet: ResetFlag -> alapértelmezett listaelem beállítása újratöltés után (Boolean)
     ' Kimenet: *         -> hamis érték (Boolean)
@@ -1629,7 +1769,7 @@ Public Class MainWindow
         If objDD.Get().Count = 0 Then
 
             ' Kiírások feltöltése üres adatokkal
-            Button_SmartOpen.Enabled = False
+            Button_SMARTInfoOpen.Enabled = False
             Value_DiskInterface.Enabled = False
             Value_DiskInterface.Text = GetLoc("NotAvailable")
             Value_DiskType.Enabled = False
@@ -1657,9 +1797,9 @@ Public Class MainWindow
 
             ' S.M.A.R.T információs gomb beállítása
             If DiskSmart(SelectedDisk) = Nothing Or SmartException Then
-                Button_SmartOpen.Enabled = False
+                Button_SMARTInfoOpen.Enabled = False
             Else
-                Button_SmartOpen.Enabled = True
+                Button_SMARTInfoOpen.Enabled = True
             End If
 
             ' Lemez elérhetőségének beállítása
@@ -2217,7 +2357,8 @@ Public Class MainWindow
         ' Ablakok bezárása
         LoadSplash.Close()
         CPUInfo.Close()
-        SmartWindow.Close()
+        RAMInfo.Close()
+        SMARTInfo.Close()
         IPInfo.Close()
 
         ' Visszatérési érték beállítása
@@ -2233,9 +2374,6 @@ Public Class MainWindow
 
         ' Processzor információk lekérdezése (Csak az órajelek frissítése!)
         SetCPUInformation(False)
-
-        ' Memóriakihasználtság frissítése
-        SetMemoryInformation()
 
         ' Uptime frissítése
         SetUptime()
@@ -2337,12 +2475,11 @@ Public Class MainWindow
         Name_CPUCore.Text = GetLoc("CPUCore")
         Name_CPUClock.Text = GetLoc("CPUClock")
         Name_CPUMaximum.Text = GetLoc("CPUMaximum")
-        Name_PhyMemSize.Text = GetLoc("PhyMemSize")
-        Name_PhyMemUsed.Text = GetLoc("PhyMemUsed")
-        Name_PhyMemFree.Text = GetLoc("PhyMemFree")
-        Name_VirtMemSize.Text = GetLoc("VirtMemSize")
-        Name_VirtMemUsed.Text = GetLoc("VirtMemUsed")
-        Name_VirtMemFree.Text = GetLoc("VirtMemFree")
+        Name_MemSize.Text = GetLoc("MemSize")
+        Name_MemClock.Text = GetLoc("MemClock")
+        Name_MemType.Text = GetLoc("MemType")
+        Name_RAMList.Text = GetLoc("MemList")
+        Name_MemVisible.Text = GetLoc("MemVisible")
         Name_OSName.Text = GetLoc("OSName")
         Name_OSVersion.Text = GetLoc("OSVersion")
         Name_OSLang.Text = GetLoc("OSLang")
@@ -2368,18 +2505,21 @@ Public Class MainWindow
         ' Checkbox és Combobox ToolTip értékek beállítása
         EventToolTip.SetToolTip(ComboBox_LanguageList, GetLoc("Tip_Language"))
         EventToolTip.SetToolTip(ComboBox_HWList, GetLoc("Tip_HW"))
-        EventToolTip.SetToolTip(Button_CPUInfoOpen, GetLoc("Tip_CPUInfo"))
-        EventToolTip.SetToolTip(Button_SmartOpen, GetLoc("Tip_Smart"))
-        EventToolTip.SetToolTip(Button_IPInfoOpen, GetLoc("Tip_IPInfo"))
-        EventToolTip.SetToolTip(Button_DiskListReload, GetLoc("Tip_Reload"))
-        EventToolTip.SetToolTip(Button_VideoListReload, GetLoc("Tip_Reload"))
-        EventToolTip.SetToolTip(Button_InterfaceListReload, GetLoc("Tip_Reload"))
         EventToolTip.SetToolTip(PictureBox_TrafficChart, GetLoc("Tip_Chart") + " (" + RefreshInterval(SelectedRefresh).ToString + " " + GetLoc("Tip_Average") + ")") ' Az átlagértékek is hozzáadva!
         EventToolTip.SetToolTip(CheckBoxChart_DownloadVisible, GetLoc("Tip_ChartDown"))
         EventToolTip.SetToolTip(CheckBoxChart_UploadVisible, GetLoc("Tip_ChartUp"))
         EventToolTip.SetToolTip(ComboBox_UpdateList, GetLoc("Tip_Refresh"))
-        EventToolTip.SetToolTip(Button_Exit, GetLoc("Tip_Exit"))
         EventToolTip.SetToolTip(Link_Bottom, GetLoc("Tip_LinkBottom"))
+
+        ' Gomb tooltipek
+        EventToolTip.SetToolTip(Button_CPUInfoOpen, GetLoc("CPUTitle") + "...")
+        EventToolTip.SetToolTip(Button_RAMInfoOpen, GetLoc("RAMTitle") + "...")
+        EventToolTip.SetToolTip(Button_SMARTInfoOpen, GetLoc("SMARTTitle") + "...")
+        EventToolTip.SetToolTip(Button_IPInfoOpen, GetLoc("IPTitle") + "...")
+        EventToolTip.SetToolTip(Button_DiskListReload, GetLoc("Tip_Reload"))
+        EventToolTip.SetToolTip(Button_VideoListReload, GetLoc("Tip_Reload"))
+        EventToolTip.SetToolTip(Button_InterfaceListReload, GetLoc("Tip_Reload"))
+        EventToolTip.SetToolTip(Button_Exit, GetLoc("Tip_Exit"))
 
         ' Állapot- és menüsori ToolTip kiírások beállítása
         StatusLabel_Host.ToolTipText = GetLoc("Tip_Hostname")
@@ -2454,6 +2594,9 @@ Public Class MainWindow
         ' Hardverlista frissítése
         UpdateHWList(False)
 
+        ' Memória információk frissítése
+        SetMemoryInformation()
+
         ' Hamis listaelem hozzáadása, ha nincs jelen interfész
         If InterfacePresent = False Then
             ComboBox_InterfaceList.Items.Clear()
@@ -2525,6 +2668,18 @@ Public Class MainWindow
 
         ' ToolTip érték beállítása
         EventToolTip.SetToolTip(ComboBox_CPUList, ComboBox_CPUList.Items(SelectedCPU))
+
+    End Sub
+
+    ' *** ELJÁRÁS: Memóriamodul kiválasztása ***
+    ' Eseményvezérelt: ComboBox_MemList.SelectedIndexChanged -> Listaelem kiválasztása
+    Private Sub MemList_Change(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ComboBox_RAMList.SelectedIndexChanged
+
+        ' Változás beállítása
+        SelectedMemory = ComboBox_RAMList.SelectedIndex
+
+        ' ToolTip érték beállítása
+        EventToolTip.SetToolTip(ComboBox_RAMList, ComboBox_RAMList.Items(SelectedMemory))
 
     End Sub
 
@@ -2644,23 +2799,6 @@ Public Class MainWindow
 
     End Sub
 
-    ' *** ELJÁRÁS: S.M.A.R.T ablak megnyitása ***
-    ' Eseményvezérelt: Button_DiskSmartOpen.Click -> Klikk (Lemez S.M.A.R.T gomb)
-    Private Sub SmartWindow_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_SmartOpen.Click
-
-        ' Külső ablakok bezárása
-        CloseExtForms()
-
-        ' Lemez elérhetőségének és S.M.A.R.T lekérdezés hibájának ellenőrzése
-        If CheckDiskAvailable() And SmartException = False Then
-
-            ' S.M.A.R.T ablak megnyitása
-            SmartWindow.Visible = True
-
-        End If
-
-    End Sub
-
     ' *** ELJÁRÁS: CPU-infó ablak megnyitása ***
     ' Eseményvezérelt: Button_CPUInfoOpen.Click -> Klikk (CPU-infó gomb)
     Private Sub CPUInfo_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_CPUInfoOpen.Click
@@ -2670,6 +2808,35 @@ Public Class MainWindow
 
         ' CPU-infó ablak megnyitása
         CPUInfo.Visible = True
+
+    End Sub
+
+    ' *** ELJÁRÁS: RAM-infó ablak megnyitása ***
+    ' Eseményvezérelt: Button_RAMInfoOpen.Click -> Klikk (CPU-infó gomb)
+    Private Sub RAMInfo_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_RAMInfoOpen.Click
+
+        ' Külső ablakok bezárása
+        CloseExtForms()
+
+        ' CPU-infó ablak megnyitása
+        RAMInfo.Visible = True
+
+    End Sub
+
+    ' *** ELJÁRÁS: S.M.A.R.T-infó ablak megnyitása ***
+    ' Eseményvezérelt: Button_SMARTInfoOpen.Click -> Klikk (Lemez S.M.A.R.T gomb)
+    Private Sub SMARTInfo_Open(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button_SMARTInfoOpen.Click
+
+        ' Külső ablakok bezárása
+        CloseExtForms()
+
+        ' Lemez elérhetőségének és S.M.A.R.T lekérdezés hibájának ellenőrzése
+        If CheckDiskAvailable() And SmartException = False Then
+
+            ' S.M.A.R.T ablak megnyitása
+            SMARTInfo.Visible = True
+
+        End If
 
     End Sub
 
