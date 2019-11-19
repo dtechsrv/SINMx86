@@ -20,6 +20,7 @@ Public Class CPUInfo
 
         ' Értékek definiálása
         Dim VendorCount, NameCount, ArchCount As Int32          ' Ciklusszámlálók (gyártó, név, architektúra)
+        Dim CPUCores, CPUThreads As Int32                       ' Magok és szálak száma
         Dim NameString As String                                ' Processzor neve
         Dim DeviceID As String = Nothing                        ' Processzor azonosítója
         Dim L2Cache(2) As Double                                ' Level 2 cache mérete
@@ -61,10 +62,37 @@ Public Class CPUInfo
         ' Sorok törlése
         CPU_Table.Items.Clear()
 
+        ' WMI értékek lekérdezése: Win32_Processor -> Magok és szálak száma
+        objPR = New ManagementObjectSearcher("SELECT NumberOfCores, NumberOfLogicalProcessors FROM Win32_Processor")
+
+        ' Processzor mag és szál értékek kiértékelése
+        ' Megjegyzés: Ha üres a tábla, akkor 'ManagementException'-t okoz, ezért kell a 'Try'!
+        ' Elsősorban XP-nél és Server 2003-nál kell rá számítani, ahol hiányzik a HT/Multicore kezelési frissítés!
+        Try
+
+            ' Értékek beállítása -> Processzor: magok, szálak
+            For Each Me.objMgmt In objPR.Get()
+                If CPUCount = SelectedCPU Then
+                    CPUCores = objMgmt("NumberOfCores")
+                    CPUThreads = objMgmt("NumberOfLogicalProcessors")
+                End If
+                CPUCount += 1
+            Next
+
+        Catch
+
+            ' Statikus értékek beállítása -> Processzor: magok, szálak (1/1)
+            CPUCores = 1
+            CPUThreads = 1
+
+        End Try
+
+        ' Processzor számláló visszaállítása
+        CPUCount = 0
+
         ' WMI értékek lekérdezése: Win32_Processor -> CPU-információk
-        ' Megjegyzés: Ha wildcard lenne, akkor túl lassú lenne a lekérdezés, ezért ilyen hosszú!
-        objPR = New ManagementObjectSearcher("SELECT DeviceID, Manufacturer, Name, Description, NumberOfCores, NumberOfLogicalProcessors, SocketDesignation, " +
-                                             "CurrentVoltage, Architecture, CurrentClockSpeed, MaxClockSpeed, ExtClock, L2CacheSize FROM Win32_Processor")
+        objPR = New ManagementObjectSearcher("SELECT DeviceID, Manufacturer, Name, Description, SocketDesignation, CurrentVoltage, " +
+                                             "Architecture, CurrentClockSpeed, MaxClockSpeed, ExtClock, L2CacheSize FROM Win32_Processor")
 
         ' Értékek beállítása -> Processzor
         For Each Me.objMgmt In objPR.Get()
@@ -89,10 +117,12 @@ Public Class CPUInfo
                 ' Módosított név hozzáadása
                 CPUTableAddRow(GetLoc("CPUName"), RemoveSpaces(NameString), Nothing)
 
-                ' Módosítás nélküli sorok felvitele
+                ' Azonosító hozzáadása
                 CPUTableAddRow(GetLoc("CPUIdent"), RemoveSpaces(objMgmt("Description")), Nothing)
-                CPUTableAddRow(GetLoc("CPUCores"), objMgmt("NumberOfCores").ToString, Nothing)
-                CPUTableAddRow(GetLoc("CPUThreads"), objMgmt("NumberOfLogicalProcessors").ToString, Nothing)
+
+                ' Korábban kiértékelt értékek soainak felvitele
+                CPUTableAddRow(GetLoc("CPUCores"), CPUCores.ToString, Nothing)
+                CPUTableAddRow(GetLoc("CPUThreads"), CPUThreads.ToString, Nothing)
 
                 ' Gyártói "lustaság" sztingek keresése
                 If Not CheckStrMatch(objMgmt("SocketDesignation"), Blacklist, False) Then

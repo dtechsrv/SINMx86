@@ -27,6 +27,7 @@ Partial Class MainWindow
         Me.GroupBox_HWInfo = New System.Windows.Forms.GroupBox()
         Me.Value_HWIdent = New System.Windows.Forms.Label()
         Me.Name_HWIdent = New System.Windows.Forms.Label()
+        Me.ComboBox_HWList = New SINMx86.LeftComboBox()
         Me.Name_HWList = New System.Windows.Forms.Label()
         Me.Value_HWVendor = New System.Windows.Forms.Label()
         Me.Name_HWVendor = New System.Windows.Forms.Label()
@@ -41,6 +42,7 @@ Partial Class MainWindow
         Me.Name_OSName = New System.Windows.Forms.Label()
         Me.GroupBox_CPUInfo = New System.Windows.Forms.GroupBox()
         Me.Button_CPUInfoOpen = New System.Windows.Forms.Button()
+        Me.ComboBox_CPUList = New SINMx86.LeftComboBox()
         Me.Value_CPUMaximum = New System.Windows.Forms.Label()
         Me.Name_CPUMaximum = New System.Windows.Forms.Label()
         Me.Value_CPUCore = New System.Windows.Forms.Label()
@@ -51,6 +53,7 @@ Partial Class MainWindow
         Me.GroupBox_MemoryInfo = New System.Windows.Forms.GroupBox()
         Me.Button_RAMInfoOpen = New System.Windows.Forms.Button()
         Me.Value_MemVisible = New System.Windows.Forms.Label()
+        Me.ComboBox_RAMList = New SINMx86.LeftComboBox()
         Me.Name_MemVisible = New System.Windows.Forms.Label()
         Me.Value_MemClock = New System.Windows.Forms.Label()
         Me.Name_MemType = New System.Windows.Forms.Label()
@@ -61,6 +64,7 @@ Partial Class MainWindow
         Me.Name_MemSize = New System.Windows.Forms.Label()
         Me.GroupBox_VideoInfo = New System.Windows.Forms.GroupBox()
         Me.Button_VideoListReload = New System.Windows.Forms.Button()
+        Me.ComboBox_VideoList = New SINMx86.LeftComboBox()
         Me.Value_VideoResolution = New System.Windows.Forms.Label()
         Me.Value_VideoMemory = New System.Windows.Forms.Label()
         Me.Name_VideoResolution = New System.Windows.Forms.Label()
@@ -75,6 +79,7 @@ Partial Class MainWindow
         Me.Button_IPInfoOpen = New System.Windows.Forms.Button()
         Me.Button_InterfaceListReload = New System.Windows.Forms.Button()
         Me.Value_UploadSpeedUnit = New System.Windows.Forms.Label()
+        Me.ComboBox_InterfaceList = New SINMx86.LeftComboBox()
         Me.Value_BandwidthUnit = New System.Windows.Forms.Label()
         Me.Value_DownloadSpeedUnit = New System.Windows.Forms.Label()
         Me.Value_UploadSpeed = New System.Windows.Forms.Label()
@@ -82,6 +87,7 @@ Partial Class MainWindow
         Me.Value_DownloadSpeed = New System.Windows.Forms.Label()
         Me.Value_Bandwidth = New System.Windows.Forms.Label()
         Me.Name_UpdateUnit = New System.Windows.Forms.Label()
+        Me.ComboBox_UpdateList = New SINMx86.RightComboBox()
         Me.Name_UpdateList = New System.Windows.Forms.Label()
         Me.Name_ChartVisible = New System.Windows.Forms.Label()
         Me.CheckBoxChart_UploadVisible = New System.Windows.Forms.CheckBox()
@@ -139,6 +145,7 @@ Partial Class MainWindow
         Me.Button_SMARTInfoOpen = New System.Windows.Forms.Button()
         Me.Value_PartLabel = New System.Windows.Forms.Label()
         Me.Value_PartInfo = New System.Windows.Forms.Label()
+        Me.ComboBox_PartList = New SINMx86.LeftComboBox()
         Me.Button_DiskListReload = New System.Windows.Forms.Button()
         Me.Value_DiskSerial = New System.Windows.Forms.Label()
         Me.Name_DiskSerial = New System.Windows.Forms.Label()
@@ -149,16 +156,9 @@ Partial Class MainWindow
         Me.Value_DiskType = New System.Windows.Forms.Label()
         Me.Name_DiskInterface = New System.Windows.Forms.Label()
         Me.Name_DiskType = New System.Windows.Forms.Label()
-        Me.Name_DiskList = New System.Windows.Forms.Label()
-        Me.ComboBox_PartList = New SINMx86.LeftComboBox()
         Me.ComboBox_DiskList = New SINMx86.LeftComboBox()
+        Me.Name_DiskList = New System.Windows.Forms.Label()
         Me.ComboBox_LanguageList = New SINMx86.LeftComboBox()
-        Me.ComboBox_InterfaceList = New SINMx86.LeftComboBox()
-        Me.ComboBox_UpdateList = New SINMx86.RightComboBox()
-        Me.ComboBox_VideoList = New SINMx86.LeftComboBox()
-        Me.ComboBox_RAMList = New SINMx86.LeftComboBox()
-        Me.ComboBox_CPUList = New SINMx86.LeftComboBox()
-        Me.ComboBox_HWList = New SINMx86.LeftComboBox()
         Me.GroupBox_HWInfo.SuspendLayout()
         Me.GroupBox_OSInfo.SuspendLayout()
         Me.GroupBox_CPUInfo.SuspendLayout()
@@ -209,6 +209,16 @@ Partial Class MainWindow
         Me.Name_HWIdent.Size = New System.Drawing.Size(61, 13)
         Me.Name_HWIdent.TabIndex = 4
         Me.Name_HWIdent.Text = "Identifier:"
+        '
+        'ComboBox_HWList
+        '
+        Me.ComboBox_HWList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_HWList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_HWList.FormattingEnabled = True
+        Me.ComboBox_HWList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_HWList.Name = "ComboBox_HWList"
+        Me.ComboBox_HWList.Size = New System.Drawing.Size(326, 21)
+        Me.ComboBox_HWList.TabIndex = 1
         '
         'Name_HWList
         '
@@ -370,6 +380,16 @@ Partial Class MainWindow
         Me.Button_CPUInfoOpen.TabIndex = 2
         Me.Button_CPUInfoOpen.UseVisualStyleBackColor = True
         '
+        'ComboBox_CPUList
+        '
+        Me.ComboBox_CPUList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_CPUList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_CPUList.FormattingEnabled = True
+        Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_CPUList.Name = "ComboBox_CPUList"
+        Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
+        Me.ComboBox_CPUList.TabIndex = 1
+        '
         'Value_CPUMaximum
         '
         Me.Value_CPUMaximum.ForeColor = System.Drawing.SystemColors.ControlText
@@ -482,6 +502,16 @@ Partial Class MainWindow
         Me.Value_MemVisible.TabIndex = 7
         Me.Value_MemVisible.Text = "0.00 MiB"
         '
+        'ComboBox_RAMList
+        '
+        Me.ComboBox_RAMList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_RAMList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_RAMList.FormattingEnabled = True
+        Me.ComboBox_RAMList.Location = New System.Drawing.Point(251, 45)
+        Me.ComboBox_RAMList.Name = "ComboBox_RAMList"
+        Me.ComboBox_RAMList.Size = New System.Drawing.Size(157, 21)
+        Me.ComboBox_RAMList.TabIndex = 9
+        '
         'Name_MemVisible
         '
         Me.Name_MemVisible.AutoSize = True
@@ -592,6 +622,16 @@ Partial Class MainWindow
         Me.Button_VideoListReload.Size = New System.Drawing.Size(23, 23)
         Me.Button_VideoListReload.TabIndex = 2
         Me.Button_VideoListReload.UseVisualStyleBackColor = True
+        '
+        'ComboBox_VideoList
+        '
+        Me.ComboBox_VideoList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_VideoList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_VideoList.FormattingEnabled = True
+        Me.ComboBox_VideoList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_VideoList.Name = "ComboBox_VideoList"
+        Me.ComboBox_VideoList.Size = New System.Drawing.Size(297, 21)
+        Me.ComboBox_VideoList.TabIndex = 1
         '
         'Value_VideoResolution
         '
@@ -761,6 +801,16 @@ Partial Class MainWindow
         Me.Value_UploadSpeedUnit.Text = "MiB/s"
         Me.Value_UploadSpeedUnit.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
+        'ComboBox_InterfaceList
+        '
+        Me.ComboBox_InterfaceList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_InterfaceList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_InterfaceList.FormattingEnabled = True
+        Me.ComboBox_InterfaceList.Location = New System.Drawing.Point(111, 22)
+        Me.ComboBox_InterfaceList.Name = "ComboBox_InterfaceList"
+        Me.ComboBox_InterfaceList.Size = New System.Drawing.Size(268, 21)
+        Me.ComboBox_InterfaceList.TabIndex = 1
+        '
         'Value_BandwidthUnit
         '
         Me.Value_BandwidthUnit.ForeColor = System.Drawing.SystemColors.ControlText
@@ -829,6 +879,17 @@ Partial Class MainWindow
         Me.Name_UpdateUnit.Size = New System.Drawing.Size(11, 13)
         Me.Name_UpdateUnit.TabIndex = 20
         Me.Name_UpdateUnit.Text = "s"
+        '
+        'ComboBox_UpdateList
+        '
+        Me.ComboBox_UpdateList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_UpdateList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_UpdateList.DropDownWidth = 46
+        Me.ComboBox_UpdateList.FormattingEnabled = True
+        Me.ComboBox_UpdateList.Location = New System.Drawing.Point(381, 360)
+        Me.ComboBox_UpdateList.Name = "ComboBox_UpdateList"
+        Me.ComboBox_UpdateList.Size = New System.Drawing.Size(41, 21)
+        Me.ComboBox_UpdateList.TabIndex = 19
         '
         'Name_UpdateList
         '
@@ -1107,7 +1168,6 @@ Partial Class MainWindow
         '
         'MainNotifyIcon
         '
-        Me.MainNotifyIcon.ContextMenuStrip = Me.MainContextMenu
         Me.MainNotifyIcon.Icon = CType(resources.GetObject("MainNotifyIcon.Icon"), System.Drawing.Icon)
         Me.MainNotifyIcon.Text = "SINMx86"
         Me.MainNotifyIcon.Visible = True
@@ -1305,6 +1365,18 @@ Partial Class MainWindow
         Me.Value_PartInfo.Text = "Not available"
         Me.Value_PartInfo.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
+        'ComboBox_PartList
+        '
+        Me.ComboBox_PartList.Anchor = System.Windows.Forms.AnchorStyles.Left
+        Me.ComboBox_PartList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.ComboBox_PartList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox_PartList.FormattingEnabled = True
+        Me.ComboBox_PartList.ItemHeight = 15
+        Me.ComboBox_PartList.Location = New System.Drawing.Point(111, 91)
+        Me.ComboBox_PartList.Name = "ComboBox_PartList"
+        Me.ComboBox_PartList.Size = New System.Drawing.Size(114, 21)
+        Me.ComboBox_PartList.TabIndex = 13
+        '
         'Button_DiskListReload
         '
         Me.Button_DiskListReload.ForeColor = System.Drawing.SystemColors.ControlText
@@ -1412,29 +1484,6 @@ Partial Class MainWindow
         Me.Name_DiskType.TabIndex = 6
         Me.Name_DiskType.Text = "Media type:"
         '
-        'Name_DiskList
-        '
-        Me.Name_DiskList.AutoSize = True
-        Me.Name_DiskList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
-        Me.Name_DiskList.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Name_DiskList.Location = New System.Drawing.Point(15, 25)
-        Me.Name_DiskList.Name = "Name_DiskList"
-        Me.Name_DiskList.Size = New System.Drawing.Size(68, 13)
-        Me.Name_DiskList.TabIndex = 0
-        Me.Name_DiskList.Text = "Disk drive:"
-        '
-        'ComboBox_PartList
-        '
-        Me.ComboBox_PartList.Anchor = System.Windows.Forms.AnchorStyles.Left
-        Me.ComboBox_PartList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_PartList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_PartList.FormattingEnabled = True
-        Me.ComboBox_PartList.ItemHeight = 15
-        Me.ComboBox_PartList.Location = New System.Drawing.Point(111, 91)
-        Me.ComboBox_PartList.Name = "ComboBox_PartList"
-        Me.ComboBox_PartList.Size = New System.Drawing.Size(114, 21)
-        Me.ComboBox_PartList.TabIndex = 13
-        '
         'ComboBox_DiskList
         '
         Me.ComboBox_DiskList.Anchor = System.Windows.Forms.AnchorStyles.Left
@@ -1447,6 +1496,17 @@ Partial Class MainWindow
         Me.ComboBox_DiskList.Size = New System.Drawing.Size(268, 21)
         Me.ComboBox_DiskList.TabIndex = 1
         '
+        'Name_DiskList
+        '
+        Me.Name_DiskList.AutoSize = True
+        Me.Name_DiskList.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(238, Byte))
+        Me.Name_DiskList.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Name_DiskList.Location = New System.Drawing.Point(15, 25)
+        Me.Name_DiskList.Name = "Name_DiskList"
+        Me.Name_DiskList.Size = New System.Drawing.Size(68, 13)
+        Me.Name_DiskList.TabIndex = 0
+        Me.Name_DiskList.Text = "Disk drive:"
+        '
         'ComboBox_LanguageList
         '
         Me.ComboBox_LanguageList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
@@ -1457,67 +1517,6 @@ Partial Class MainWindow
         Me.ComboBox_LanguageList.Name = "ComboBox_LanguageList"
         Me.ComboBox_LanguageList.Size = New System.Drawing.Size(93, 21)
         Me.ComboBox_LanguageList.TabIndex = 3
-        '
-        'ComboBox_InterfaceList
-        '
-        Me.ComboBox_InterfaceList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_InterfaceList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_InterfaceList.FormattingEnabled = True
-        Me.ComboBox_InterfaceList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_InterfaceList.Name = "ComboBox_InterfaceList"
-        Me.ComboBox_InterfaceList.Size = New System.Drawing.Size(268, 21)
-        Me.ComboBox_InterfaceList.TabIndex = 1
-        '
-        'ComboBox_UpdateList
-        '
-        Me.ComboBox_UpdateList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_UpdateList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_UpdateList.DropDownWidth = 46
-        Me.ComboBox_UpdateList.FormattingEnabled = True
-        Me.ComboBox_UpdateList.Location = New System.Drawing.Point(381, 360)
-        Me.ComboBox_UpdateList.Name = "ComboBox_UpdateList"
-        Me.ComboBox_UpdateList.Size = New System.Drawing.Size(41, 21)
-        Me.ComboBox_UpdateList.TabIndex = 19
-        '
-        'ComboBox_VideoList
-        '
-        Me.ComboBox_VideoList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_VideoList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_VideoList.FormattingEnabled = True
-        Me.ComboBox_VideoList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_VideoList.Name = "ComboBox_VideoList"
-        Me.ComboBox_VideoList.Size = New System.Drawing.Size(297, 21)
-        Me.ComboBox_VideoList.TabIndex = 1
-        '
-        'ComboBox_RAMList
-        '
-        Me.ComboBox_RAMList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_RAMList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_RAMList.FormattingEnabled = True
-        Me.ComboBox_RAMList.Location = New System.Drawing.Point(251, 45)
-        Me.ComboBox_RAMList.Name = "ComboBox_RAMList"
-        Me.ComboBox_RAMList.Size = New System.Drawing.Size(157, 21)
-        Me.ComboBox_RAMList.TabIndex = 9
-        '
-        'ComboBox_CPUList
-        '
-        Me.ComboBox_CPUList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_CPUList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_CPUList.FormattingEnabled = True
-        Me.ComboBox_CPUList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_CPUList.Name = "ComboBox_CPUList"
-        Me.ComboBox_CPUList.Size = New System.Drawing.Size(297, 21)
-        Me.ComboBox_CPUList.TabIndex = 1
-        '
-        'ComboBox_HWList
-        '
-        Me.ComboBox_HWList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.ComboBox_HWList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.ComboBox_HWList.FormattingEnabled = True
-        Me.ComboBox_HWList.Location = New System.Drawing.Point(111, 22)
-        Me.ComboBox_HWList.Name = "ComboBox_HWList"
-        Me.ComboBox_HWList.Size = New System.Drawing.Size(326, 21)
-        Me.ComboBox_HWList.TabIndex = 1
         '
         'MainWindow
         '

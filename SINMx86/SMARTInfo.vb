@@ -16,7 +16,13 @@ Public Class SMARTInfo
     Public SmartPnPID(32) As String                             ' PnP azonosító a S.M.A.R.T-hoz
     Public DiskCount As Int32 = 0                               ' Lemezek száma
     Public SmartRecord(255) As String                           ' Rekord nevek tömbje
-    Public IsCritical(255) As Boolean                           ' Rekord jellemző: ahol igaz, az kritikus rekord
+    Public RecordFlag(255) As Int32                             ' Rekord jellemző: 0 -> nem kritikus, 1 -> figyelmeztető, 2 -> kritikus
+
+    ' Eltérő riasztási értékek változói (kézzel felülbírált limitek)
+    Public WarningTreshold As Int32 = 100                       ' Figyelmeztető köszöbérték 
+    Public CriticalTreshold As Int32 = 100                      ' Kritikus köszöbérték
+    Public TempWarning As Int32 = 45                            ' Figyelmeztetési hőmérséklet értéke (Celsius)
+    Public TempCritical As Int32 = 55                           ' Kritikus hőmérséklet értéke (Celsius)
 
     ' *** FŐ ELJÁRÁS: S.M.A.R.T ablak betöltése (MyBase.Load -> SmartWindow) ***
     ' Eseményvezérelt: Ablak megnyitása
@@ -138,48 +144,30 @@ Public Class SMARTInfo
                 ValueSum = ToInt32(SmartData(SmartCount + SmartColunms(4)))
                 ListFields(7) = ValueSum.ToString + " °C"
 
-                ' Hőmérséklet érték átalakítása (Celsius -> Fahrenheit)
+                ' Nyers adat felülbírálása (Celsius érték beállítása)
+                RecordRawValue = ValueSum
+
+                ' Hőmérséklet érték átalakítása (Celsius -> Fahrenheit) és hozzáadása a formázott sztringhez 
                 ValueSum = Round((9 * ValueSum / 5) + 32)
                 ListFields(7) += " / " + ValueSum.ToString + " °F"
 
-                ' Nyers adat (önállóan nem kerül kiértékelésre, ezért '0')
-                RecordRawValue = 0
+            ElseIf RecordNumber = 9 Or RecordNumber = 240 Then
 
-            ElseIf RecordNumber = 9 Then
-
-                ' Üzemórák száma (Csak az első három érték kerül feldolgozásra!)
+                ' Üzemórák és fejpozícionálással töltőtt órák száma (Csak az első három érték kerül feldolgozásra!)
                 For ByteDigit = 0 To 2
                     ValueSum += ToInt32(SmartData(SmartCount + SmartColunms(4) + ByteDigit)) * (256 ^ ByteDigit)
                 Next
 
-                ' Üzemidő: napok
+                ' Nyers adat felülbírálása (összes óra beállítása)
+                RecordRawValue = ValueSum
+
+                ' Értékek formázása: napok
                 ValueDiff = Int(ValueSum / (24))
                 ListFields(7) = ValueDiff.ToString + " " + GetLoc("Days")
 
-                ' Üzemidő: órák
+                ' Értékek formázása: órák (különbözet)
                 ValueDiff = ValueSum - (ValueDiff * 24)
                 ListFields(7) += ", " + ValueDiff.ToString + " " + GetLoc("Hours")
-
-                ' Nyers adat (önállóan nem kerül kiértékelésre, ezért '0')
-                RecordRawValue = 0
-
-            ElseIf RecordNumber = 240 Then
-
-                ' Fejpozícionálással töltött üzemórák száma (Csak az első három érték kerül feldolgozásra!)
-                For ByteDigit = 0 To 2
-                    ValueSum += ToInt32(SmartData(SmartCount + SmartColunms(4) + ByteDigit)) * (256 ^ ByteDigit)
-                Next
-
-                ' Üzemidő: napok
-                ValueDiff = Int(ValueSum / (24))
-                ListFields(7) = ValueDiff.ToString + " " + GetLoc("Days")
-
-                ' Üzemidő: órák
-                ValueDiff = ValueSum - (ValueDiff * 24)
-                ListFields(7) += ", " + ValueDiff.ToString + " " + GetLoc("Hours")
-
-                ' Nyers adat (önállóan nem kerül kiértékelésre, ezért '0')
-                RecordRawValue = 0
 
             Else
 
@@ -196,32 +184,58 @@ Public Class SMARTInfo
 
             End If
 
-            ' Kritikus rekordok kiértékelése
-            If IsCritical(RecordNumber) Then
+            ' Figyelmeztető és kritikus rekordok kiértékelése
+            If RecordFlag(RecordNumber) = 1 Then
 
-                ' Nyers érték 0-tól való eltérésének keresése
+                ' Figyelmeztető rekordok kezelése
+                ' Megjegyzés: A gyártói küszöböt figyelmen kívül hagyva, ha az érték eléri a beállított köszöböt, akkor figyelmeztetésre lesz módosítva!
+                If RecordRawValue >= WarningTreshold Then
+                    RecordStatus = 1
+                    ListFields(6) = GetLoc("SMARTWarning")
+                Else
+                    RecordStatus = 0
+                    ListFields(6) = GetLoc("SMARTOK")
+                End If
+
+            ElseIf RecordFlag(RecordNumber) = 2 Then
+
+                ' Kritikus rekordok kezelése
+                ' Megjegyzés: A gyártói küszöböt figyelmen kívül hagyva, ha az érték eléri a beállított köszöböt, akkor kritikusra lesz módosítva!
                 If RecordRawValue = 0 Then
                     RecordStatus = 0
                     ListFields(6) = GetLoc("SMARTOK")
+                ElseIf RecordRawValue >= CriticalTreshold Then
+                    RecordStatus = 2
+                    ListFields(6) = GetLoc("SMARTCritical")
                 Else
                     RecordStatus = 1
                     ListFields(6) = GetLoc("SMARTWarning")
                 End If
 
-                ' Jelenlegi és köszübérték összehasonlítása -> Felülírja az első ellenőrzést!
-                ' Megjegyzés: A gyártói küszöböt figyelmen kívül hagyva, ha az érték eléri a 100-as nagyságrendet, akkor kritikussá lesz nyilvánítva!
-                If RecordRawValue >= 100 Then
+            ElseIf RecordFlag(RecordNumber) = 3 Then
+
+                ' Hőmérsékleti figyelmeztetés beállítása (beállított limittel a kritikus hőmérsékletküszöb előtt)
+                If RecordRawValue < TempWarning Then
+                    RecordStatus = 0
+                    ListFields(6) = GetLoc("SMARTOK")
+                ElseIf RecordRawValue >= TempWarning And RecordRawValue < TempCritical Then
+                    RecordStatus = 1
+                    ListFields(6) = GetLoc("SMARTWarning")
+                Else
                     RecordStatus = 2
                     ListFields(6) = GetLoc("SMARTCritical")
                 End If
+
             Else
 
                 ' Alapérték beállítása nem kritikus rekordoknál
                 RecordStatus = 0
                 ListFields(6) = GetLoc("SMARTOK")
+
             End If
 
-            ' Köszüb és jelenlegi érték összehasonlítása -> Minden rekordnál érvényes és felülírja az első ellenőrzést!
+            ' Köszüb és jelenlegi érték összehasonlítása
+            ' Megjegyzés: Minden rekordnál érvényes és felülírja az első ellenőrzést!
             If RecordTreshold > RecordValue Then
                 RecordStatus = 2
                 ListFields(6) = GetLoc("SMARTCritical")
@@ -257,7 +271,7 @@ Public Class SMARTInfo
                 End If
 
                 ' Kritikus rekordok betű- és háttér színének megváltoztatása
-                If IsCritical(RecordNumber) Then
+                If RecordFlag(RecordNumber) > 0 Then
                     ListItem.SubItems(ListColumn).BackColor = Color.WhiteSmoke
                     ListItem.SubItems(ListColumn).ForeColor = Color.ForestGreen
                 End If
@@ -296,8 +310,19 @@ Public Class SMARTInfo
         Dim ArrayCount As Int32                                 ' Tömb számláló
 
         ' Kritikus rekordok -> Ezeknek rendszerint 0 értéket kell mutatniuk, ha minden rendben!
-        ' Megjegyzés: Reallocated Sectors, Spin Retry, End-to-End Errors, Reallocation Events, Current Pending Sectors, Off-Line Uncorrectable Sectors
+        ' Megjegyzés: Ha nem 0, akkor figyelmeztetés, a beállított küszöböt átlépve kritikus értéket vesz fel!
+        ' Rekordok: Reallocated Sectors, Spin Retry Count, End-to-End Errors, Reallocation Events, Current Pending Sectors, Off-Line Uncorrectable Sectors.
         Dim CriticalRecords() As Int32 = {5, 10, 184, 196, 197, 198}
+
+        ' Figyelmeztető rekordok -> Ezeknek egy értéket meghaladóan csak figyelmeztetést kell megjeleníteni!
+        ' Megjegyzés: A beállított köszöböt átlépve figyelmeztetés!
+        ' Rekordok: Reported Uncorrectable Errors, Command Timeout, Off-Line Uncorrectable Sectors.
+        Dim WarningRecords() As Int32 = {187, 188, 199}
+
+        ' Hőmérsékletet tartalmazó rekordok -> Kizárólag a konvertáltak!
+        ' Megjegyzés: A köszöb elérése előtt figyelmeztetési állapotot kap!
+        ' Rekordok: Airflow Temperature, Disk Temperature.
+        Dim TemperatureRecords() As Int32 = {190, 194}
 
         ' Alapértelmezett érték (A '0'-ás rekord nincs definiálva!)
         SmartRecord(0) = "Vendor Specific Record"
@@ -403,9 +428,19 @@ Public Class SMARTInfo
             End If
         Next
 
+        ' Figyelmeztető rekordok beállítása
+        For ArrayCount = 0 To UBound(WarningRecords)
+            RecordFlag(WarningRecords(ArrayCount)) = 1
+        Next
+
         ' Kritikus rekordok beállítása
         For ArrayCount = 0 To UBound(CriticalRecords)
-            IsCritical(CriticalRecords(ArrayCount)) = True
+            RecordFlag(CriticalRecords(ArrayCount)) = 2
+        Next
+
+        ' Hőmérséklet értéket tartalmazó rekordok beállítása
+        For ArrayCount = 0 To UBound(TemperatureRecords)
+            RecordFlag(TemperatureRecords(ArrayCount)) = 3
         Next
 
         ' Visszatérési érték beállítása

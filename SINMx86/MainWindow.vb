@@ -90,6 +90,9 @@ Public Class MainWindow
         ' Betöltési állapot beállítása -> Alapértékek
         DebugLoadStage(GetLoc("LoadDefaults"))
 
+        ' Képernyő felbontás ellenőrzése
+        CheckScreenResolution()
+
         ' XP esetén Splash letiltása (Felülírja a registry beállítást, mivel XP alatt hibásan jelenik meg!)
         If OSVersion(0) < 6 Then
             CheckedSplashDisable = True
@@ -227,6 +230,9 @@ Public Class MainWindow
 
         ' Taskbar ikon nevének beállítása -> Végleges (név és verziószám)
         MainNotifyIcon.Text = MyName + " - " + GetLoc("Version") + " " + VersionString
+
+        ' Taskbarikon menüjének engedélyezése
+        MainNotifyIcon.ContextMenuStrip = MainContextMenu
 
         ' Főablak betöltése kész
         MainWindowDone = True
@@ -403,14 +409,27 @@ Public Class MainWindow
             ' WMI értékek lekérdezése: Win32_Processor -> Magok és szálak száma
             objPR = New ManagementObjectSearcher("SELECT NumberOfCores, NumberOfLogicalProcessors FROM Win32_Processor")
 
-            ' Értékek beállítása -> Processzor: magok, szálak
-            For Each Me.objMgmt In objPR.Get()
-                If CPUCount = SelectedCPU Then
-                    CPUCoreNumber = objMgmt("NumberOfCores")
-                    CPUThreadNumber = objMgmt("NumberOfLogicalProcessors")
-                End If
-                CPUCount += 1
-            Next
+            ' Processzor mag és szál értékek kiértékelése
+            ' Megjegyzés: Ha üres a tábla, akkor 'ManagementException'-t okoz, ezért kell a 'Try'!
+            ' Elsősorban XP-nél és Server 2003-nál kell rá számítani, ahol hiányzik a HT/Multicore kezelési frissítés!
+            Try
+
+                ' Értékek beállítása -> Processzor: magok, szálak
+                For Each Me.objMgmt In objPR.Get()
+                    If CPUCount = SelectedCPU Then
+                        CPUCoreNumber = objMgmt("NumberOfCores")
+                        CPUThreadNumber = objMgmt("NumberOfLogicalProcessors")
+                    End If
+                    CPUCount += 1
+                Next
+
+            Catch
+
+                ' Statikus értékek beállítása -> Processzor: magok, szálak (1/1)
+                CPUCoreNumber = 1
+                CPUThreadNumber = 1
+
+            End Try
 
             ' Kiírások frissítése -> Magok / Szálak
             If UpdateCores Then Value_CPUCore.Text = CPUCoreNumber.ToString + " / " + CPUThreadNumber.ToString
@@ -451,13 +470,17 @@ Public Class MainWindow
         Dim OSService As Int32 = 0                              ' Szervizcsomag
         Dim OSLanguage(32) As String                            ' Nyelv
         Dim OSRelease As String = Nothing                       ' Kiadás típusa
+        Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
+
+        ' Névből törlendő sztringek tömbje
+        Dim DeleteList() As String = {"(C)", "(R)", "(TM)", "©", "®", "™"}
 
         ' WMI értékek lekérdezése: Win32_OperatingSystem -> Operációs rendszer információi
         objOS = New ManagementObjectSearcher("SELECT Caption, ServicePackMajorVersion FROM Win32_OperatingSystem")
 
         ' Értékek beállítása -> Operációs rendszer: gyártó, modell
         For Each Me.objMgmt In objOS.Get()
-            OSName = RemoveSpaces(objMgmt("Caption"))
+            OSName = objMgmt("Caption")
             OSService = objMgmt("ServicePackMajorVersion")
         Next
 
@@ -472,11 +495,16 @@ Public Class MainWindow
             OSRelease = objMgmt("AddressWidth").ToString
         Next
 
+        ' Törlendő sztringek keresése és törlése
+        For DeleteCount = 0 To UBound(DeleteList)
+            OSName = Replace(OSName, DeleteList(DeleteCount), " ")
+        Next
+
         ' Kiírások frissítése
         If OSService = 0 Then
-            Value_OSName.Text = OSName
+            Value_OSName.Text = RemoveSpaces(OSName)
         Else
-            Value_OSName.Text = OSName + ", " + GetLoc("SvcPack") + " " + OSService.ToString
+            Value_OSName.Text = RemoveSpaces(OSName) + ", " + GetLoc("SvcPack") + " " + OSService.ToString
         End If
 
         ' Kiírások frissítése
@@ -513,7 +541,7 @@ Public Class MainWindow
     Private Function SetMemoryInformation()
 
         ' Értékek definiálása
-        Dim ModuleSum As Int64                                  ' Memória modulok összmérete (rekurzívan összeadódik)
+        Dim ModuleSum As Int64 = 0                              ' Memória modulok összmérete (rekurzívan összeadódik)
         Dim MemorySize(1), MemoryUsable(1) As Double            ' Formázott modul összméret és a rendszer által felhasználható memória
         Dim MemoryCount = 0                                     ' Memória modul számláló
         Dim MemoryClock, TypeValue As Int32                     ' Órajel és típus azonosító
@@ -540,8 +568,14 @@ Public Class MainWindow
         Next
 
         ' Memória összméret konvertálása és formázása
-        MemorySize = ScaleConversion(ModuleSum, 0, True)
-        Value_MemSize.Text = FixNumberFormat(MemorySize(0), 2, False) + " " + BytePrefix(MemorySize(1)) + "B"
+        If ModuleSum <> 0 Then
+            MemorySize = ScaleConversion(ModuleSum, 0, True)
+            Value_MemSize.Enabled = True
+            Value_MemSize.Text = FixNumberFormat(MemorySize(0), 2, False) + " " + BytePrefix(MemorySize(1)) + "B"
+        Else
+            Value_MemSize.Enabled = False
+            Value_MemSize.Text = GetLoc("Unknown")
+        End If
 
         ' WMI értékek lekérdezése: Win32_OperatingSystem -> Memória információk (kiB-ban vannak az értékek!)
         objOS = New ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem")
@@ -579,6 +613,7 @@ Public Class MainWindow
                 Value_MemType.Enabled = False
                 MemoryType = GetLoc("Unknown")
             Else
+                Value_MemType.Enabled = True
                 MemoryType = SMBIOSMemoryType(TypeValue)
             End If
 
@@ -591,12 +626,14 @@ Public Class MainWindow
         Else
 
             ' Valós kiolvasott érték kiírása
+            Value_MemType.Enabled = True
             MemoryType = WMIMemoryType(TypeValue)
 
         End If
 
         ' SDRAM korrekció (Néhány alaplap hibásan jelzi!)
         If MemoryType = "SDRAM" And MemoryClock >= 200 Then
+            Value_MemType.Enabled = False
             MemoryType = Nothing
         End If
 
@@ -605,16 +642,21 @@ Public Class MainWindow
             If MemoryClock < 66 Then
                 Value_MemType.Enabled = False
                 MemoryType = GetLoc("Unknown")
-            ElseIf MemoryClock <= 175 Then
-                MemoryType = "SDRAM"
-            ElseIf MemoryClock <= 500 Then
-                MemoryType = "DDR"
-            ElseIf MemoryClock <= 950 Then
-                MemoryType = "DDR2"
-            ElseIf MemoryClock <= 1750 Then
-                MemoryType = "DDR3"
             Else
-                MemoryType = "DDR4"
+                Value_MemType.Enabled = True
+
+                ' Becslés órajel alapján
+                If MemoryClock <= 175 Then
+                    MemoryType = "SDRAM"
+                ElseIf MemoryClock <= 500 Then
+                    MemoryType = "DDR"
+                ElseIf MemoryClock <= 950 Then
+                    MemoryType = "DDR2"
+                ElseIf MemoryClock <= 1750 Then
+                    MemoryType = "DDR3"
+                Else
+                    MemoryType = "DDR4"
+                End If
             End If
         End If
 
@@ -1359,9 +1401,11 @@ Public Class MainWindow
 
         ' Üres lista, ha nincs elérhető memóriamodul információ
         If ModuleCount = 0 Then
+            Button_RAMInfoOpen.Enabled = False
             ComboBox_RAMList.Enabled = False
             ComboBox_RAMList.Items.Add(GetLoc("NotAvailable"))
         Else
+            Button_RAMInfoOpen.Enabled = True
             ComboBox_RAMList.Enabled = True
         End If
 
@@ -2346,6 +2390,38 @@ Public Class MainWindow
 
         ' Visszatérési érték beállítása
         Return StampValid
+
+    End Function
+
+    ' *** FÜGGVÉNY: Kijelző felbontás ellenőrzése ***
+    ' Bemenet: * -> üres (Void)
+    ' Kimenet: * -> hamis érték (Boolean)
+    Private Function CheckScreenResolution()
+
+        ' Képernyőlimitek (X, Y)
+        Dim LimitX As Int32 = 1024
+        Dim LimitY As Int32 = 768
+
+        ' Jelenlegi felbontás beállítása (X, Y)
+        Dim ScreenX As Int32 = Screen.PrimaryScreen.Bounds.Width
+        Dim ScreenY As Int32 = Screen.PrimaryScreen.Bounds.Height
+
+        ' Jelenlegi felbontás és limit összehasonlítása
+        If ScreenX < LimitX Or ScreenY < LimitY Then
+
+            ' Üzenet megjelenítése
+            MsgBox(GetLoc("MsgResolutionText") + " (" + LimitX.ToString + "x" + LimitY.ToString + ").", vbCritical, GetLoc("MsgResolutionTitle"))
+
+            ' Kilépési megerősítés kikapcsolása
+            CheckedNoQuitAsk = True
+
+            ' Kilépés
+            Me.Close()
+
+        End If
+
+        ' Visszatérési érték beállítása
+        Return False
 
     End Function
 

@@ -30,8 +30,8 @@ Public Class RAMInfo
         Dim BankCount As Int32                                  ' Sztring keresési ciklusszámláló
 
         ' Sztring cserék változói (eredeti, csere)
-        Dim BankSearch() As String = {"_", "CHANNEL", "BANK", "DIMM"}
-        Dim BankReplace() As String = {", ", "Channel ", "Bank ", "DIMM "}
+        Dim BankSearch() As String = {"_", "-", "CHANNEL", "BANK", "DIMM"}
+        Dim BankReplace() As String = {" ", " ", "Channel ", "Bank ", "DIMM "}
 
         ' Értékek átvétele a főablaktól
         Dim TableName As String = MainWindow.ComboBox_RAMList.Items(SelectedMemory)
@@ -59,8 +59,8 @@ Public Class RAMInfo
         RAM_Table.Items.Clear()
 
         ' WMI értékek lekérdezése: Win32_PhysicalMemory -> Memória információk
-        ' Megjegyzés: Ha wildcard lenne, akkor túl lassú lenne a lekérdezés, ezért ilyen hosszú!
-        objPM = New ManagementObjectSearcher("SELECT Manufacturer, PartNumber, SerialNumber, Capacity, BankLabel, DeviceLocator, Speed, TotalWidth, FormFactor, MemoryType FROM Win32_PhysicalMemory")
+        objPM = New ManagementObjectSearcher("SELECT Manufacturer, PartNumber, SerialNumber, Capacity, BankLabel, " +
+                                             "DeviceLocator, Speed, TotalWidth, FormFactor, MemoryType FROM Win32_PhysicalMemory")
 
         ' Értékek beállítása -> memória modulok tulajdonságai
         For Each Me.objMgmt In objPM.Get()
@@ -71,34 +71,35 @@ Public Class RAMInfo
                 MemoryModel = RemoveInvalidChars(objMgmt("PartNumber"))
                 MemorySerial = RemoveInvalidChars(objMgmt("SerialNumber"))
 
-                ' Gyártóspecifikus értékek ellenőrzése (Valós érték esetén kerül csak a táblázatba!)
-                If Not IsNothing(objMgmt("Manufacturer")) And InStr(MemoryVendor, "Manufacturer") = 0 Then
+                ' Gyártóspecifikus értékek ellenőrzése
+                If RemoveSpaces(MemoryVendor) <> Nothing And InStr(MemoryVendor, "Manufacturer") = 0 Then
                     RAMTableAddRow(GetLoc("RAMVendor"), RemoveSpaces(MemoryVendor), Nothing)
                 End If
 
-                If Not IsNothing(objMgmt("PartNumber")) And InStr(MemoryModel, "PartNum") = 0 Then
+                If RemoveSpaces(MemoryModel) <> Nothing And InStr(MemoryModel, "PartNum") = 0 Then
                     RAMTableAddRow(GetLoc("RAMModel"), RemoveSpaces(MemoryModel), Nothing)
                 End If
 
-                If Not IsNothing(objMgmt("SerialNumber")) And InStr(MemorySerial, "SerNum") = 0 Then
+                If RemoveSpaces(MemorySerial) <> Nothing And InStr(MemorySerial, "SerNum") = 0 Then
                     RAMTableAddRow(GetLoc("RAMSerial"), RemoveSpaces(MemorySerial), Nothing)
                 End If
 
-                ' Memória foglalt beállítása
-                If Not IsNothing(objMgmt("BankLabel")) Then
+                ' Bank és hely értékek beállítása
+                MemoryBank = RemoveInvalidChars(objMgmt("BankLabel"))
+                MemoryLocation = RemoveInvalidChars(objMgmt("DeviceLocator"))
 
-                    ' Bank és hely beállítása
-                    MemoryBank = objMgmt("BankLabel")
-                    MemoryLocation = objMgmt("DeviceLocator")
+                ' Bank és hely értékek ellenőrzése
+                If RemoveSpaces(MemoryBank) <> Nothing Then
 
-                    ' Bank korrekciós sztringek keresése és cseréje
+                    ' Bank és hely korrekciós sztringek keresése és cseréje
                     For BankCount = 0 To UBound(BankSearch)
                         MemoryBank = Replace(MemoryBank, BankSearch(BankCount), BankReplace(BankCount))
+                        MemoryLocation = Replace(MemoryLocation, BankSearch(BankCount), BankReplace(BankCount))
                     Next
 
                     ' Hely formázása
-                    If Not IsNothing(MemoryLocation) Then
-                        MemoryLocation = " (" + RemoveSpaces(Replace(MemoryLocation, "_", " ")) + ")"
+                    If RemoveSpaces(MemoryLocation) <> Nothing Then
+                        MemoryLocation = "(" + RemoveSpaces(MemoryLocation) + ")"
                     End If
 
                     ' Sor hozzáadása

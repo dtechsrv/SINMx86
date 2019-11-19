@@ -92,6 +92,8 @@ Public Class Localization
                 AddLoc("Disabled", "Disabled")
 
                 ' Üzenetdoboz változók
+                AddLoc("MsgResolutionTitle", "Screen resolution error")
+                AddLoc("MsgResolutionText", "The screen resolution is lower than the minimum supported by the software")
                 AddLoc("MsgInterfaceTitle", "Interface is missing")
                 AddLoc("MsgInterfaceText", "The selected interface has been removed or disabled, the interface list will be updated!")
                 AddLoc("MsgDiskTitle", "Disk is missing")
@@ -144,12 +146,12 @@ Public Class Localization
                 AddLoc("RAMVendor", "Vendor")
                 AddLoc("RAMModel", "Model number")
                 AddLoc("RAMSerial", "Serial number")
-                AddLoc("RAMBank", "Location")
+                AddLoc("RAMBank", "Socket")
                 AddLoc("RAMSize", "Size")
                 AddLoc("RAMSocket", "Package type")
                 AddLoc("RAMType", "Type")
                 AddLoc("RAMClock", "Clock")
-                AddLoc("RAMIdent", "JEDEC identifier")
+                AddLoc("RAMIdent", "Type identifier")
                 AddLoc("RAMWidth", "Module width")
 
                 ' Külső nyelvi sztingek -> S.M.A.R.T ablak
@@ -338,6 +340,8 @@ Public Class Localization
                 AddLoc("Disabled", "Letiltva")
 
                 ' Üzenetdoboz változók
+                AddLoc("MsgResolutionTitle", "Képernyő felbontás hiba")
+                AddLoc("MsgResolutionText", "A képernyő felbontása alacsonyabb a szoftver által támogatott minimumnál")
                 AddLoc("MsgInterfaceTitle", "Hiányzó interfész")
                 AddLoc("MsgInterfaceText", "A kiválasztott interfészt eltávolították vagy le lett tiltva, az interfész lista frissítve lesz!")
                 AddLoc("MsgDiskTitle", "Hiányzó lemez")
@@ -364,7 +368,7 @@ Public Class Localization
                 AddLoc("SplashClose", "Bezárás")
 
                 ' Külső nyelvi sztingek -> CPU-infó ablak
-                AddLoc("CPUTitle", "Processzor információk")
+                AddLoc("CPUTitle", "CPU tulajdonságok")
                 AddLoc("CPUTable", "CPU")
                 AddLoc("CPUDescription", "Megnevezés")
                 AddLoc("CPUValue", "Érték")
@@ -383,23 +387,23 @@ Public Class Localization
                 AddLoc("CPUL3", "L3 gyorsítótár mérete")
 
                 ' Külső nyelvi sztingek -> RAM-infó ablak
-                AddLoc("RAMTitle", "Memória modul információk")
+                AddLoc("RAMTitle", "Memória modul tulajdonságai")
                 AddLoc("RAMTable", "Memória modul")
                 AddLoc("RAMDescription", "Megnevezés")
                 AddLoc("RAMValue", "Érték")
                 AddLoc("RAMVendor", "Gyártó")
                 AddLoc("RAMModel", "Modellszám")
                 AddLoc("RAMSerial", "Sorozatszám")
-                AddLoc("RAMBank", "Hely")
+                AddLoc("RAMBank", "Foglalat")
                 AddLoc("RAMSize", "Méret")
                 AddLoc("RAMSocket", "Tokozás")
                 AddLoc("RAMType", "Típus")
                 AddLoc("RAMClock", "Órajel")
-                AddLoc("RAMIdent", "JEDEC szonosító")
+                AddLoc("RAMIdent", "Típus azonosító")
                 AddLoc("RAMWidth", "Modul szélessége")
 
                 ' Külső nyelvi sztingek -> S.M.A.R.T ablak
-                AddLoc("SMARTTitle", "S.M.A.R.T információk")
+                AddLoc("SMARTTitle", "S.M.A.R.T tábla")
                 AddLoc("SMARTStatus", "Állapot")
                 AddLoc("SMARTNumber", "#")
                 AddLoc("SMARTRaw", "Nyers adat")
@@ -416,7 +420,7 @@ Public Class Localization
                 AddLoc("SMARTClose", "&Bezárás")
 
                 ' Külső nyelvi sztingek -> IP-infó ablak
-                AddLoc("IPTitle", "Interfész beállítások")
+                AddLoc("IPTitle", "Interfész konfiguráció")
                 AddLoc("IPTable", "Interfész")
                 AddLoc("IPDescription", "Megnevezés")
                 AddLoc("IPValue", "Érték")

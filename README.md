@@ -14,8 +14,8 @@ __Supported languages:__ English, Hungarian,\
 __Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5),\
 __Source author:__ Gábor Deé (dtech),\
 __License:__ GNU General Public License v2.0,\
-__Supported operating systems:__ Microsoft Windows XP / Vista / 7 / 8 / 8.1 / 10,\
-__Requirements:__ Microsoft .NET Framework 3.5.
+__Supported clients operating systems:__ Microsoft Windows XP / Vista / 7 / 8 / 8.1 / 10,\
+__Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 
 ## Screenshot
 
@@ -23,8 +23,13 @@ __Requirements:__ Microsoft .NET Framework 3.5.
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-11-18 - Version 3.0.0 RC / Build 5315 (testing)__
+__2019-11-19 - Version 3.0.0 Release Candidate / Build 5318 (pre-stable)__
 
+- Nem támogatott felbontás hiba megjelenítése 1024x768-asnál kisebb felbontás esetén,
+- Taskbar ikon menüjének letiltása indítás közben,
+- Win XP/Server 2003 hiányzó HT/Multicore patch lekezelése (magok/szálak),
+- Lemezek független hőfok figyelmeztetése (figyelmeztetés: 45 fok, kritikus 55 fok),
+- Figyelmeztető S.M.A.R.T rekordok bevezetése: nem kritikus, de veszélyt jelentő rekordok,
 - Ténylegesen kritikus S.M.A.R.T rekordok beállítása figyelmeztetésre,
 - Memória infó blokk újraírása, memória infó ablak hozzáadása,
 - Főablak blokkok átrendezése: minden hardver információ bal oldalra került,
