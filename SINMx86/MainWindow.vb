@@ -1071,7 +1071,7 @@ Public Class MainWindow
                 StatusLabel_ChartStatus.Text = GetLoc("ChartStop")
 
                 ' Üzenet megjelenítése
-                MsgBox(GetLoc("MsgInterfaceText"), vbExclamation, GetLoc("MsgInterfaceTitle") + ": " + ComboBox_InterfaceList.Items(SelectedInterface))
+                MsgBox(GetLoc("MsgInterfaceText"), vbExclamation, MyName + " - " + GetLoc("MsgInterfaceTitle") + ": " + ComboBox_InterfaceList.Items(SelectedInterface))
 
                 ' Interfész lista újratöltése
                 UpdateInterfaceList(True)
@@ -1657,48 +1657,57 @@ Public Class MainWindow
         ' Névből törlendő sztringek tömbje
         Dim DeleteList() As String = {"_", "(C)", "(R)", "(TM)", " - Packet Scheduler Miniport"}
 
-        ' Operációs rendszer függő változók definiálása
-        Dim NameRecord, IndexRecord, SourceTable As String
+        ' WMI lekérdezés: Win32_NetworkAdapter -> Hálózati adapterek darabszáma
+        objNA = New ManagementObjectSearcher("SELECT Index FROM Win32_NetworkAdapterConfiguration")
 
-        ' Név és index rekord, valamint a forrás tábla beállítása
-        ' Megjegyzés: az adapter sorszáma is itt van feltűntetve a névben, ha több van ugyanabból a kártyatípusból!
-        If OSVersion(0) >= 6 Then
-            NameRecord = "Name"
-            IndexRecord = "DeviceID"
-            SourceTable = "Win32_NetworkAdapter"
-        Else
-            NameRecord = "Description"
-            IndexRecord = "Index"
-            SourceTable = "Win32_NetworkAdapterConfiguration"
-        End If
-
-        ' WMI lekérdezés: OS-függő -> Hálózati adapterek neve és sorszáma
-        objNA = New ManagementObjectSearcher("SELECT " + NameRecord + ", " + IndexRecord + " FROM " + SourceTable)
-
-        ' Eszközszám meghatározása
+        ' Adapterek darabszámának meghatározása
         AdapterNum = objNA.Get().Count
 
         ' Függő értékek definiálása
         Dim AdapterList(AdapterNum - 1) As String           ' Hálózati adapterek eszközneveinek tömbje
-        Dim AdapterName(AdapterNum - 1) As String           ' Előformázott eszköznevek tömbje (összehasonlításhoz)
         Dim AdapterID(AdapterNum - 1) As String             ' Hálózati adapter azonosítója
 
-        ' Értékek beállítása -> Hálózati adapterek neveinek lekérdezése 
-        For Each Me.objMgmt In objNA.Get()
+        ' Adapter nevének és azonosító sorszámának beállítása
+        ' NT6 előtt a "Win32_NetworkAdapterConfiguration"-ben, utána pedig a 'Win32_NetworkAdapter'-ben.
+        If OSVersion(0) >= 6 Then
 
-            ' Eredeti adapternév felvitele az adapterlistába (lekérdezéshez)
-            AdapterList(AdapterCount) = objMgmt(NameRecord)
+            ' WMI lekérdezés (NT6+): Win32_NetworkAdapter -> Hálózati adapterek neve és sorszáma
+            objNA = New ManagementObjectSearcher("SELECT DeviceID, Name FROM Win32_NetworkAdapter")
 
-            ' Konvertált név felitele a névlistába (összehasonlításhoz)
-            AdapterName(AdapterCount) = StatNameConv(objMgmt(NameRecord))
+            ' Értékek beállítása -> Hálózati adapterek neveinek és sorszámaik lekérdezése 
+            For Each Me.objMgmt In objNA.Get()
 
-            ' Adapter azonosítója (IP-infó lekérdezéshez)
-            AdapterID(AdapterCount) = objMgmt(IndexRecord)
+                ' Adapter azonosítója (IP-infó lekérdezéshez)
+                AdapterID(AdapterCount) = objMgmt("DeviceID")
 
-            ' Adapter számláló növelése
-            AdapterCount += 1
+                ' Eredeti adapternév felvitele az adapterlistába (lekérdezéshez)
+                AdapterList(AdapterCount) = objMgmt("Name")
 
-        Next
+                ' Adapter számláló növelése
+                AdapterCount += 1
+
+            Next
+
+        Else
+
+            ' WMI lekérdezés (WinXP/2003): Win32_NetworkAdapterConfiguration -> Hálózati adapterek neve és sorszáma
+            objNC = New ManagementObjectSearcher("SELECT Description, Index FROM Win32_NetworkAdapterConfiguration")
+
+            ' Értékek beállítása -> Hálózati adapterek neveinek és sorszámaik lekérdezése 
+            For Each Me.objMgmt In objNC.Get()
+
+                ' Adapter azonosítója (IP-infó lekérdezéshez)
+                AdapterID(AdapterCount) = objMgmt("Index")
+
+                ' Eredeti adapternév felvitele az adapterlistába (lekérdezéshez)
+                AdapterList(AdapterCount) = objMgmt("Description")
+
+                ' Adapter számláló növelése
+                AdapterCount += 1
+
+            Next
+
+        End If
 
         ' Lista kiürítése
         ComboBox_InterfaceList.Items.Clear()
@@ -1719,7 +1728,7 @@ Public Class MainWindow
                 For StatCount = 0 To (AdapterNum - 1)
 
                     ' Konvertált adapter név és Interfésznév összehasonlítása (XP-s névkorrekcióval!)
-                    If AdapterName(StatCount) = InterfaceList(InterfaceCount) Then
+                    If StatNameConv(AdapterList(StatCount)) = InterfaceList(InterfaceCount) Then
 
                         ' Interfész azonosító és név hozzáadása
                         InterfaceID(InterfaceCount) = AdapterID(StatCount)
@@ -1832,7 +1841,7 @@ Public Class MainWindow
             ComboBox_PartList.SelectedIndex = 0
 
             ' Üzenet megjelenítése
-            MsgBox(GetLoc("MsgDiskText"), vbExclamation, GetLoc("MsgDiskTitle") + ": " + ComboBox_DiskList.Items(SelectedDisk))
+            MsgBox(GetLoc("MsgDiskText"), vbExclamation, MyName + " - " + GetLoc("MsgDiskTitle") + ": " + ComboBox_DiskList.Items(SelectedDisk))
 
             ' Lemezlista újratöltése
             UpdateDiskList(True)
@@ -2410,7 +2419,7 @@ Public Class MainWindow
         If ScreenX < LimitX Or ScreenY < LimitY Then
 
             ' Üzenet megjelenítése
-            MsgBox(GetLoc("MsgResolutionText") + " (" + LimitX.ToString + "x" + LimitY.ToString + ").", vbCritical, GetLoc("MsgResolutionTitle"))
+            MsgBox(GetLoc("MsgResolutionText") + " (" + LimitX.ToString + "x" + LimitY.ToString + ").", vbCritical, MyName + " - " + GetLoc("MsgResolutionTitle"))
 
             ' Kilépési megerősítés kikapcsolása
             CheckedNoQuitAsk = True
@@ -2996,7 +3005,7 @@ Public Class MainWindow
             Me.TopMost = False
 
             ' Megerősítőablak megjelenítése (Igen -> Kilépés, Nem -> Mégse)
-            e.Cancel = MsgBox(GetLoc("MsgQuitText"), vbQuestion + vbYesNo + vbMsgBoxSetForeground, GetLoc("MsgQuitTitle")) = MsgBoxResult.No
+            e.Cancel = MsgBox(GetLoc("MsgQuitText"), vbQuestion + vbYesNo + vbMsgBoxSetForeground, MyName + " - " + GetLoc("MsgQuitTitle")) = MsgBoxResult.No
 
             ' Folyamatos láthatósag visszaállítása
             Me.TopMost = CheckedTopMost

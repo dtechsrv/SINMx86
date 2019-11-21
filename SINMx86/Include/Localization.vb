@@ -98,7 +98,7 @@ Public Class Localization
                 AddLoc("MsgInterfaceText", "The selected interface has been removed or disabled, the interface list will be updated!")
                 AddLoc("MsgDiskTitle", "Disk is missing")
                 AddLoc("MsgDiskText", "The selected disk has been removed, the disk list will be updated!")
-                AddLoc("MSgQuitTitle", "Exit confirmation")
+                AddLoc("MsgQuitTitle", "Exit confirmation")
                 AddLoc("MsgQuitText", "Do you really want to quit?")
 
                 ' Betöltési változók

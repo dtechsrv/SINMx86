@@ -91,15 +91,28 @@ Public Class RAMInfo
                 ' Bank és hely értékek ellenőrzése
                 If RemoveSpaces(MemoryBank) <> Nothing Then
 
-                    ' Bank és hely korrekciós sztringek keresése és cseréje
+                    ' Bank átalakítása csupa nagybetűsre
+                    MemoryBank = UCase(MemoryBank)
+
+                    ' Bank korrekciós sztringek keresése és cseréje
                     For BankCount = 0 To UBound(BankSearch)
                         MemoryBank = Replace(MemoryBank, BankSearch(BankCount), BankReplace(BankCount))
-                        MemoryLocation = Replace(MemoryLocation, BankSearch(BankCount), BankReplace(BankCount))
                     Next
 
                     ' Hely formázása
                     If RemoveSpaces(MemoryLocation) <> Nothing Then
+
+                        ' Hely átalakítása csupa nagybetűsre
+                        MemoryLocation = UCase(MemoryLocation)
+
+                        ' Hely korrekciós sztringek keresése és cseréje
+                        For BankCount = 0 To UBound(BankSearch)
+                            MemoryLocation = Replace(MemoryLocation, BankSearch(BankCount), BankReplace(BankCount))
+                        Next
+
+                        ' Hely beállítása (A mértékegység helyére kerül!)
                         MemoryLocation = "(" + RemoveSpaces(MemoryLocation) + ")"
+
                     End If
 
                     ' Sor hozzáadása
