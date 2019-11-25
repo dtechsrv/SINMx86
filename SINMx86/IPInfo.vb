@@ -63,7 +63,7 @@ Public Class IPInfo
         For Each Me.objMgmt In objNA.Get()
 
             ' Adapter nevének felvitele
-            AdapterName = objMgmt("Description")
+            AdapterName = RemoveParentheses(objMgmt("Description"))
             IPTableAddRow(GetLoc("IPAdapter"), AdapterName)
 
         Next

@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 2.5.1 Build 5010 (2019-09-18)
+## Current stable version: 3.0.0 Build 5400 (2019-11-25)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -14,7 +14,7 @@ __Supported languages:__ English, Hungarian,\
 __Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5),\
 __Source author:__ Gábor Deé (dtech),\
 __License:__ GNU General Public License v2.0,\
-__Supported clients operating systems:__ Microsoft Windows XP / Vista / 7 / 8 / 8.1 / 10,\
+__Supported clients operating systems:__ Microsoft Windows XP SP3 / Vista / 7 / 8 / 8.1 / 10,\
 __Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 
 ## Screenshot
@@ -23,11 +23,15 @@ __Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 
 ## Changelog since version 2.1.0 (Hungarian only)
 
-__2019-11-19 - Version 3.0.0 Release Candidate / Build 5318 (pre-stable)__
+__2019-11-25 - Version 3.0.0 / Build 5400 (stable)__
 
+- Windows XP hiányzó processzor név patch lekezelése (KB953955),
+- Zárójeles sztringek eltávolításának lehetősége új függvénnyel,
+- Operációs rendszer információk módosítása, Windows 10 verzió kiírásának hozzáadása,
+- A kiírásokat javító függvények paramétereinek tisztítása,
 - Nem támogatott felbontás hiba megjelenítése 1024x768-asnál kisebb felbontás esetén,
 - Taskbar ikon menüjének letiltása indítás közben,
-- Win XP/Server 2003 hiányzó HT/Multicore patch lekezelése (magok/szálak),
+- Windows XP hiányzó HT/Multicore patch lekezelése (KB936235),
 - Lemezek független hőfok figyelmeztetése (figyelmeztetés: 45 fok, kritikus 55 fok),
 - Figyelmeztető S.M.A.R.T rekordok bevezetése: nem kritikus, de veszélyt jelentő rekordok,
 - Ténylegesen kritikus S.M.A.R.T rekordok beállítása figyelmeztetésre,

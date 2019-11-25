@@ -1,6 +1,7 @@
 ﻿Imports System.Math
 Imports System.Convert
 Imports System.Management
+Imports Microsoft.Win32
 
 Imports SINMx86.Functions
 Imports SINMx86.Localization
@@ -9,7 +10,7 @@ Imports SINMx86.Localization
 Public Class MainWindow
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objBT, objPR, objPM, objNA, objNI, objNC, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objBT, objPR, objPE, objPM, objNA, objNI, objNC, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
     ' Főablak változói
@@ -468,19 +469,23 @@ Public Class MainWindow
         ' Értékek definiálása
         Dim OSName As String = Nothing                          ' OS neve
         Dim OSService As Int32 = 0                              ' Szervizcsomag
-        Dim OSLanguage(32) As String                            ' Nyelv
+        Dim OSLanguage As String                                ' Nyelv
         Dim OSRelease As String = Nothing                       ' Kiadás típusa
         Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
+        Dim OSBuild As String = Nothing                         ' OS Build (Win10+)
+
+        ' Registry elérési útja (Csak olvasásra!)
+        Dim OSInfoPath As RegistryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", False)
 
         ' Névből törlendő sztringek tömbje
-        Dim DeleteList() As String = {"(C)", "(R)", "(TM)", "©", "®", "™"}
+        Dim DeleteList() As String = {"©", "®", "™"}
 
         ' WMI értékek lekérdezése: Win32_OperatingSystem -> Operációs rendszer információi
         objOS = New ManagementObjectSearcher("SELECT Caption, ServicePackMajorVersion FROM Win32_OperatingSystem")
 
         ' Értékek beállítása -> Operációs rendszer: gyártó, modell
         For Each Me.objMgmt In objOS.Get()
-            OSName = objMgmt("Caption")
+            OSName = RemoveParentheses(objMgmt("Caption"))
             OSService = objMgmt("ServicePackMajorVersion")
         Next
 
@@ -490,41 +495,46 @@ Public Class MainWindow
         ' XP-nél nincs alapból az OS kiadásnál ilyen WMI érték, de a CPU címbuszból ott is származtatható.
         objPR = New ManagementObjectSearcher("SELECT AddressWidth FROM Win32_Processor")
 
-        ' Értékek beállítása
+        ' Értékek beállítása -> Kiadás
         For Each Me.objMgmt In objPR.Get()
             OSRelease = objMgmt("AddressWidth").ToString
         Next
 
         ' Törlendő sztringek keresése és törlése
         For DeleteCount = 0 To UBound(DeleteList)
-            OSName = Replace(OSName, DeleteList(DeleteCount), " ")
+            OSName = RemoveSpaces(Replace(OSName, DeleteList(DeleteCount), Nothing))
         Next
 
-        ' Kiírások frissítése
-        If OSService = 0 Then
-            Value_OSName.Text = RemoveSpaces(OSName)
-        Else
-            Value_OSName.Text = RemoveSpaces(OSName) + ", " + GetLoc("SvcPack") + " " + OSService.ToString
+        ' Win10 frissítési verzió lekérdezése (Jelenleg csak registry-ből lehet!)
+        If OSVersion(0) >= 10 Then
+
+            ' Registry érték lekérdezése
+            OSBuild = OSInfoPath.GetValue("ReleaseId")
+
+            ' OS nevének bővítése a frissítési verzióval, ha nem üres!
+            If OSBuild <> Nothing Then
+                OSName += ", " + GetLoc("Version") + " " + OSBuild
+            End If
+
         End If
 
+        ' OS szervizcsomag információ hozzáadása a névhez, ha 0-tól eltérő!
+        If OSService <> 0 Then
+            OSName += ", " + GetLoc("SvcPack") + " " + OSService.ToString
+        End If
+
+        ' Nyelv beállítása
+        OSLanguage = System.Globalization.CultureInfo.InstalledUICulture.Name
+
         ' Kiírások frissítése
+        Value_OSName.Text = OSName
         Value_OSRelease.Text = OSRelease + "-bit"
         Value_OSVersion.Text = OSVersion(0).ToString + "." + OSVersion(1).ToString + "." + OSVersion(2).ToString
 
-        ' NT6+ értékek lekérdezése (A korábbiaknál üres értékkel való feltöltés!)
-        If OSVersion(0) >= 6 Then
-
-            ' WMI értékek lekérdezése: Win32_OperatingSystem -> Operációs rendszer információi
-            objOS = New ManagementObjectSearcher("SELECT MUILanguages FROM Win32_OperatingSystem")
-
-            ' Értékek beállítása -> Operációs rendszer: nyelv
-            For Each Me.objMgmt In objOS.Get()
-                OSLanguage = objMgmt("MUILanguages")
-            Next
-
-            ' Kiírások frissítése
+        ' Nyelv értékének beállítása, ha nem üres!
+        If OSLanguage <> Nothing Then
             Value_OSLang.Enabled = True
-            Value_OSLang.Text = OSLanguage(0)
+            Value_OSLang.Text = OSLanguage
         Else
             Value_OSLang.Enabled = False
             Value_OSLang.Text = GetLoc("Unknown")
@@ -958,7 +968,7 @@ Public Class MainWindow
 
         ' Értékek definiálása
         Dim SearchCount As Int32                                ' Keresendő sztring sorszáma
-        Dim ModifyCount As Int32                                ' Törlendő sztring sorszáma
+        Dim ModifyCount As Int32                                ' Átírandó sztring sorszáma
 
         ' Sztring cserék változói (eredeti, csere)
         Dim SearchList() As String = {"(", ")"}
@@ -1301,9 +1311,11 @@ Public Class MainWindow
     Private Function UpdateCPUList(ByVal ResetFlag As Boolean)
 
         ' Értékek definiálása
+        Dim CPUDataWidth As Int32 = 0                           ' Processzor adatbusz szélessége
         Dim CPUNumber As Int32 = 0                              ' Processzorok száma
         Dim CPUString(32) As String                             ' Processzor neve
-        Dim CPUDataWidth As Int32 = 0                           ' Processzor adatbusz szélessége
+        Dim FixNumber As Int32 = 0                              ' Javított nevek száma
+        Dim FixString As String = Nothing                       ' Javított processzor név (WinXP/2003 alatt)
         Dim ListCount As Int32                                  ' Lista sorszám
         Dim SearchCount As Int32                                ' Keresendő sztring sorszáma
         Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
@@ -1313,7 +1325,7 @@ Public Class MainWindow
         Dim ReplaceList() As String = {" MHz", " GHz"}
 
         ' Névből törlendő sztringek tömbje
-        Dim DeleteList() As String = {"CPU", "Processor", "(C)", "(R)", "(TM)"}
+        Dim DeleteList() As String = {"CPU", "processor"}
 
         ' Lista kiürítése
         ComboBox_CPUList.Items.Clear()
@@ -1323,10 +1335,36 @@ Public Class MainWindow
 
         ' Értékek beállítása -> Számítógép: név, adatbusz szélessége
         For Each Me.objMgmt In objPR.Get()
-            CPUString(CPUNumber) = objMgmt("Name")
+            CPUString(CPUNumber) = RemoveParentheses(objMgmt("Name"))
             CPUDataWidth = objMgmt("DataWidth")
             CPUNumber += 1
         Next
+
+        ' WinXP/2003 CPU nevének javítása (KB953955)
+        ' Megjegyzés: Mivel minden processzor neve egyezik, ezért csak az első kerül beállításra. Ha eltér, akkor az összes ezzele a névvel lesz felülírva!
+        If OSVersion(0) <= 6 Then
+
+            ' WMI lekérdezés: Win32_PnPEntity -> Processzorok listája
+            objPE = New ManagementObjectSearcher("SELECT Caption FROM Win32_PnPEntity WHERE ClassGuid='{50127DC3-0F36-415E-A6CC-4CB3BE910B65}'")
+
+            ' Értékek beállítása -> CPU neve (Csak az első!)
+            For Each Me.objMgmt In objPE.Get()
+                While FixNumber < 1
+                    FixString = RemoveParentheses(objMgmt("Caption"))
+                    FixNumber += 1
+                End While
+            Next
+
+            ' Értékek összehasonlítása
+            If CPUString(0) <> FixString Then
+
+                ' Az összes név lecserélése
+                For FixNumber = 0 To CPUNumber - 1
+                    CPUString(FixNumber) = FixString
+                Next
+
+            End If
+        End If
 
         ' CPU nevéből a felesleges karakterek eltávolítása
         For ListCount = 0 To CPUNumber - 1
@@ -1338,7 +1376,7 @@ Public Class MainWindow
 
             ' Törlendő sztringek keresése és törlése
             For DeleteCount = 0 To UBound(DeleteList)
-                CPUString(ListCount) = Replace(CPUString(ListCount), DeleteList(DeleteCount), " ")
+                CPUString(ListCount) = Replace(CPUString(ListCount), DeleteList(DeleteCount), Nothing)
             Next
 
             ' Listaelem hozzáadása
@@ -1595,11 +1633,6 @@ Public Class MainWindow
         ' Értékek definiálása
         Dim VideoCount As Int32 = 0                             ' Kártya sorszáma
         Dim ListCount As Int32                                  ' Lista sorszám
-        Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
-
-        ' Névből törlendő sztringek tömbje
-        Dim DeleteList() As String = {"(C)", "(R)", "(TM)", "(Microsoft Corporation - WDDM)", "(Microsoft Corporation - WDDM 1.0)",
-                                      "(Microsoft Corporation - WDDM 1.1)", "(Microsoft Corporation - WDDM 1.2)"}
 
         ' Lista kiürítése
         ComboBox_VideoList.Items.Clear()
@@ -1607,15 +1640,9 @@ Public Class MainWindow
         ' WMI lekérdezés: Win32_VideoController -> Videokártyák
         objVC = New ManagementObjectSearcher("SELECT Name FROM Win32_VideoController")
 
-        ' Értékek beállítása -> Videokártya: név
+        ' Értékek beállítása -> Videokártya neve (Zárójeles sztringek eltávolításával!)
         For Each Me.objMgmt In objVC.Get()
-            VideoName(VideoCount) = RemoveSpaces(objMgmt("Name"))
-
-            ' Törlendő sztringek keresése és törlése
-            For DeleteCount = 0 To UBound(DeleteList)
-                VideoName(VideoCount) = Replace(VideoName(VideoCount), DeleteList(DeleteCount), Nothing)
-            Next
-
+            VideoName(VideoCount) = RemoveParentheses(objMgmt("Name"))
             VideoCount += 1
         Next
 
@@ -1655,7 +1682,7 @@ Public Class MainWindow
         Dim ReplaceList() As String = {"(", ")", " #", "/100", "/AR", "PRO/", "/RTL"}
 
         ' Névből törlendő sztringek tömbje
-        Dim DeleteList() As String = {"_", "(C)", "(R)", "(TM)", " - Packet Scheduler Miniport"}
+        Dim DeleteList() As String = {"_", " - Packet Scheduler Miniport"}
 
         ' WMI lekérdezés: Win32_NetworkAdapter -> Hálózati adapterek darabszáma
         objNA = New ManagementObjectSearcher("SELECT Index FROM Win32_NetworkAdapterConfiguration")
@@ -1732,7 +1759,7 @@ Public Class MainWindow
 
                         ' Interfész azonosító és név hozzáadása
                         InterfaceID(InterfaceCount) = AdapterID(StatCount)
-                        InterfaceName(InterfaceCount) = AdapterList(StatCount)
+                        InterfaceName(InterfaceCount) = RemoveParentheses(AdapterList(StatCount))
 
                         ' Törlendő sztringek keresése és törlése
                         For DeleteCount = 0 To UBound(DeleteList)
@@ -1752,6 +1779,9 @@ Public Class MainWindow
                     For SearchCount = 0 To UBound(SearchList)
                         InterfaceName(InterfaceCount) = Replace(InterfaceName(InterfaceCount), SearchList(SearchCount), ReplaceList(SearchCount))
                     Next
+
+                    ' Zárójeles sztringekl törlése
+                    InterfaceName(InterfaceCount) = RemoveParentheses(InterfaceName(InterfaceCount))
 
                     ' Törlendő sztringek keresése és törlése
                     For DeleteCount = 0 To UBound(DeleteList)
@@ -2273,8 +2303,6 @@ Public Class MainWindow
         Dim TextSpacing() As Int32 = {160, 295}                 ' Másod és harmadszintű kiírások vízszintes eltolása
         Dim DownCurrentConv(2), UpCurrentConv(2) As Double      ' Aktuális le- és feltöltési konvertált értékek tömbje (érték, prefixum sorszáma)
 
-        ' Másod és harmadszintű kiírások vízszintes eltolása
-
         ' *** SZÖVEGES KIÍRÁSOK: Interfész (1. sor) ***
 
         ' Koordinátacsúszás visszaállítása: Kezdeti kiírás kezdetének beállítása (Vízszintes: 12, Függőleges: 12)
@@ -2668,8 +2696,8 @@ Public Class MainWindow
         ' Lemez és videokártya információk újratöltése
         If MainWindowDone Then
 
-            ' Lemez információk frissítése, ha nem lett eltávolítva
-            If CheckDiskAvailable() Then SetDiskInformation()
+            ' Lemezlista újratöltése (Frissítés nélkül, ha nem lett eltávolítva a kiválasztott lemez!)
+            If CheckDiskAvailable() Then UpdateDiskList(False)
 
             ' Videokártya információk frissítése
             SetVideoInformation()

@@ -8,7 +8,7 @@ Imports SINMx86.Localization
 Public Class CPUInfo
 
     ' WMI feldolgozási objektumok
-    Public objPR As ManagementObjectSearcher
+    Public objPR, objPE As ManagementObjectSearcher
     Public objMgmt As ManagementObject
 
     ' CPU-infó tábla változói
@@ -21,7 +21,8 @@ Public Class CPUInfo
         ' Értékek definiálása
         Dim VendorCount, NameCount, ArchCount As Int32          ' Ciklusszámlálók (gyártó, név, architektúra)
         Dim CPUCores, CPUThreads As Int32                       ' Magok és szálak száma
-        Dim NameString As String                                ' Processzor neve
+        Dim NameString As String = Nothing                      ' Processzor neve
+        Dim CorrString As String = Nothing                      ' Processzor javított neve (KB953955)
         Dim DeviceID As String = Nothing                        ' Processzor azonosítója
         Dim L2Cache(2) As Double                                ' Level 2 cache mérete
         Dim L3Cache(2) As Double                                ' Level 3 cache mérete
@@ -29,6 +30,9 @@ Public Class CPUInfo
         ' Sztring cserék változói (eredeti, csere)
         Dim NameSearch() As String = {"MHz", "GHz"}
         Dim NameReplace() As String = {" MHz", " GHz"}
+
+        ' Névből törlendő sztringek tömbje
+        Dim NameDelete() As String = {"CPU", "processor"}
 
         ' CPU architektúra tömbök értékei (keresett azonosító, valódi érték)
         Dim ArchID() As Int32 = {0, 1, 2, 3, 6, 9}
@@ -65,7 +69,7 @@ Public Class CPUInfo
         ' WMI értékek lekérdezése: Win32_Processor -> Magok és szálak száma
         objPR = New ManagementObjectSearcher("SELECT NumberOfCores, NumberOfLogicalProcessors FROM Win32_Processor")
 
-        ' Processzor mag és szál értékek kiértékelése
+        ' Processzor mag és szál értékek kiértékelése (XP: KB936235, 2003: KB932370)
         ' Megjegyzés: Ha üres a tábla, akkor 'ManagementException'-t okoz, ezért kell a 'Try'!
         ' Elsősorban XP-nél és Server 2003-nál kell rá számítani, ahol hiányzik a HT/Multicore kezelési frissítés!
         Try
@@ -90,6 +94,26 @@ Public Class CPUInfo
         ' Processzor számláló visszaállítása
         CPUCount = 0
 
+        ' WinXP/2003 CPU nevének javítása (KB953955)
+        ' Megjegyzés: Mivel minden processzor neve egyezik, ezért csak az első kerül beállításra.
+        If OSVersion(0) <= 6 Then
+
+            ' WMI lekérdezés: Win32_PnPEntity -> Processzorok listája
+            objPE = New ManagementObjectSearcher("SELECT Caption FROM Win32_PnPEntity WHERE ClassGuid='{50127DC3-0F36-415E-A6CC-4CB3BE910B65}'")
+
+            ' Értékek beállítása -> CPU neve (Csak az első!)
+            For Each Me.objMgmt In objPE.Get()
+                While CPUCount < 1
+                    CorrString = RemoveParentheses(objMgmt("Caption"))
+                    CPUCount += 1
+                End While
+            Next
+
+        End If
+
+        ' Processzor számláló visszaállítása
+        CPUCount = 0
+
         ' WMI értékek lekérdezése: Win32_Processor -> CPU-információk
         objPR = New ManagementObjectSearcher("SELECT DeviceID, Manufacturer, Name, Description, SocketDesignation, CurrentVoltage, " +
                                              "Architecture, CurrentClockSpeed, MaxClockSpeed, ExtClock, L2CacheSize FROM Win32_Processor")
@@ -108,10 +132,22 @@ Public Class CPUInfo
                     End If
                 Next
 
+                ' Név beállítása
+                NameString = RemoveParentheses(objMgmt("Name"))
+
+                ' Értékek összehasonlítása (Ha eltér, akkor felül lesz írva!)
+                If OSVersion(0) <= 6 Then
+                    If NameString <> CorrString Then NameString = CorrString
+                End If
+
                 ' Név korrekciós sztringek keresése és cseréje
-                NameString = objMgmt("Name")
                 For NameCount = 0 To UBound(NameSearch)
                     NameString = Replace(NameString, NameSearch(NameCount), NameReplace(NameCount))
+                Next
+
+                ' Névből törlendő sztringek keresése és törlése
+                For NameCount = 0 To UBound(NameDelete)
+                    NameString = Replace(NameString, NameDelete(NameCount), Nothing)
                 Next
 
                 ' Módosított név hozzáadása

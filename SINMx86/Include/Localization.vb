@@ -282,7 +282,7 @@ Public Class Localization
                                 "augusztus", "szeptember", "október", "november", "december"}
 
                 ' Főablak nyelvi változói
-                AddLoc("Title", "Rendszerinformációk és hálózatfigyelés")
+                AddLoc("Title", "Rendszer információk és hálózatfigyelés")
                 AddLoc("Comment", "Ez a szoftver nyílt forrású és hordozható.")
                 AddLoc("Version", "Verziószám")
                 AddLoc("DigitSeparator", ",")

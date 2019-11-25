@@ -30,8 +30,8 @@ Public Class RAMInfo
         Dim BankCount As Int32                                  ' Sztring keresési ciklusszámláló
 
         ' Sztring cserék változói (eredeti, csere)
-        Dim BankSearch() As String = {"_", "-", "CHANNEL", "BANK", "DIMM"}
-        Dim BankReplace() As String = {" ", " ", "Channel ", "Bank ", "DIMM "}
+        Dim BankSearch() As String = {"_", "-", "NODE", "CHANNEL", "BANK", "DIMM"}
+        Dim BankReplace() As String = {" ", " ", "Node ", "Channel ", "Bank ", "DIMM "}
 
         ' Értékek átvétele a főablaktól
         Dim TableName As String = MainWindow.ComboBox_RAMList.Items(SelectedMemory)

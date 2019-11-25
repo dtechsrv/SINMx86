@@ -89,7 +89,7 @@ Public Class Functions
 
         ' *** REGISTRY LEKÉRDEZÉS: Regisztrációs kulcs létrehozása, ha nem létezik (HKCU\Software) ***
         If RegPath Is Nothing Then
-            RegPath = Registry.CurrentUser.CreateSubKey("Software\\" + MyName, RegistryKeyPermissionCheck.ReadWriteSubTree)
+            RegPath = Registry.CurrentUser.CreateSubKey("SOFTWARE\\" + MyName, RegistryKeyPermissionCheck.ReadWriteSubTree)
         End If
 
         ' Registry lekérdezés: Utolsó beállított értékek lekérdezése
@@ -237,8 +237,31 @@ Public Class Functions
         Dim Str2Char() As Char                                  ' Sztring-karakter konverzió tömbje
         Dim TempString As String = Nothing                      ' Ideiglenes sztring az elemzéshez
         Dim Position As Int32                                   ' Pozíció számláló
+        Dim SearchCount As Int32                                ' Keresendő sztring sorszáma
 
-        ' Dupla szóközök eltávolítása, addig amíg szerepel benne! (Ezért kell a While!)
+        ' Sztring cserék változói (zárójelek előtti és utáni felesleges szóközök)
+        Dim SearchList() As String = {"( ", " )", "[ ", " ]", "{ ", " }"}
+        Dim ReplaceList() As String = {"(", ")", "[", "]", "{", "}"}
+
+        ' Névből törlendő sztringek tömbje (üres zárójelek eltűntetése)
+        Dim DeleteList() As String = {"()", "[]", "{}"}
+
+        ' Módosítandó sztringek keresése és cseréje, amíg szerepel benne!
+        For SearchCount = 0 To UBound(SearchList)
+            While (InStr(RawString, SearchList(SearchCount)))
+                RawString = Replace(RawString, SearchList(SearchCount), ReplaceList(SearchCount))
+            End While
+        Next
+
+        ' Törlendő sztringek keresése és törlése, amíg szerepel benne!
+        For SearchCount = 0 To UBound(DeleteList)
+            While (InStr(RawString, DeleteList(SearchCount)))
+                RawString = Replace(RawString, DeleteList(SearchCount), Nothing)
+            End While
+        Next
+
+        ' Dupla szóközök eltávolítása
+        ' Megjegyzés: Muszáj a végére, mert a törlések után is keletkezhet!
         While (InStr(RawString, "  "))
             RawString = Replace(RawString, "  ", " ")
         End While
@@ -270,7 +293,47 @@ Public Class Functions
                 Next
                 RawString = TempString
             End If
+
         End If
+
+        ' Visszatérési érték beállítása
+        Return RawString
+
+    End Function
+
+    ' *** FÜGGVÉNY: Zárójeles sztringek eltávolítása ***
+    ' Bemenet: RawString -> formázandó sztring (String)
+    ' Kimenet: RawString -> formázott sztring (String)
+    Public Shared Function RemoveParentheses(RawString)
+
+        ' Értékek definiálása
+        Dim Str2Char() As Char                                  ' Sztring-karakter konverzió tömbje
+        Dim TempString As String = Nothing                      ' Ideiglenes sztring az elemzéshez
+        Dim Position As Int32                                   ' Pozíció számláló
+        Dim ParenthOn As Boolean = False                        ' Nyitott zárójel
+
+        ' Karaktertömbre bontás
+        Str2Char = RawString.ToCharArray()
+
+        ' Sztring végignézése
+        For Position = 0 To UBound(Str2Char)
+
+            ' Zárójelek keresése (Bezáró zárójel esetén szóközre kell cserélni!)
+            If Str2Char(Position) = "(" And ParenthOn = False Then
+                ParenthOn = True
+            ElseIf Str2Char(Position) = ")" And ParenthOn = True Then
+                Str2Char(Position) = " "
+                ParenthOn = False
+            End If
+
+            ' Karakterek hozzáadása, ha nincs nyitott zárójel és a karakter nem üres!
+            If ParenthOn = False Then
+                TempString += Str2Char(Position)
+            End If
+        Next
+
+        ' Felesleges szóközök eltávolítása
+        RawString = RemoveSpaces(TempString)
 
         ' Visszatérési érték beállítása
         Return RawString
