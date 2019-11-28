@@ -47,7 +47,7 @@ Partial Class SMARTInfo
         Me.SMART_Table.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable
         Me.SMART_Table.Location = New System.Drawing.Point(10, 23)
         Me.SMART_Table.Name = "SMART_Table"
-        Me.SMART_Table.Size = New System.Drawing.Size(818, 300)
+        Me.SMART_Table.Size = New System.Drawing.Size(801, 300)
         Me.SMART_Table.StateImageList = Me.SMART_Status
         Me.SMART_Table.TabIndex = 0
         Me.SMART_Table.UseCompatibleStateImageBehavior = False
@@ -70,28 +70,28 @@ Partial Class SMARTInfo
         '
         Me.Record.Tag = "Record"
         Me.Record.Text = "Record"
-        Me.Record.Width = 250
+        Me.Record.Width = 265
         '
         'Treshold
         '
         Me.Treshold.Tag = "Treshold"
         Me.Treshold.Text = "Treshold"
         Me.Treshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.Treshold.Width = 80
+        Me.Treshold.Width = 75
         '
         'Value
         '
         Me.Value.Tag = "Value"
         Me.Value.Text = "Value"
         Me.Value.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.Value.Width = 80
+        Me.Value.Width = 75
         '
         'Worst
         '
         Me.Worst.Tag = "Worst"
         Me.Worst.Text = "Worst"
         Me.Worst.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.Worst.Width = 80
+        Me.Worst.Width = 75
         '
         'Status
         '
@@ -118,34 +118,34 @@ Partial Class SMARTInfo
         Me.GroupBox_Table.ForeColor = System.Drawing.SystemColors.Highlight
         Me.GroupBox_Table.Location = New System.Drawing.Point(12, 12)
         Me.GroupBox_Table.Name = "GroupBox_Table"
-        Me.GroupBox_Table.Size = New System.Drawing.Size(838, 334)
-        Me.GroupBox_Table.TabIndex = 1
+        Me.GroupBox_Table.Size = New System.Drawing.Size(821, 334)
+        Me.GroupBox_Table.TabIndex = 0
         Me.GroupBox_Table.TabStop = False
         Me.GroupBox_Table.Text = "S.M.A.R.T - Selected disk name"
         '
         'Button_Close
         '
-        Me.Button_Close.Location = New System.Drawing.Point(775, 356)
+        Me.Button_Close.Location = New System.Drawing.Point(758, 356)
         Me.Button_Close.Name = "Button_Close"
         Me.Button_Close.Size = New System.Drawing.Size(75, 23)
-        Me.Button_Close.TabIndex = 0
+        Me.Button_Close.TabIndex = 1
         Me.Button_Close.Text = "&Close"
         Me.Button_Close.UseVisualStyleBackColor = True
         '
-        'SmartWindow
+        'SMARTInfo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(862, 389)
+        Me.ClientSize = New System.Drawing.Size(845, 389)
         Me.Controls.Add(Me.Button_Close)
         Me.Controls.Add(Me.GroupBox_Table)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
-        Me.Name = "SmartWindow"
+        Me.Name = "SMARTInfo"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "S.M.A.R.T information"
+        Me.Text = "SINMx86 - S.M.A.R.T table"
         Me.TopMost = True
         Me.GroupBox_Table.ResumeLayout(False)
         Me.ResumeLayout(False)

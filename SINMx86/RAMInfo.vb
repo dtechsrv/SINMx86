@@ -13,6 +13,7 @@ Public Class RAMInfo
 
     ' RAM-infó tábla változói
     Public RAMCount As Int32 = 0                                ' Modulok száma
+    Public RowNumber As Int32 = 0                               ' Sorok száma a listanézetben
 
     ' *** FŐ ELJÁRÁS: RAM-infó ablak betöltése (MyBase.Load -> RAMInfo) ***
     ' Eseményvezérelt: Ablak megnyitása
@@ -234,10 +235,22 @@ Public Class RAMInfo
             End If
 
         End If
+
         ' Memóriamodul sávszélességének beállítása
         If MemoryWidth <> 0 Then
             RAMTableAddRow(GetLoc("RAMWidth"), MemoryWidth.ToString, "bit")
         End If
+
+        ' Gördítősáv helyének kivonása, ha a lista nem fér el a táblában görgetés nélkül! (Ha az utolsó sor alja lejjebb van, mint a tábla magassága!)
+        If RAM_Table.Height <= RAM_Table.Items(RowNumber - 1).GetBounds(ItemBoundsPortion.Entire).Bottom Then
+
+            ' Érték oszlop szélességének csökkentése (a gördítősáv szélességével)
+            Me.Value.Width -= SystemInformation.VerticalScrollBarWidth
+
+        End If
+
+        ' Tábla kiválasztása (A gördítés miatt fontos!)
+        RAM_Table.Select()
 
     End Sub
 
@@ -300,9 +313,11 @@ Public Class RAMInfo
             ListItem.SubItems.Add(ListFields(ListColumn))
         Next
 
-        ' Sor hozzáadása a lsitához
+        ' Sor hozzáadása a listához
         RAM_Table.Items.Add(ListItem)
 
+        ' Sorok számának növelése
+        RowNumber += 1
 
         ' Visszatérési érték beállítása
         Return False

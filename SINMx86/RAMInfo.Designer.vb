@@ -41,7 +41,7 @@ Partial Class RAMInfo
         Me.RAM_Table.Location = New System.Drawing.Point(10, 23)
         Me.RAM_Table.Name = "RAM_Table"
         Me.RAM_Table.ShowGroups = False
-        Me.RAM_Table.Size = New System.Drawing.Size(471, 249)
+        Me.RAM_Table.Size = New System.Drawing.Size(454, 249)
         Me.RAM_Table.TabIndex = 0
         Me.RAM_Table.UseCompatibleStateImageBehavior = False
         Me.RAM_Table.View = System.Windows.Forms.View.Details
@@ -73,17 +73,17 @@ Partial Class RAMInfo
         Me.GroupBox_Table.ForeColor = System.Drawing.SystemColors.Highlight
         Me.GroupBox_Table.Location = New System.Drawing.Point(12, 12)
         Me.GroupBox_Table.Name = "GroupBox_Table"
-        Me.GroupBox_Table.Size = New System.Drawing.Size(491, 283)
-        Me.GroupBox_Table.TabIndex = 1
+        Me.GroupBox_Table.Size = New System.Drawing.Size(474, 283)
+        Me.GroupBox_Table.TabIndex = 0
         Me.GroupBox_Table.TabStop = False
-        Me.GroupBox_Table.Text = "Memory module - # 1/1"
+        Me.GroupBox_Table.Text = "Memory module - Selected memory module name"
         '
         'Button_Close
         '
-        Me.Button_Close.Location = New System.Drawing.Point(428, 305)
+        Me.Button_Close.Location = New System.Drawing.Point(411, 305)
         Me.Button_Close.Name = "Button_Close"
         Me.Button_Close.Size = New System.Drawing.Size(75, 23)
-        Me.Button_Close.TabIndex = 0
+        Me.Button_Close.TabIndex = 1
         Me.Button_Close.Text = "&Close"
         Me.Button_Close.UseVisualStyleBackColor = True
         '
@@ -91,7 +91,7 @@ Partial Class RAMInfo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(515, 338)
+        Me.ClientSize = New System.Drawing.Size(498, 338)
         Me.Controls.Add(Me.Button_Close)
         Me.Controls.Add(Me.GroupBox_Table)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
@@ -100,7 +100,7 @@ Partial Class RAMInfo
         Me.MinimizeBox = False
         Me.Name = "RAMInfo"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Memory module information"
+        Me.Text = "SINMx86 - Memory module details"
         Me.TopMost = True
         Me.GroupBox_Table.ResumeLayout(False)
         Me.ResumeLayout(False)

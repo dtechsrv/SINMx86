@@ -10,6 +10,9 @@ Public Class IPInfo
     Public objNA, objNC As ManagementObjectSearcher
     Public objMgmt As ManagementObject
 
+    ' IP-infó tábla változói
+    Public RowNumber As Int32 = 0                               ' Sorok száma a listanézetben
+
     ' *** FŐ ELJÁRÁS: IP-infó ablak betöltése (MyBase.Load -> IPInfo) ***
     ' Eseményvezérelt: Ablak megnyitása
     Private Sub IPInfo_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
@@ -189,6 +192,14 @@ Public Class IPInfo
             End If
         Next
 
+        ' Gördítősáv helyének kivonása, ha a lista nem fér el a táblában görgetés nélkül! (Ha az utolsó sor alja lejjebb van, mint a tábla magassága!)
+        If IP_Table.Height <= IP_Table.Items(RowNumber - 1).GetBounds(ItemBoundsPortion.Entire).Bottom Then
+            Me.Value.Width -= SystemInformation.VerticalScrollBarWidth
+        End If
+
+        ' Tábla kiválasztása (A gördítés miatt fontos!)
+        IP_Table.Select()
+
     End Sub
 
     ' ----- FÜGGVÉNYEK -----
@@ -247,9 +258,10 @@ Public Class IPInfo
         Next
 
         ' Sor hozzáadása a lsitához
-
         IP_Table.Items.Add(ListItem)
 
+        ' Sorok számának növelése
+        RowNumber += 1
 
         ' Visszatérési érték beállítása
         Return False

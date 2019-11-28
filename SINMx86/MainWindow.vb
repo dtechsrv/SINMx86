@@ -3263,9 +3263,20 @@ Public Class MainWindow
         If OpenFile Then
             Process.Start(SavePath)
         Else
-            ' Főablak előtérbe hozása
-            Me.Visible = True
-            Me.WindowState = FormWindowState.Normal
+
+            ' Főablak megjelenítésének engedélyezése
+            If Me.Visible = False Then
+                Me.Visible = True
+            End If
+
+            ' Visszaállítás normálra, ha kis méretű
+            If Me.WindowState = FormWindowState.Minimized Then
+                Me.WindowState = FormWindowState.Normal
+            End If
+
+            ' Előtérbe hozás
+            Me.BringToFront()
+
         End If
 
     End Sub

@@ -13,10 +13,28 @@ Namespace My
 
     Partial Friend Class MyApplication
 
+        ' Második példány indítása esetén végrhajtandó
         Private Sub MyApplication_StartupNextInstance(ByVal sender As System.Object, ByVal e As Microsoft.VisualBasic.ApplicationServices.StartupNextInstanceEventArgs) Handles Me.StartupNextInstance
 
+            ' Ha a főablak be van töltve
             If MainWindowDone Then
+
+                ' Buboréküzenet megjelenítése
                 MainWindow.MainNotifyIcon.ShowBalloonTip(3000, MyName + " - " + GetLoc("Note"), GetLoc("AlreadyRun"), ToolTipIcon.Info)
+
+                ' Főablak megjelenítésének engedélyezése
+                If MainWindow.Visible = False Then
+                    MainWindow.Visible = True
+                End If
+
+                ' Visszaállítás normálra, ha kis méretű
+                If MainWindow.WindowState = FormWindowState.Minimized Then
+                    MainWindow.WindowState = FormWindowState.Normal
+                End If
+
+                ' Előtérbe hozás
+                MainWindow.BringToFront()
+
             End If
 
         End Sub

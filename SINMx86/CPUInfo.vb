@@ -13,6 +13,7 @@ Public Class CPUInfo
 
     ' CPU-infó tábla változói
     Public CPUCount As Int32 = 0                                ' Processzorok száma
+    Public RowNumber As Int32 = 0                               ' Sorok száma a listanézetben
 
     ' *** FŐ ELJÁRÁS: CPU-infó ablak betöltése (MyBase.Load -> CPUInfo) ***
     ' Eseményvezérelt: Ablak megnyitása
@@ -116,7 +117,7 @@ Public Class CPUInfo
 
         ' WMI értékek lekérdezése: Win32_Processor -> CPU-információk
         objPR = New ManagementObjectSearcher("SELECT DeviceID, Manufacturer, Name, Description, SocketDesignation, CurrentVoltage, " +
-                                             "Architecture, CurrentClockSpeed, MaxClockSpeed, ExtClock, L2CacheSize FROM Win32_Processor")
+                                             "Architecture, MaxClockSpeed, ExtClock, L2CacheSize FROM Win32_Processor")
 
         ' Értékek beállítása -> Processzor
         For Each Me.objMgmt In objPR.Get()
@@ -177,17 +178,12 @@ Public Class CPUInfo
                     End If
                 Next
 
-                ' Üres aktuális órajel ellenőrzése
-                If objMgmt("CurrentClockSpeed") <> 0 Then
-                    CPUTableAddRow(GetLoc("CPUCurrentSpeed"), FixNumberFormat(objMgmt("CurrentClockSpeed"), 0, False), "MHz")
-                End If
-
-                ' Üres gyári órajel ellenőrzése
+                ' Beállított órajel ellenőrzése
                 If objMgmt("MaxClockSpeed") <> 0 Then
-                    CPUTableAddRow(GetLoc("CPUMaxSpeed"), FixNumberFormat(objMgmt("MaxClockSpeed"), 0, False), "MHz")
+                    CPUTableAddRow(GetLoc("CPURatedSpeed"), FixNumberFormat(objMgmt("MaxClockSpeed"), 0, False), "MHz")
                 End If
 
-                ' Üres busz órajel ellenőrzése
+                ' Busz órajel ellenőrzése
                 If objMgmt("ExtClock") <> 0 Then
                     CPUTableAddRow(GetLoc("CPUBusClock"), FixNumberFormat(objMgmt("ExtClock"), 0, False), "MHz")
                 End If
@@ -226,6 +222,17 @@ Public Class CPUInfo
 
             Next
         End If
+
+        ' Gördítősáv helyének kivonása, ha a lista nem fér el a táblában görgetés nélkül! (Ha az utolsó sor alja lejjebb van, mint a tábla magassága!)
+        If CPU_Table.Height <= CPU_Table.Items(RowNumber - 1).GetBounds(ItemBoundsPortion.Entire).Bottom Then
+
+            ' Érték oszlop szélességének csökkentése (a gördítősáv szélességével)
+            Me.Value.Width -= SystemInformation.VerticalScrollBarWidth
+
+        End If
+
+        ' Tábla kiválasztása (A gördítés miatt fontos!)
+        CPU_Table.Select()
 
     End Sub
 
@@ -288,10 +295,11 @@ Public Class CPUInfo
             ListItem.SubItems.Add(ListFields(ListColumn))
         Next
 
-        ' Sor hozzáadása a lsitához
-
+        ' Sor hozzáadása a listához
         CPU_Table.Items.Add(ListItem)
 
+        ' Sorok számának növelése
+        RowNumber += 1
 
         ' Visszatérési érték beállítása
         Return False

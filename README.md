@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 3.0.0 Build 5400 (2019-11-25)
+## Current stable version: 3.0.1 Build 5410 (2019-11-27)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -22,6 +22,12 @@ __Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 ![](Screenshots/SINMx86_MainWindow_Win7.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__2019-11-27 - Version 3.0.1 / Build 5410 (stable)__
+
+- Cellaszélesség beállítása az infó ablakokban, a gördítősáv figyelembevételével,
+- Ablak eltűnésének javítása a második példány indításakor (Windows 10),
+- Aktuális órajel eltűntetése a CPU-infó ablakból (nem frissül és nincs is jelentősége),
 
 __2019-11-25 - Version 3.0.0 / Build 5400 (stable)__
 

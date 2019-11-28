@@ -37,6 +37,7 @@ Public Class SMARTInfo
         Dim SmartData() As Byte = Nothing                       ' Nyers adatok tömbje
         Dim SmartTreshold() As Byte = Nothing                   ' Nyers küszöbértékek tömbje
         Dim ByteDigit As Int32                                  ' Bájt helyiérték (RAW adat számításhoz)
+        Dim RowNumber As Int32 = 0                              ' Sorok száma a listanézetben
 
         ' Rekordok változói (szám, küszöb, érték, legrosszabb)
         Dim RecordNumber, RecordTreshold, RecordValue, RecordWorst As Int32
@@ -294,7 +295,21 @@ Public Class SMARTInfo
             ' Számláló növelése az ugrásközzel
             SmartCount += SmartStep
 
+            ' Sorok számának növelése
+            RowNumber += 1
+
         End While
+
+        ' Gördítősáv helyének kivonása, ha a lista nem fér el a táblában görgetés nélkül! (Ha az utolsó sor alja lejjebb van, mint a tábla magassága!)
+        If SMART_Table.Height <= SMART_Table.Items(RowNumber - 1).GetBounds(ItemBoundsPortion.Entire).Bottom Then
+
+            ' Rekordnév oszlop szélességének csökkentése (a gördítősáv szélességével)
+            Me.Record.Width -= SystemInformation.VerticalScrollBarWidth
+
+        End If
+
+        ' Tábla kiválasztása (A gördítés miatt fontos!)
+        SMART_Table.Select()
 
     End Sub
 
