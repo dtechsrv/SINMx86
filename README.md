@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 3.0.1 Build 5410 (2019-11-27)
+## Current stable version: 3.0.2 Build 5420 (2019-12-05)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -14,7 +14,7 @@ __Supported languages:__ English, Hungarian,\
 __Compilation environment:__ Microsoft Visual Basic 2013 (Community, Update 5),\
 __Source author:__ Gábor Deé (dtech),\
 __License:__ GNU General Public License v2.0,\
-__Supported clients operating systems:__ Microsoft Windows XP SP3 / Vista / 7 / 8 / 8.1 / 10,\
+__Supported operating systems:__ Microsoft Windows 2000 SP4, XP SP3, Server 2003/XP x64 SP2, Vista, 7, 8, 8.1, 10,\
 __Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 
 ## Screenshot
@@ -22,6 +22,12 @@ __Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 ![](Screenshots/SINMx86_MainWindow_Win7.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__2019-12-05 - Version 3.0.2 / Build 5420 (stable)__
+
+- Hiányzó processzor név patch lekezelésének javítása (Windows 2000),
+- Átlagsebesség megjelenítése a diagramon a jelenlegi sebesség helyett,
+- S.M.A.R.T értékek korrekciója: üzemórák konverziójának javítása.
 
 __2019-11-27 - Version 3.0.1 / Build 5410 (stable)__
 

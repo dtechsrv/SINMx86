@@ -46,7 +46,7 @@ Public Class SMARTInfo
         Dim RecordStatus As Int32 = 0                           ' Rekord állapota: 0 = OK, 1 = figyelmeztetés, 2 = kritikus (hiba)
 
         ' Formázás -> Félkövér és normál betűk soron belül (Ügyelni kell az elemszámra!)
-        Dim ListBold() As Boolean = {False, True, True, True, False, False, True, True}
+        Dim ListBold() As Boolean = {False, True, True, False, True, False, True, True}
 
         ' Listaelemek definiálása
         Dim ListItem As ListViewItem                            ' Egy sor elemei listanézetben
@@ -154,21 +154,37 @@ Public Class SMARTInfo
 
             ElseIf RecordNumber = 9 Or RecordNumber = 240 Then
 
-                ' Üzemórák és fejpozícionálással töltőtt órák száma (Csak az első három érték kerül feldolgozásra!)
-                For ByteDigit = 0 To 2
+                ' Üzemórák és fejpozícionálással töltőtt órák száma (Csak az első két érték kerül feldolgozásra!)
+                For ByteDigit = 0 To 1
                     ValueSum += ToInt32(SmartData(SmartCount + SmartColunms(4) + ByteDigit)) * (256 ^ ByteDigit)
                 Next
+
+                ' Korrekciós bájt ellenőrzése (Ha a harmadik bájt nem nulla, akkor nem az órák száma van megadva!)
+                ValueDiff = ToInt32(SmartData(SmartCount + SmartColunms(4) + 2))
+
+                ' Korrekció elvégzése (A percek nem kerülnek kiszámításra!)
+                If ValueDiff <> 0 Then
+                    ValueSum = Fix((ValueDiff * (256 ^ 2) + ValueSum) / (60 * 2))
+                End If
 
                 ' Nyers adat felülbírálása (összes óra beállítása)
                 RecordRawValue = ValueSum
 
-                ' Értékek formázása: napok
-                ValueDiff = Int(ValueSum / (24))
-                ListFields(7) = ValueDiff.ToString + " " + GetLoc("Days")
+                ' Értékek formázása: évek
+                ValueDiff = Fix(ValueSum / (365 * 24))
+                ValueSum = ValueSum - (ValueDiff * 365 * 24)
 
-                ' Értékek formázása: órák (különbözet)
-                ValueDiff = ValueSum - (ValueDiff * 24)
-                ListFields(7) += ", " + ValueDiff.ToString + " " + GetLoc("Hours")
+                ' Évek kiírása (Csak akkor kerül kiírásra, ha nem nulla!)
+                If ValueDiff <> 0 Then
+                    ListFields(7) = ValueDiff.ToString + " " + GetLoc("Years") + ", "
+                Else
+                    ListFields(7) = Nothing
+                End If
+
+                ' Értékek formázása: napok és órák
+                ValueDiff = Fix(ValueSum / (24))
+                ValueSum = ValueSum - (ValueDiff * 24)
+                ListFields(7) += ValueDiff.ToString + " " + GetLoc("Days") + ", " + ValueSum.ToString + " " + GetLoc("Hours")
 
             Else
 

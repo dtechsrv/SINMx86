@@ -1,5 +1,6 @@
 ﻿Imports System.Convert
 Imports System.Management
+Imports Microsoft.Win32
 
 Imports SINMx86.Functions
 Imports SINMx86.Localization
@@ -8,7 +9,7 @@ Imports SINMx86.Localization
 Public Class CPUInfo
 
     ' WMI feldolgozási objektumok
-    Public objPR, objPE As ManagementObjectSearcher
+    Public objPR As ManagementObjectSearcher
     Public objMgmt As ManagementObject
 
     ' CPU-infó tábla változói
@@ -27,6 +28,9 @@ Public Class CPUInfo
         Dim DeviceID As String = Nothing                        ' Processzor azonosítója
         Dim L2Cache(2) As Double                                ' Level 2 cache mérete
         Dim L3Cache(2) As Double                                ' Level 3 cache mérete
+
+        ' CPU infó registry elérési útja (Csak olvasásra!)
+        Dim CPUInfoPath As RegistryKey = Registry.LocalMachine.OpenSubKey("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", False)
 
         ' Sztring cserék változói (eredeti, csere)
         Dim NameSearch() As String = {"MHz", "GHz"}
@@ -97,18 +101,10 @@ Public Class CPUInfo
 
         ' WinXP/2003 CPU nevének javítása (KB953955)
         ' Megjegyzés: Mivel minden processzor neve egyezik, ezért csak az első kerül beállításra.
-        If OSVersion(0) <= 6 Then
+        If OSVersion(0) < 6 Then
 
-            ' WMI lekérdezés: Win32_PnPEntity -> Processzorok listája
-            objPE = New ManagementObjectSearcher("SELECT Caption FROM Win32_PnPEntity WHERE ClassGuid='{50127DC3-0F36-415E-A6CC-4CB3BE910B65}'")
-
-            ' Értékek beállítása -> CPU neve (Csak az első!)
-            For Each Me.objMgmt In objPE.Get()
-                While CPUCount < 1
-                    CorrString = RemoveParentheses(objMgmt("Caption"))
-                    CPUCount += 1
-                End While
-            Next
+            ' Registry érték lekérdezése
+            CorrString = RemoveParentheses(CPUInfoPath.GetValue("ProcessorNameString"))
 
         End If
 
@@ -137,7 +133,7 @@ Public Class CPUInfo
                 NameString = RemoveParentheses(objMgmt("Name"))
 
                 ' Értékek összehasonlítása (Ha eltér, akkor felül lesz írva!)
-                If OSVersion(0) <= 6 Then
+                If OSVersion(0) < 6 Then
                     If NameString <> CorrString Then NameString = CorrString
                 End If
 
@@ -161,8 +157,8 @@ Public Class CPUInfo
                 CPUTableAddRow(GetLoc("CPUCores"), CPUCores.ToString, Nothing)
                 CPUTableAddRow(GetLoc("CPUThreads"), CPUThreads.ToString, Nothing)
 
-                ' Gyártói "lustaság" sztingek keresése
-                If Not CheckStrContain(objMgmt("SocketDesignation"), Blacklist, False) Then
+                ' Gyártói "lustaság" és üres szting keresése
+                If Not CheckStrContain(objMgmt("SocketDesignation"), Blacklist, False) And RemoveSpaces(objMgmt("SocketDesignation")) <> Nothing Then
                     CPUTableAddRow(GetLoc("CPUSocket"), objMgmt("SocketDesignation"), Nothing)
                 End If
 

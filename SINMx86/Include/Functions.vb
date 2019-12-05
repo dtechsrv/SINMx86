@@ -52,7 +52,7 @@ Public Class Functions
                                               "United Microelectronics Corporation", "VIA Technologies Inc.", "DM&P Electronics"}
 
     ' Beállításjegyzék változói
-    Public Shared RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("Software\\" + MyName, True)
+    Public Shared RegPath As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\" + MyName, True)
 
     ' Checkboxok és menüelemek változói
     Public Shared CheckedSplashDisable, CheckedTopMost, CheckedNoQuitAsk, CheckedMinToTray As Boolean

@@ -10,7 +10,7 @@ Imports SINMx86.Localization
 Public Class MainWindow
 
     ' WMI feldolgozási objektumok
-    Public objOS, objBB, objCS, objBS, objBT, objPR, objPE, objPM, objNA, objNI, objNC, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
+    Public objOS, objBB, objCS, objBS, objBT, objPR, objPM, objNA, objNI, objNC, objVC, objDD, objSM, objDP, objLP, objLD As ManagementObjectSearcher
     Public objMgmt, objRes As ManagementObject
 
     ' Főablak változói
@@ -31,6 +31,7 @@ Public Class MainWindow
     Public PartInfo(32) As String                                                   ' Partíció információk (kiírásokhoz)
     Public VideoName(32) As String                                                  ' Videókártyák nevei (kiírásokhoz)
     Public TraffResolution As Int32 = 60                                            ' Diagramon jelzett értékek száma (ennyi időegységre van felosztva a diagram)
+    Public SpeedCounter As Int32 = 0                                                ' Sebesség értékek száma (az átlagszámításhoz szükséges osztó)
     Public VerticalGrids As Int32 = 1                                               ' Fuggőleges osztóvonalak száma (másodpercre vetítve)
     Public GridSlip As Int32                                                        ' Függőleges rács eltolás
     Public GridUpdate As Boolean = False                                            ' Rácsfrissítés engedélyezése (kell az eltolás számításához)
@@ -474,7 +475,7 @@ Public Class MainWindow
         Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
         Dim OSBuild As String = Nothing                         ' OS Build (Win10+)
 
-        ' Registry elérési útja (Csak olvasásra!)
+        ' OS infó registry elérési útja (Csak olvasásra!)
         Dim OSInfoPath As RegistryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", False)
 
         ' Névből törlendő sztringek tömbje
@@ -1262,6 +1263,9 @@ Public Class MainWindow
                 Upload(Count) = Upload(0)
             Next
 
+            ' Mérési számláló alaphelyzetbe állítása
+            SpeedCounter = 0
+
         Else
 
             ' Korábbi értékek hátrébb tolása 1 hellyel
@@ -1269,6 +1273,11 @@ Public Class MainWindow
                 Download(Count) = TraffDownArray(Count - 1)
                 Upload(Count) = TraffUpArray(Count - 1)
             Next
+
+            ' Mérési számláló növelése
+            If SpeedCounter < TraffResolution Then
+                SpeedCounter += 1
+            End If
 
         End If
 
@@ -1320,6 +1329,9 @@ Public Class MainWindow
         Dim SearchCount As Int32                                ' Keresendő sztring sorszáma
         Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
 
+        ' CPU infó registry elérési útja (Csak olvasásra!)
+        Dim CPUInfoPath As RegistryKey = Registry.LocalMachine.OpenSubKey("HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", False)
+
         ' Sztring cserék változói (eredeti, csere)
         Dim SearchList() As String = {"MHz", "GHz"}
         Dim ReplaceList() As String = {" MHz", " GHz"}
@@ -1341,19 +1353,11 @@ Public Class MainWindow
         Next
 
         ' WinXP/2003 CPU nevének javítása (KB953955)
-        ' Megjegyzés: Mivel minden processzor neve egyezik, ezért csak az első kerül beállításra. Ha eltér, akkor az összes ezzele a névvel lesz felülírva!
-        If OSVersion(0) <= 6 Then
+        ' Megjegyzés: Mivel minden processzor neve egyezik, ezért csak az első kerül beállításra. Ha eltér, akkor az összes ezzel a névvel lesz felülírva!
+        If OSVersion(0) < 6 Then
 
-            ' WMI lekérdezés: Win32_PnPEntity -> Processzorok listája
-            objPE = New ManagementObjectSearcher("SELECT Caption FROM Win32_PnPEntity WHERE ClassGuid='{50127DC3-0F36-415E-A6CC-4CB3BE910B65}'")
-
-            ' Értékek beállítása -> CPU neve (Csak az első!)
-            For Each Me.objMgmt In objPE.Get()
-                While FixNumber < 1
-                    FixString = RemoveParentheses(objMgmt("Caption"))
-                    FixNumber += 1
-                End While
-            Next
+            ' Registry érték lekérdezése
+            FixString = RemoveParentheses(CPUInfoPath.GetValue("ProcessorNameString"))
 
             ' Értékek összehasonlítása
             If CPUString(0) <> FixString Then
@@ -2301,7 +2305,10 @@ Public Class MainWindow
         Dim IntervalValue As Int32                              ' Időintervallum formázatlan értéke (másodperc)
         Dim IntervalTag As String = Nothing                     ' Időintervallum egységesített értéke (óra, perc, másodperc)
         Dim TextSpacing() As Int32 = {160, 295}                 ' Másod és harmadszintű kiírások vízszintes eltolása
-        Dim DownCurrentConv(2), UpCurrentConv(2) As Double      ' Aktuális le- és feltöltési konvertált értékek tömbje (érték, prefixum sorszáma)
+        Dim DownAverageSum As Double = 0                        ' Átlagos letöltési sebességértékek összege (átlagoláshoz)
+        Dim UpAverageSum As Double = 0                          ' Átlagos feltöltési sebességértékek összege (átlagoláshoz)
+        Dim DownAverageConv(2), UpAverageConv(2) As Double      ' Átlagos le- és feltöltési konvertált értékek tömbje (érték, prefixum sorszáma)
+        Dim AverageSumCount As Int32                            ' Átlagszámítási ciklusszámláló
 
         ' *** SZÖVEGES KIÍRÁSOK: Interfész (1. sor) ***
 
@@ -2357,12 +2364,20 @@ Public Class MainWindow
         Chart.DrawLines(Pens.Lime, SignLine)
         Chart.DrawString(GetLoc("ChartDown"), SignFont, Brushes.Lime, TextOffset(0) + 25, TextOffset(1))
 
-        ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
-        DownCurrentConv = ScaleConversion(ChartDownNumbers(0), TraffDigit, True)
+        ' Átlagolás és konvertálás (Ha a számláló nem nullán áll!)
+        If SpeedCounter = 0 Then
+            DownAverageConv = ScaleConversion(0, 0, True)
+        Else
+            For AverageSumCount = 0 To (SpeedCounter - 1)
+                DownAverageSum += ChartDownNumbers(AverageSumCount)
+            Next
+            DownAverageConv = ScaleConversion(DownAverageSum / SpeedCounter, 2, True)
+        End If
 
+        ' Átlag- és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
         If CheckedDownChart And InterfacePresent Then
-            Chart.DrawString(GetLoc("Current") + ": " + FixNumberFormat(DownCurrentConv(0), TraffDigit, True) + " " +
-                             BytePrefix(DownCurrentConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
+            Chart.DrawString(GetLoc("Average") + ": " + FixNumberFormat(DownAverageConv(0), TraffDigit, True) + " " +
+                             BytePrefix(DownAverageConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(0), TextOffset(1))
             Chart.DrawString(GetLoc("Peak") + ": " + FixNumberFormat(DownPeakConv(0), TraffDigit, True) + " " +
                              BytePrefix(DownPeakConv(1)) + "B/s", SignFont, Brushes.DarkGreen, TextOffset(0) + TextSpacing(1), TextOffset(1))
         Else
@@ -2384,11 +2399,19 @@ Public Class MainWindow
         Chart.DrawLines(Pens.Red, SignLine)
         Chart.DrawString(GetLoc("ChartUp"), SignFont, Brushes.Red, TextOffset(0) + 25, TextOffset(1))
 
-        ' Jelenlegi és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
-        UpCurrentConv = ScaleConversion(ChartUpNumbers(0), TraffDigit, True)
+        ' Átlagolás és konvertálás (Ha a számláló nem nullán áll!)
+        If SpeedCounter = 0 Then
+            UpAverageConv = ScaleConversion(0, 0, True)
+        Else
+            For AverageSumCount = 0 To (SpeedCounter - 1)
+                UpAverageSum += ChartUpNumbers(AverageSumCount)
+            Next
+            UpAverageConv = ScaleConversion(UpAverageSum / SpeedCounter, 2, True)
+        End If
 
+        ' Átlag- és csúcssebesség kiírása (vagy, ha ki van kapcsolva, akkor az erre vonatkozó szöveg)
         If CheckedUpChart And InterfacePresent Then
-            Chart.DrawString(GetLoc("Current") + ": " + FixNumberFormat(UpCurrentConv(0), TraffDigit, True) + " " +
+            Chart.DrawString(GetLoc("Average") + ": " + FixNumberFormat(UpAverageConv(0), TraffDigit, True) + " " +
                              BytePrefix(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(0), TextOffset(1))
             Chart.DrawString(GetLoc("Peak") + ": " + FixNumberFormat(UpPeakConv(0), TraffDigit, True) + " " +
                              BytePrefix(UpPeakConv(1)) + "B/s", SignFont, Brushes.DarkRed, TextOffset(0) + TextSpacing(1), TextOffset(1))
@@ -3256,7 +3279,7 @@ Public Class MainWindow
     End Sub
 
     ' *** ELJÁRÁS: Buboréküzenetre kattintás kezelése ***
-    ' Eseményvezérelt: MainNotifyIcon.BalloonTipClicked -> Klikk (Taskbar ikon buboréküzenet)
+    ' Eseményvezérelt: MaincpuNotifyIcon.BalloonTipClicked -> Klikk (Taskbar ikon buboréküzenet)
     Private Sub MainNotifyIcon_BalloonTipClicked(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MainNotifyIcon.BalloonTipClicked
 
         ' Kép megnyitása, a buboréközenet fájl mentésére vonatkozik (egyébként a főablak előtérbe hozása)
