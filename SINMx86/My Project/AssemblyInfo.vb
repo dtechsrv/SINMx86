@@ -14,7 +14,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("https://github.com/dtechsrv/SINMx86")> 
 <Assembly: AssemblyCompany("dtech(.hu)")> 
 <Assembly: AssemblyProduct("System Information and Network Monitor")> 
-<Assembly: AssemblyCopyright("Copyright (C) 2019 dtech(.hu)")> 
+<Assembly: AssemblyCopyright("Copyright (C) 2021 dtech(.hu)")> 
 <Assembly: AssemblyTrademark("This software is open source and portable.")> 
 
 <Assembly: ComVisible(True)> 
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("3.0.2.5420")> 
-<Assembly: AssemblyFileVersion("3.0.2.5420")> 
+<Assembly: AssemblyVersion("3.0.3.5421")> 
+<Assembly: AssemblyFileVersion("3.0.3.5421")> 
 
 <Assembly: NeutralResourcesLanguageAttribute("hu-HU")> 

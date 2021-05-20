@@ -1568,8 +1568,8 @@ Public Class MainWindow
                         ' Léptetés a rekordok között, amíg el nem fogynak
                         While SmartData(SmartCount) <> 0
 
-                            ' SSD-re jellemző rekord keresése -> Wear Leveling Count (173) vagy Wear Range Delta (177)
-                            If SmartData(SmartCount) = 173 Or SmartData(SmartCount) = 177 Then
+                            ' SSD-re jellemző rekord keresése -> Reserved Block Count (170), Wear Leveling Count (173) vagy Wear Range Delta (177)
+                            If SmartData(SmartCount) = 170 Or SmartData(SmartCount) = 173 Or SmartData(SmartCount) = 177 Then
                                 DiskType(DiskSort(ListCount)) = "SSD"
                             End If
 

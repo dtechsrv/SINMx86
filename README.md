@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 3.0.2 Build 5420 (2019-12-05)
+## Current stable version: 3.0.3 Build 5421 (2021-05-20)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -22,6 +22,10 @@ __Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 ![](Screenshots/SINMx86_MainWindow_Win7.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__2021-05-20 - Version 3.0.3 / Build 5421 (stable)__
+
+- Intel SATA SSD-k detektálása javítva.
 
 __2019-12-05 - Version 3.0.2 / Build 5420 (stable)__
 
@@ -149,4 +153,4 @@ __2019-03-20 - Version 2.2.0 / Build 4500 (stable)__
 - Windows 7 lemez szériaszám korrekció (hexadecimális visszaalakítás és bájtsorrend csere),
 - Rendszermemória tizedes elválasztó hiba javítva.
 
-__Copyright (C) 2019 dtech(.hu), [http://sinmx86.dtech.hu/](http://sinmx86.dtech.hu/).__
+__Copyright (C) 2021 dtech(.hu), [http://sinmx86.dtech.hu/](http://sinmx86.dtech.hu/).__
