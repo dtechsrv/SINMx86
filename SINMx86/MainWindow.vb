@@ -474,6 +474,7 @@ Public Class MainWindow
         Dim OSRelease As String = Nothing                       ' Kiadás típusa
         Dim DeleteCount As Int32                                ' Törlendő sztring sorszáma
         Dim OSBuild As String = Nothing                         ' OS Build (Win10+)
+        Dim OSSeason As String = Nothing                        ' OS Season Build verziószám (Win10 20H2 óta)
 
         ' OS infó registry elérési útja (Csak olvasásra!)
         Dim OSInfoPath As RegistryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", False)
@@ -510,10 +511,13 @@ Public Class MainWindow
         If OSVersion(0) >= 10 Then
 
             ' Registry érték lekérdezése
+            OSSeason = OSInfoPath.GetValue("DisplayVersion")
             OSBuild = OSInfoPath.GetValue("ReleaseId")
 
-            ' OS nevének bővítése a frissítési verzióval, ha nem üres!
-            If OSBuild <> Nothing Then
+            ' OS nevének bővítése a frissítési verzióval vagy a build számmal, ha nem üres!
+            If OSSeason <> Nothing Then
+                OSName += ", " + GetLoc("Version") + " " + OSSeason
+            ElseIf OSBuild <> Nothing Then
                 OSName += ", " + GetLoc("Version") + " " + OSBuild
             End If
 

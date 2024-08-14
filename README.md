@@ -4,7 +4,7 @@
 A simple system information and real-time network monitoring utility.\
 This utility reads all system information directly from WMI database.
 
-## Current stable version: 3.0.3 Build 5421 (2021-05-20)
+## Current stable version: 3.0.4 Build 5422 (2024-08-14)
 
 ![](Screenshots/SINMx86_LoadSplash.png)
 
@@ -22,6 +22,10 @@ __Requirements:__ Microsoft .NET Framework 3.5 (Minimum required: 2.0 SP2).
 ![](Screenshots/SINMx86_MainWindow_Win7.png)
 
 ## Changelog since version 2.1.0 (Hungarian only)
+
+__2024-08-14 - Version 3.0.4 / Build 5422 (stable)__
+
+- Win10 új verziószámozás támogatásának hozzáadása, a 20H2-es verziótól kezdve.
 
 __2021-05-20 - Version 3.0.3 / Build 5421 (stable)__
 
